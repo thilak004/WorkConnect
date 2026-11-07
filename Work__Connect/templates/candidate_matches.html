@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="{{ active_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('nav_candidate_matcher') }} | WorkConnect</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .site-nav {
+            background: #ffffff;
+            border-bottom: 1px solid #e3eaf2;
+            padding: 0 4%;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .site-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #172b4d;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .site-brand span { color: #2864c9; }
+        .site-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .site-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #536780;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .site-link:hover, .site-link.active {
+            color: #2864c9;
+            background: #eef4fc;
+        }
+        .candidate-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 28px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: auto;
+            box-sizing: border-box;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96) translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #2864c9;
+            box-shadow: 0 0 0 3px rgba(40, 100, 201, 0.12);
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            line-height: 1;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: color 0.15s, background-color 0.15s;
+        }
+        .modal-close-btn:hover {
+            color: #1e293b;
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+
+<body class="employer-dashboard-page" style="background: #f7f9fd;">
+
+    <!-- Universal Site Navigation -->
+    <header class="site-nav">
+        <a href="{{ url_for('home') }}" class="site-brand">
+            Work<span>Connect</span>
+        </a>
+        <nav class="site-links">
+            <a href="{{ url_for('home') }}" class="site-link">{{ t('nav_home') }}</a>
+            <a href="{{ url_for('post_job') }}" class="site-link">{{ t('nav_post_job') }}</a>
+            <a href="{{ url_for('employer_dashboard') }}" class="site-link">{{ t('nav_employer_dashboard') }}</a>
+            <a href="{{ url_for('candidate_matches') }}" class="site-link active" style="color: #ffffff; background: #2864c9;">{{ t('nav_candidate_matcher') }}</a>
+
+            <!-- Language Switcher -->
+            <div class="lang-selector">
+                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
+                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
+                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
+            </div>
+
+            <a href="{{ url_for('logout') }}" style="font-size: 12px; font-weight: 700; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 10px; border-radius: 8px; text-decoration: none;">
+                {{ t('nav_logout') }}
+            </a>
+        </nav>
+    </header>
+
+    <main class="dashboard-main" style="max-width: 1050px; margin: 0 auto; padding: 30px 20px;">
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-weight: 600; font-size: 13px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% elif category == 'danger' %}#fee2e2; color: #991b1b; border: 1px solid #fecaca;{% else %}#eff6ff; color: #1e40af; border: 1px solid #bfdbfe;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <header class="dashboard-heading" style="text-align: center; margin-bottom: 25px;">
+            <p class="dashboard-eyebrow" style="color: #2864c9; font-weight: 800; font-size: 12px;">SMART JOB MATCHING (STEP 7)</p>
+            <h1 style="font-size: 26px; font-weight: 850; color: #172b4d; margin: 0 0 6px 0;">Worker Compatibility Recommendations</h1>
+            <p style="font-size: 14px; color: #536780; max-width: 650px; margin: 0 auto;">
+                Our intelligent scoring engine scans all registered workers and ranks the best candidates for your job requirements with detailed multilingual explanations.
+            </p>
+        </header>
+
+        <!-- Employer & Job Selector Panel -->
+        <section class="dashboard-panel" style="background: #ffffff; border: 1px solid #e3eaf2; border-radius: 14px; padding: 22px; box-shadow: 0 4px 18px rgba(25, 45, 75, 0.04); margin-bottom: 25px;">
+            
+            <form method="GET" action="{{ url_for('candidate_matches') }}" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Select One of Your Posted Jobs:</label>
+                    <select name="job_id" onchange="this.form.submit()" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                        {% for j in employer_jobs %}
+                            <option value="{{ j.id }}" {% if selected_job and selected_job.id == j.id %}selected{% endif %}>
+                                #{{ j.id }} - {{ j.title }} ({{ j.skill_required }} | 📍 {{ j.location }} | 💰 ₹{{ j.daily_wage }}/day)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn-apply-big" style="padding: 10px 20px; font-size: 13px;">
+                    🎯 Find Top Candidates
+                </button>
+            </form>
+
+            {% if selected_job %}
+                <div style="margin-top: 16px; padding: 14px 18px; background: #eef5ff; border: 1px solid #c7d2fe; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <strong style="color: #1e3a8a; font-size: 15px;">Active Job: {{ selected_job.title }}</strong>
+                        <div style="font-size: 12px; color: #4338ca; margin-top: 2px;">
+                            Required Skill: <strong>{{ selected_job.skill_required }}</strong> | Location: <strong>{{ selected_job.location }}</strong> | Wage: <strong>₹{{ selected_job.daily_wage }}/day</strong>
+                        </div>
+                    </div>
+                    <span style="background: #2864c9; color: #ffffff; font-weight: 800; font-size: 12px; padding: 4px 12px; border-radius: 14px;">
+                        {{ matched_workers|length }} Candidates Analyzed
+                    </span>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- Matched Candidates List -->
+        {% if matched_workers %}
+            <div style="display: grid; gap: 14px;">
+                {% for cand in matched_workers %}
+                    <div class="candidate-card" style="border-left: 4px solid {% if cand.match_percentage >= 80 %}#22c55e{% elif cand.match_percentage >= 60 %}#2864c9{% else %}#cbd5e1{% endif %};">
+                        <div style="flex: 1; min-width: 280px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                <h3 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0;">
+                                    {{ cand.name }}
+                                </h3>
+                                <span style="background: {% if cand.match_percentage >= 75 %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% else %}#eff6ff; color: #1e40af; border: 1px solid #bfdbfe;{% endif %} font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 12px;">
+                                    🎯 {{ cand.match_percentage }}% • {{ cand.match_level }}
+                                </span>
+                            </div>
+                            
+                            <div style="font-size: 13px; color: #64748b; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
+                                <span>🛠️ <strong>{{ cand.skill }}</strong></span>
+                                <span>📍 {{ cand.location }}</span>
+                                <span>⏳ {{ cand.experience }} yrs exp</span>
+                                <span>💰 Expected: ₹{{ cand.wage }}/day</span>
+                                <span>⚡ {{ cand.availability }}</span>
+                            </div>
+
+                            <!-- Explanations in Active Language (Step 7) -->
+                            {% if cand.match_reasons %}
+                                <div class="match-reasons-list">
+                                    <strong>Why this candidate matches:</strong>
+                                    {% for r in cand.match_reasons %}
+                                        <div style="margin-top: 2px;">{{ r }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action Button to Schedule Meeting -->
+                        <div>
+                            <button onclick="scheduleCandidate('{{ selected_job.id }}', '{{ cand.id }}', '{{ cand.name }}', '{{ selected_job.title }}')" class="btn-apply-big" style="padding: 10px 18px; font-size: 13px;">
+                                📅 Schedule Meeting
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
+                <div style="font-size: 40px; margin-bottom: 10px;">🎯</div>
+                {% if selected_job %}
+                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No candidates found for this profession.</h3>
+                    <p style="font-size: 13px; color: #64748b;">Workers with the required profession ({{ selected_job.skill_required }}) will appear here ranked by compatibility as they register.</p>
+                {% else %}
+                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No candidates found for this profession.</h3>
+                    <p style="font-size: 13px; color: #64748b;">Workers will appear here ranked by compatibility as they register.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Meeting Modal -->
+    <div class="modal-overlay" id="interview-modal" style="display: none;">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0;" id="cand-modal-title">
+                    📅 Schedule Meeting
+                </h3>
+                <button type="button" class="modal-close-btn" onclick="closeInterviewModal()" title="Close">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ url_for('schedule_interview_route') }}" onsubmit="prepareInterviewForm()">
+                <input type="hidden" name="job_id" id="cand-job-id">
+                <input type="hidden" name="application_id" value="0">
+                <input type="hidden" name="worker_id" id="cand-worker-id">
+                <input type="hidden" name="location_or_link" id="cand-location-or-link">
+                <input type="hidden" name="return_to" value="candidate_matches">
+
+                <!-- 1. Meeting Date -->
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Date</label>
+                    <input type="date" name="interview_date" id="cand-date" class="form-control" required>
+                </div>
+
+                <!-- 2. Meeting Time -->
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Time</label>
+                    <input type="time" name="interview_time" id="cand-time" class="form-control" required>
+                </div>
+
+                <!-- 3. Meeting Venue (Optional) -->
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Venue</label>
+                    <input type="text" name="venue" id="cand-venue" class="form-control" placeholder="e.g., Site Office, Narasapur">
+                </div>
+
+                <!-- 4. Meeting Phone Number (Optional) -->
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Phone Number</label>
+                    <input type="tel" name="phone" id="cand-phone" class="form-control" placeholder="Enter phone number for phone meeting" pattern="[0-9+\-\s()]{7,20}" title="Please enter a valid phone number">
+                </div>
+
+                <!-- 5. Notes -->
+                <div style="margin-bottom: 18px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Notes</label>
+                    <textarea name="notes" id="cand-notes" rows="2" class="form-control" placeholder="Instructions or message for candidate..."></textarea>
+                </div>
+
+                <!-- 6 & 7. Action Buttons -->
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn-apply-big" style="flex: 1; padding: 11px 18px; font-size: 14px; border-radius: 8px; font-weight: 700;">
+                        Send Meeting Request
+                    </button>
+                    <button type="button" onclick="closeInterviewModal()" style="padding: 11px 18px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; cursor: pointer; font-weight: 700; color: #64748b; font-size: 14px;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function scheduleCandidate(jobId, workerId, workerName, jobTitle) {
+            document.getElementById('cand-job-id').value = jobId;
+            document.getElementById('cand-worker-id').value = workerId;
+            document.getElementById('cand-modal-title').innerText = `📅 Schedule Meeting with ${workerName}`;
+            
+            // Reset fields
+            document.getElementById('cand-venue').value = '';
+            document.getElementById('cand-phone').value = '';
+            document.getElementById('cand-notes').value = '';
+            
+            const modal = document.getElementById('interview-modal');
+            modal.style.display = 'flex';
+        }
+
+        function closeInterviewModal() {
+            const modal = document.getElementById('interview-modal');
+            modal.style.display = 'none';
+        }
+
+        function prepareInterviewForm() {
+            const venue = document.getElementById('cand-venue').value.trim();
+            const phone = document.getElementById('cand-phone').value.trim();
+            let parts = [];
+            if (venue) parts.push(venue);
+            if (phone) parts.push(`Phone: ${phone}`);
+            document.getElementById('cand-location-or-link').value = parts.length > 0 ? parts.join(' | ') : 'To be coordinated';
+        }
+
+        // Close when clicking outside modal box on overlay
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('interview-modal');
+            if (event.target === modal) {
+                closeInterviewModal();
+            }
+        });
+
+        // Close on Escape key
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeInterviewModal();
+            }
+        });
+    </script>
+</body>
+</html>
