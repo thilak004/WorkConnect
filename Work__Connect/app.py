@@ -13,7 +13,8 @@ from flask import (
     flash,
     jsonify,
     make_response,
-    abort
+    abort,
+    send_from_directory
 )
 import psycopg
 
@@ -312,6 +313,15 @@ def forgot_password():
 # =====================================================================
 # STEP 1, 2, & 4: REGISTRATION ROUTES (WORKER, EMPLOYER, VOICE AI)
 # =====================================================================
+
+@app.route("/google71cc56081c262476.html")
+def google_site_verification():
+    return send_from_directory(
+        app.root_path,
+        "google71cc56081c262476.html",
+        mimetype="text/html"
+    )
+
 
 @app.route("/")
 def home():
