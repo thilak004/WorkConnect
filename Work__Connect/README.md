@@ -54,6 +54,8 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 `GEMINI_API_KEY` is optional. When unset, the assistant uses its built-in WorkConnect fallback. Do not commit `.env` or paste a database password/API key into templates or JavaScript.
 
+Password recovery is temporarily disabled until a verified email-reset flow is configured. The recovery page does not collect passwords, and reset submissions are rejected.
+
 ## Create and configure Supabase
 
 1. Create a Supabase project and choose a database password and region.
@@ -130,6 +132,7 @@ Test these flows against a non-production test database and test accounts:
 
 - App home page, static trade illustrations, and English/Telugu/Hindi switching.
 - Worker and employer registration, login, logout, and profile updates.
+- Password recovery displays that it is unavailable until email ownership can be verified; do not re-enable direct password changes by email alone.
 - Employer job creation; worker browse/search, apply, and save/unsave.
 - Employer application review/status updates and candidate matching.
 - Notifications, interview scheduling, and report submission.

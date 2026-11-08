@@ -842,36 +842,6 @@ def verify_employer_credentials(email, password):
     return None
 
 
-def reset_worker_password(email, new_password):
-    """Update a worker password and store only its secure hash."""
-    email = email.strip().lower()
-    worker = get_worker_by_email(email)
-    if not worker:
-        return False
-    password_hash = generate_password_hash(new_password)
-    with get_db_connection() as connection:
-        cursor = connection.execute(
-            "UPDATE workers SET password_hash = %s WHERE email = %s",
-            (password_hash, email)
-        )
-        return cursor.rowcount == 1
-
-
-def reset_employer_password(email, new_password):
-    """Update an employer password and store only its secure hash."""
-    email = email.strip().lower()
-    employer = get_employer_by_email(email)
-    if not employer:
-        return False
-    password_hash = generate_password_hash(new_password)
-    with get_db_connection() as connection:
-        cursor = connection.execute(
-            "UPDATE employers SET password_hash = %s WHERE email = %s",
-            (password_hash, email)
-        )
-        return cursor.rowcount == 1
-
-
 def update_worker_profile(worker_id, name, skill, location, experience, wage, availability):
     """Allow workers to correct and update their profile and preferences (Step 7)."""
     with get_db_connection() as connection:

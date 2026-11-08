@@ -37,8 +37,6 @@ from database import (
     create_employer,
     verify_worker_credentials,
     verify_employer_credentials,
-    reset_worker_password,
-    reset_employer_password,
     update_worker_profile,
     update_employer_profile,
     toggle_employer_verification,
@@ -260,54 +258,15 @@ def logout():
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
-    """Allow an account owner to reset their password using their registered email."""
+    """Keep password recovery disabled until email ownership can be verified."""
     active_tab = request.args.get("role", "worker").strip().lower()
-
-    if request.method == "POST":
-        role = request.form.get("role", "worker").strip().lower()
-        email = request.form.get("email", "").strip().lower()
-        new_password = request.form.get("new_password", "").strip()
-        confirm_password = request.form.get("confirm_password", "").strip()
-
-        if not email or not new_password or not confirm_password:
-            return render_template(
-                "forgot_password.html",
-                error="Please complete all fields.",
-                active_tab=role,
-                email=email
-            )
-        if len(new_password) < 8:
-            return render_template(
-                "forgot_password.html",
-                error="New password must be at least 8 characters.",
-                active_tab=role,
-                email=email
-            )
-        if new_password != confirm_password:
-            return render_template(
-                "forgot_password.html",
-                error="Passwords do not match.",
-                active_tab=role,
-                email=email
-            )
-
-        if role == "employer":
-            reset = reset_employer_password(email, new_password)
-        else:
-            reset = reset_worker_password(email, new_password)
-
-        if not reset:
-            return render_template(
-                "forgot_password.html",
-                error="No account was found for this email in the selected role.",
-                active_tab=role,
-                email=email
-            )
-
-        flash("Your password has been reset. You can now log in.", "success")
-        return redirect(url_for("login", role=role))
-
-    return render_template("forgot_password.html", active_tab=active_tab)
+    if active_tab not in ("worker", "employer"):
+        active_tab = "worker"
+    return render_template(
+        "forgot_password.html",
+        active_tab=active_tab,
+        unavailable=True
+    ), 410 if request.method == "POST" else 200
 
 
 # =====================================================================
