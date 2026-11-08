@@ -478,13 +478,20 @@
             box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
         }
 
+        function appendAIMessage(messages, text, type) {
+            const bubble = document.createElement('div');
+            bubble.className = `ai-bubble ${type}`;
+            bubble.textContent = text;
+            messages.appendChild(bubble);
+        }
+
         function sendAIMessage() {
             const input = document.getElementById('ai-user-query');
             const query = input.value.trim();
             if (!query) return;
 
             const messages = document.getElementById('ai-messages');
-            messages.innerHTML += `<div class="ai-bubble user">${query}</div>`;
+            appendAIMessage(messages, query, 'user');
             input.value = '';
             messages.scrollTop = messages.scrollHeight;
 
@@ -495,11 +502,11 @@
             })
             .then(res => res.json())
             .then(data => {
-                messages.innerHTML += `<div class="ai-bubble bot">${data.reply}</div>`;
+                appendAIMessage(messages, data.reply, 'bot');
                 messages.scrollTop = messages.scrollHeight;
             })
             .catch(() => {
-                messages.innerHTML += `<div class="ai-bubble bot">Assistant temporarily busy. Please try again.</div>`;
+                appendAIMessage(messages, 'Assistant temporarily busy. Please try again.', 'bot');
             });
         }
     </script>

@@ -2,6 +2,7 @@ import os
 import secrets
 from datetime import timedelta
 from functools import wraps
+from urllib.parse import urlsplit
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -132,15 +133,34 @@ def set_language(lang_code):
     if lang_code in SUPPORTED_LANGUAGES:
         session["lang"] = lang_code
 
-    next_url = request.referrer or url_for("home")
-    # Avoid redirect loop to set-language
-    if "/set-language/" in next_url:
+    next_url = _safe_local_redirect(request.referrer) or url_for("home")
+    if next_url.startswith("/set-language/"):
         next_url = url_for("home")
 
     response = make_response(redirect(next_url))
     if lang_code in SUPPORTED_LANGUAGES:
         response.set_cookie("workconnect_lang", lang_code, max_age=30 * 24 * 3600)
     return response
+
+
+def _safe_local_redirect(target, forbidden_prefix=None):
+    """Return a same-origin path for redirects, or None for external targets."""
+    if not target:
+        return None
+    try:
+        parsed = urlsplit(target)
+    except ValueError:
+        return None
+    if parsed.scheme or parsed.netloc:
+        if parsed.scheme not in ("http", "https") or parsed.netloc.lower() != request.host.lower():
+            return None
+    if not parsed.path.startswith("/") or parsed.path.startswith("//") or "\\" in parsed.path:
+        return None
+    if forbidden_prefix and parsed.path.startswith(forbidden_prefix):
+        return None
+    return parsed.path + (f"?{parsed.query}" if parsed.query else "") + (
+        f"#{parsed.fragment}" if parsed.fragment else ""
+    )
 
 
 # =====================================================================
@@ -213,8 +233,9 @@ def login():
                 session["email"] = employer["email"]
                 session["name"] = employer["name"]
                 flash(f"Welcome back, {employer['name']}!", "success")
-                if next_url and next_url.startswith("/") and not next_url.startswith("/worker"):
-                    return redirect(next_url)
+                safe_next = _safe_local_redirect(next_url, forbidden_prefix="/worker")
+                if safe_next:
+                    return redirect(safe_next)
                 return redirect(url_for("employer_dashboard"))
             else:
                 return render_template(
@@ -233,8 +254,9 @@ def login():
                 session["email"] = worker["email"]
                 session["name"] = worker["name"]
                 flash(f"Welcome back, {worker['name']}!", "success")
-                if next_url and next_url.startswith("/") and not next_url.startswith("/employer"):
-                    return redirect(next_url)
+                safe_next = _safe_local_redirect(next_url, forbidden_prefix="/employer")
+                if safe_next:
+                    return redirect(safe_next)
                 return redirect(url_for("worker_dashboard"))
             else:
                 return render_template(
@@ -980,7 +1002,7 @@ def save_job_route(job_id):
     if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.is_json:
         return jsonify({"success": success, "message": msg})
     flash(msg, "success" if success else "info")
-    return redirect(request.referrer or url_for("browse_jobs"))
+    return redirect(_safe_local_redirect(request.referrer) or url_for("browse_jobs"))
 
 
 @app.route("/jobs/<int:job_id>/unsave", methods=["POST"])
@@ -991,7 +1013,7 @@ def unsave_job_route(job_id):
     if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.is_json:
         return jsonify({"success": success, "message": msg})
     flash(msg, "info")
-    return redirect(request.referrer or url_for("worker_dashboard"))
+    return redirect(_safe_local_redirect(request.referrer) or url_for("worker_dashboard"))
 
 
 @app.route("/employer/interviews/schedule", methods=["POST"])
@@ -1080,7 +1102,7 @@ def submit_report_route():
 
     if not reason or not target_type or not target_id:
         flash("Please provide complete details for the report.", "warning")
-        return redirect(request.referrer or url_for("home"))
+        return redirect(_safe_local_redirect(request.referrer) or url_for("home"))
 
     submit_report(
         reporter_role=session.get("role", "user"),
@@ -1092,7 +1114,7 @@ def submit_report_route():
     )
 
     flash("Thank you for your report. Our team has recorded it to maintain trust and safety on WorkConnect.", "success")
-    return redirect(request.referrer or url_for("home"))
+    return redirect(_safe_local_redirect(request.referrer) or url_for("home"))
 
 
 @app.route("/api/notifications", methods=["GET"])

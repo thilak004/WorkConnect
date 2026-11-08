@@ -253,7 +253,12 @@
 
                         <!-- Action Button to Schedule Meeting -->
                         <div>
-                            <button onclick="scheduleCandidate('{{ selected_job.id }}', '{{ cand.id }}', '{{ cand.name }}', '{{ selected_job.title }}')" class="btn-apply-big" style="padding: 10px 18px; font-size: 13px;">
+                            <button type="button" class="btn-apply-big" data-schedule-candidate
+                                    data-job-id="{{ selected_job.id }}"
+                                    data-worker-id="{{ cand.id }}"
+                                    data-worker-name="{{ cand.name }}"
+                                    data-job-title="{{ selected_job.title }}"
+                                    style="padding: 10px 18px; font-size: 13px;">
                                 📅 Schedule Meeting
                             </button>
                         </div>
@@ -354,6 +359,18 @@
             const modal = document.getElementById('interview-modal');
             modal.style.display = 'none';
         }
+
+        document.querySelectorAll('[data-schedule-candidate]').forEach(button => {
+            button.addEventListener('click', () => {
+                const data = button.dataset;
+                scheduleCandidate(
+                    data.jobId,
+                    data.workerId,
+                    data.workerName,
+                    data.jobTitle
+                );
+            });
+        });
 
         function prepareInterviewForm() {
             const venue = document.getElementById('cand-venue').value.trim();

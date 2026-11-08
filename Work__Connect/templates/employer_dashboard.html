@@ -1279,7 +1279,12 @@
                                     </button>
                                 </form>
 
-                                <button onclick="openInterviewModal('{{ app.job_id }}', '{{ app.application_id }}', '{{ app.worker_id }}', '{{ app.worker_name }}', '{{ app.job_title }}')" class="btn-schedule-action">
+                                <button type="button" class="btn-schedule-action" data-open-interview
+                                        data-job-id="{{ app.job_id }}"
+                                        data-application-id="{{ app.application_id }}"
+                                        data-worker-id="{{ app.worker_id }}"
+                                        data-worker-name="{{ app.worker_name }}"
+                                        data-job-title="{{ app.job_title }}">
                                     <span>📅</span>
                                     <span>Schedule Meeting</span>
                                 </button>
@@ -1398,13 +1403,31 @@
             document.getElementById('modal-job-id').value = jobId;
             document.getElementById('modal-app-id').value = appId;
             document.getElementById('modal-worker-id').value = workerId;
-            document.getElementById('modal-candidate-name').innerHTML = `<span>📅</span><span>Meeting with ${workerName} for ${jobTitle}</span>`;
+            const heading = document.getElementById('modal-candidate-name');
+            const icon = document.createElement('span');
+            const title = document.createElement('span');
+            icon.textContent = '📅';
+            title.textContent = `Meeting with ${workerName} for ${jobTitle}`;
+            heading.replaceChildren(icon, title);
             document.getElementById('interview-modal').style.display = 'flex';
         }
 
         function closeInterviewModal() {
             document.getElementById('interview-modal').style.display = 'none';
         }
+
+        document.querySelectorAll('[data-open-interview]').forEach(button => {
+            button.addEventListener('click', () => {
+                const data = button.dataset;
+                openInterviewModal(
+                    data.jobId,
+                    data.applicationId,
+                    data.workerId,
+                    data.workerName,
+                    data.jobTitle
+                );
+            });
+        });
 
         // Support direct linking to tabs (e.g. #applicants or #interviews)
         window.addEventListener('DOMContentLoaded', () => {

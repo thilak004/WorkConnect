@@ -201,12 +201,13 @@
                     <div class="summary-item">
                         <span style="color: #64748b;">Email Address:</span>
                         <strong id="sum-email">-</strong>
-                        <input type="hidden" name="email" id="form-email">
+                        <input type="email" name="email" id="form-email" required placeholder="you@example.com" style="width: 100%; margin-top: 8px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
                     <div class="summary-item" style="border-bottom: none;">
-                        <span style="color: #64748b;">Account Password:</span>
-                        <strong>••••••••</strong>
-                        <input type="hidden" name="password" id="form-password" value="password123">
+                        <label for="voice-password" style="display: block; color: #64748b; margin-bottom: 8px;">Create account password (at least 8 characters):</label>
+                        <input type="password" name="password" id="voice-password" minlength="8" required autocomplete="new-password" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                        <label for="voice-confirm-password" style="display: block; color: #64748b; margin: 12px 0 8px;">Confirm password:</label>
+                        <input type="password" name="confirm_password" id="voice-confirm-password" minlength="8" required autocomplete="new-password" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
                 </div>
 
@@ -260,9 +261,9 @@
             },
             {
                 id: 'email',
-                en: "What is your email address or phone username?",
-                te: "మీ ఈమెయిల్ లేదా ఫోన్ నంబర్ చెప్పండి.",
-                hi: "आपका ईमेल या फोन नंबर क्या है?",
+                en: "What is your email address?",
+                te: "మీ ఈమెయిల్ చిరునామా చెప్పండి.",
+                hi: "आपका ईमेल पता क्या है?",
                 hint: "Example: ravi@gmail.com"
             }
         ];
@@ -270,10 +271,10 @@
         let currentStep = 0;
         let answers = {
             name: '',
-            skill: 'Electrician',
+            skill: '',
             location: '',
-            experience: 2,
-            wage: 650,
+            experience: '',
+            wage: '',
             email: ''
         };
 
@@ -361,16 +362,16 @@
 
         function saveStepAnswer(val) {
             const q = QUESTIONS[currentStep];
-            val = val.replace(/[.,]/g, '').trim();
+            val = val.trim();
 
             if (q.id === 'experience' || q.id === 'wage') {
-                const nums = val.match(/\d+/);
-                answers[q.id] = nums ? parseInt(nums[0]) : (q.id === 'wage' ? 650 : 2);
+                const nums = val.replace(/[.,]/g, '').match(/\d+/);
+                answers[q.id] = nums ? parseInt(nums[0], 10) : '';
             } else if (q.id === 'email') {
-                // normalize spoken email
-                let clean = val.toLowerCase().replace(/\s+/g, '').replace(/attherate/g, '@').replace(/dot/g, '.');
-                if (!clean.includes('@')) clean += '@gmail.com';
-                answers[q.id] = clean;
+                answers[q.id] = val.toLowerCase()
+                    .replace(/\s+at(?:\s+the\s+rate)?\s+/g, '@')
+                    .replace(/\s+dot\s+/g, '.')
+                    .replace(/\s+/g, '');
             } else {
                 answers[q.id] = val;
             }
@@ -388,12 +389,9 @@
 
         function confirmAndNext() {
             const q = QUESTIONS[currentStep];
-            if (!answers[q.id]) {
-                // If not spoken, generate reasonable default
-                if (q.id === 'name') answers.name = "Worker User";
-                if (q.id === 'skill') answers.skill = "Electrician";
-                if (q.id === 'location') answers.location = "Narasapur";
-                if (q.id === 'email') answers.email = "worker" + Math.floor(Math.random() * 9000 + 1000) + "@example.com";
+            if (answers[q.id] === '' || answers[q.id] === null) {
+                alert("Please provide this answer before continuing. Use Edit to type it.");
+                return;
             }
 
             if (currentStep < QUESTIONS.length - 1) {
@@ -408,24 +406,23 @@
             document.getElementById('wizard-card').style.display = 'none';
             document.getElementById('summary-card').style.display = 'block';
 
-            document.getElementById('sum-name').innerText = answers.name || "Worker User";
-            document.getElementById('form-name').value = answers.name || "Worker User";
+            document.getElementById('sum-name').innerText = answers.name;
+            document.getElementById('form-name').value = answers.name;
 
-            document.getElementById('sum-skill').innerText = answers.skill || "Electrician";
-            document.getElementById('form-skill').value = answers.skill || "Electrician";
+            document.getElementById('sum-skill').innerText = answers.skill;
+            document.getElementById('form-skill').value = answers.skill;
 
-            document.getElementById('sum-loc').innerText = answers.location || "Narasapur";
-            document.getElementById('form-loc').value = answers.location || "Narasapur";
+            document.getElementById('sum-loc').innerText = answers.location;
+            document.getElementById('form-loc').value = answers.location;
 
-            document.getElementById('sum-exp').innerText = (answers.experience || 2) + " years";
-            document.getElementById('form-exp').value = answers.experience || 2;
+            document.getElementById('sum-exp').innerText = answers.experience + " years";
+            document.getElementById('form-exp').value = answers.experience;
 
-            document.getElementById('sum-wage').innerText = "₹" + (answers.wage || 650) + "/day";
-            document.getElementById('form-wage').value = answers.wage || 650;
+            document.getElementById('sum-wage').innerText = "₹" + answers.wage + "/day";
+            document.getElementById('form-wage').value = answers.wage;
 
-            const finalEmail = answers.email || ("worker" + Math.floor(Math.random() * 9000 + 1000) + "@example.com");
-            document.getElementById('sum-email').innerText = finalEmail;
-            document.getElementById('form-email').value = finalEmail;
+            document.getElementById('sum-email').innerText = answers.email;
+            document.getElementById('form-email').value = answers.email;
 
             speakText((activeLang === 'te') ? "అన్ని వివరాలు సేకరించబడ్డాయి. ధృవీకరించి పూర్తి చేయండి." : "All details collected. Please confirm to finish registration.");
         }

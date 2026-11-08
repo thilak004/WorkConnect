@@ -56,6 +56,8 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 Password recovery is temporarily disabled until a verified email-reset flow is configured. The recovery page does not collect passwords, and reset submissions are rejected.
 
+Voice registration requires a user-provided email address and password; it does not create accounts with shared default credentials or invented contact details. User and AI chat messages are rendered as text, and redirects are restricted to this site.
+
 ## Create and configure Supabase
 
 1. Create a Supabase project and choose a database password and region.
