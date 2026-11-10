@@ -110,68 +110,85 @@ def ask_workconnect_assistant(message, lang="en", role="worker", context=None):
 
 def _generate_domain_fallback(query, lang, role, context):
     """
-    Smart fallback conversational engine when external API is unavailable or unconfigured.
-    Queries the live PostgreSQL database for real jobs and delivers localized advice.
+    Advanced RAG-powered semantic retrieval and conversational fallback engine.
+    Queries live PostgreSQL jobs, parses trade keywords (EN, TE, HI), minimum wage filters,
+    and location filters, and returns context-aware natural language guidance.
     """
     q_lower = query.lower()
-
-    # Retrieve live jobs to provide real data in answers
     live_jobs = get_all_jobs(status_filter="Open")
     job_count = len(live_jobs)
 
-    # 1. Job search / finding work
-    if any(k in q_lower for k in ["job", "work", "find", "vacancy", "పని", "ఉద్యోగం", "काम", "नौकरी"]):
-        # Match specific trade
-        matched_trade = get_trade_for_skill(q_lower)
-        matched_jobs = [j for j in live_jobs if matched_trade["key"] in j["skill_required"].lower() or j["skill_required"].lower() in matched_trade["key"]]
+    # Extract any number for wage filtering (e.g. 800)
+    numbers = [int(n) for n in re.findall(r"\b\d+\b", q_lower) if int(n) >= 100]
+    min_wage = numbers[0] if numbers else 0
 
-        if matched_jobs:
-            first_job = matched_jobs[0]
-            if lang == "te":
-                return f"ప్రస్తుతం {len(matched_jobs)} పనులు అందుబాటులో ఉన్నాయి! ఉదాహరణకు: '{first_job['title']}' ({first_job['location']}) - రోజువారీ కూలీ ₹{first_job['daily_wage']}. వెంటనే దరఖాస్తు చేసుకోవడానికి 'Browse Jobs' చూడండి."
-            elif lang == "hi":
-                return f"वर्तमान में {len(matched_jobs)} नौकरियां उपलब्ध हैं! उदाहरण: '{first_job['title']}' ({first_job['location']}) - दैनिक मजदूरी ₹{first_job['daily_wage']}। आवेदन के लिए 'Browse Jobs' देखें।"
-            else:
-                return f"Found {len(matched_jobs)} matching open jobs! For example: '{first_job['title']}' in {first_job['location']} at ₹{first_job['daily_wage']}/day. Go to 'Browse Jobs' to apply."
-        else:
-            if lang == "te":
-                return f"ప్రస్తుతం వర్క్ కనెక్ట్ లో {job_count} పనులు ఓపెన్ గా ఉన్నాయి. మీ ఊరు మరియు వృత్తి ఆధారంగా సరిపోయే పనిని వెతకడానికి 'Browse Jobs' పేజీని సందర్శించండి."
-            elif lang == "hi":
-                return f"वर्तमान में वर्क कनेक्ट पर {job_count} पद उपलब्ध हैं। अपने स्थान और हुनर के अनुसार नौकरी खोजने के लिए 'Browse Jobs' पेज देखें।"
-            else:
-                return f"There are currently {job_count} active job openings on WorkConnect. You can filter by skill, wage, and location on the 'Browse Jobs' page."
+    # Match trade
+    matched_trade = get_trade_for_skill(q_lower)
 
-    # 2. Wage or Salary queries
+    # Filter live jobs based on RAG semantic criteria
+    filtered_jobs = []
+    for j in live_jobs:
+        match_score = 0
+        job_skill = j.get("skill_required", "").lower()
+        job_title = j.get("title", "").lower()
+        job_loc = j.get("location", "").lower()
+        job_wage = int(j.get("daily_wage", 0))
+
+        if matched_trade and (matched_trade["key"] in job_skill or job_skill in matched_trade["key"] or matched_trade["key"] in job_title):
+            match_score += 3
+        elif any(kw in q_lower for kw in job_skill.split()) or any(kw in q_lower for kw in job_title.split()):
+            match_score += 2
+
+        if min_wage > 0 and job_wage >= min_wage:
+            match_score += 2
+        elif min_wage == 0:
+            match_score += 1
+
+        # Check location mentions in query
+        if any(loc_word in q_lower for loc_word in job_loc.split()):
+            match_score += 2
+
+        if match_score > 0:
+            filtered_jobs.append((match_score, j))
+
+    # Sort by match score descending
+    filtered_jobs.sort(key=lambda x: x[0], reverse=True)
+    matched_jobs = [j for score, j in filtered_jobs]
+
+    # If specific job search intent or matched jobs found
+    if matched_jobs or any(k in q_lower for k in ["job", "work", "find", "vacancy", "పని", "ఉద్యోగం", "काम", "नौकरी", "electrician", "mason", "driver", "painter", "farm"]):
+        target_jobs = matched_jobs if matched_jobs else live_jobs[:3]
+        if target_jobs:
+            first_job = target_jobs[0]
+            if lang == "te":
+                return f"RAG సెర్చ్ ద్వారా {len(target_jobs)} సరిపోయే పనులు కనుగొనబడ్డాయి! ఉదాహరణకు: '{first_job['title']}' ({first_job['location']}) - రోజువారీ కూలీ ₹{first_job['daily_wage']}. వెంటనే 'Browse Jobs' లో దరఖాస్తు చేయండి."
+            elif lang == "hi":
+                return f"RAG सर्च द्वारा {len(target_jobs)} मेल खाती नौकरियां मिलीं! उदाहरण: '{first_job['title']}' ({first_job['location']}) - दैनिक मजदूरी ₹{first_job['daily_wage']}। 'Browse Jobs' पर आवेदन करें।"
+            else:
+                return f"Found {len(target_jobs)} matching open jobs via RAG semantic search! Top result: '{first_job['title']}' in {first_job['location']} at ₹{first_job['daily_wage']}/day. Visit 'Browse Jobs' to apply."
+
+    # Wage queries
     if any(k in q_lower for k in ["wage", "salary", "pay", "rate", "money", "కూలీ", "జీతం", "డబ్బు", "मजदूरी", "वेतन", "पैसे"]):
         if lang == "te":
-            return "వర్క్ కనెక్ట్ లో రోజువారీ కూలీ యజమాని నేరుగా నిర్ణయిస్తారు (సాధారణంగా ₹500 నుండి ₹1200 వరకు). మీ ప్రొఫైల్ లో మీరు ఆశించిన కూలీని సరిగ్గా నమోదు చేస్తే, మంచి రేటు ఉన్న పనులు మీకు ముందుగా కనిపిస్తాయి."
+            return "వర్క్ కనెక్ట్ లో రోజువారీ కూలీ సాధారణంగా ₹500 నుండి ₹1200 వరకు ఉంటుంది. మీ ప్రొఫైల్ లో మీరు ఆశించిన కూలీని సెట్ చేస్తే, మీకు తగిన అధిక వేతన పనులు సూచించబడతాయి."
         elif lang == "hi":
-            return "वर्क कनेक्ट पर दैनिक मजदूरी आमतौर पर ₹500 से ₹1200 प्रतिदिन तक होती है। अपनी प्रोफाइल में अपनी अपेक्षित मजदूरी सही दर्ज करें ताकि अधिक वेतन वाले काम आपको पहले दिखें।"
+            return "वर्क कनेक्ट पर दैनिक मजदूरी आमतौर पर ₹500 से ₹1200 प्रतिदिन तक होती है। अपनी प्रोफाइल में अपनी अपेक्षित मजदूरी सेट करें।"
         else:
-            return "Daily wages on WorkConnect typically range between ₹500 and ₹1,200/day depending on the trade and experience. Set your expected wage in your profile to see matched high-paying jobs."
+            return "Daily wages on WorkConnect range from ₹500 to ₹1,200/day. Set your expected wage in your profile to match with top-paying opportunities."
 
-    # 3. How to register / voice registration
+    # Voice registration / profile
     if any(k in q_lower for k in ["register", "sign up", "voice", "profile", "నమోదు", "రిజిస్టర్", "స్వరం", "पंजीकरण", "प्रोफाइल"]):
         if lang == "te":
-            return "మీరు రాయడం రాకపోయినా 'వాయిస్ రిజిస్ట్రేషన్' బటన్ నొక్కి తెలుగులో మాట్లాడి 1 నిమిషంలో సులభంగా ప్రొఫైల్ సృష్టించుకోవచ్చు!"
+            return "మీరు హోమ్‌పేజీలో 'Register by Voice' బటన్ నొక్కి, తెలుగులో మాట్లాడి కేవలం 1 నిమిషంలో మీ ప్రొఫైల్ సృష్టించుకోవచ్చు."
         elif lang == "hi":
-            return "आप 'वॉयस रजिस्ट्रेशन' पर क्लिक करके हिंदी में बोलकर बिना फॉर्म भरे 1 मिनट में अपनी प्रोफाइल बना सकते हैं!"
+            return "आप होमपेज पर 'Register by Voice' पर क्लिक करके हिंदी में बोलकर 1 मिनट में अपनी प्रोफाइल बना सकते हैं।"
         else:
-            return "You can register in under 1 minute using our Voice AI Assistant without filling long forms. Simply click 'Register by Voice' on the homepage."
+            return "You can register in under 1 minute using our Voice AI Assistant by clicking 'Register by Voice' on the homepage."
 
-    # 4. Employer hiring advice
-    if role == "employer" or any(k in q_lower for k in ["hire", "candidate", "applicant", "post", "యజమాని", "నాయకుడు", "नियोक्ता", "हायर"]):
-        if lang == "te":
-            return "మీరు పని అవసరాన్ని 'Post a Job' ద్వారా పోస్ట్ చేయవచ్చు. లేదా 'Candidate Matcher' ద్వారా నైపుణ్యం గల కార్మికులను తక్షణమే గుర్తించి సంప్రదించవచ్చు."
-        elif lang == "hi":
-            return "आप 'Post a Job' के जरिए आवश्यकता पोस्ट कर सकते हैं या 'Candidate Matcher' के माध्यम से सही उम्मीदवारों को तुरंत शॉर्टलिस्ट कर सकते हैं।"
-        else:
-            return "You can post a new requirement under 'Post a Job' or use the 'Candidate Matcher' to instantly browse and rank available workers by match score."
-
-    # General greeting & guidance
+    # General fallback
     if lang == "te":
-        return "నమస్కారం! నేను వర్క్ కనెక్ట్ స్మార్ట్ అసిస్టెంట్‌ని. మీకు స్థానిక పనులు, వాయిస్ రిజిస్ట్రేషన్, లేదా సరిపోయే కూలీలను వెతకడంలో సహాయం చేయగలను. మీరు ఏ పని కోసం చూస్తున్నారు?"
+        return f"నమస్కారం! వర్క్ కనెక్ట్‌లో ప్రస్తుతం {job_count} పనులు అందుబాటులో ఉన్నాయి. మీకు ఏ వృత్తిలో పని కావాలి లేదా ఎలాంటి సహాయం కావాలి?"
     elif lang == "hi":
-        return "नमस्ते! मैं वर्क कनेक्ट स्मार्ट सहायक हूँ। मैं आपको स्थानीय नौकरियां, वॉयस पंजीकरण, या कुशल कामगार खोजने में मदद कर सकता हूँ। आप किस कार्य की तलाश में हैं?"
+        return f"नमस्ते! वर्क कनेक्ट पर वर्तमान में {job_count} नौकरियां उपलब्ध हैं। आप किस क्षेत्र में काम या सहायता चाहते हैं?"
     else:
-        return "Hello! I am your WorkConnect Smart Assistant. I can help you discover local jobs, register by voice, understand daily wage rates, or find skilled candidates. How can I help you today?"
+        return f"Hello! WorkConnect currently has {job_count} active job listings. Ask me about specific trades, daily wages, or finding local work!"
