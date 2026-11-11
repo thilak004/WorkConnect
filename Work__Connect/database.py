@@ -381,8 +381,25 @@ def get_all_jobs(status_filter="Open", search_query=None, skill_filter=None,
             params.append(status_filter)
 
         if skill_filter and skill_filter.strip():
-            query += " AND LOWER(jobs.skill_required) LIKE %s"
-            params.append(f"%{skill_filter.strip().lower()}%")
+            sf = skill_filter.strip().lower()
+            from trade_utils import TRADE_METADATA
+            trade_obj = None
+            for tk, tdata in TRADE_METADATA.items():
+                if tk == sf or sf in tk or any(kw.lower() == sf or sf in kw.lower() for kw in tdata["keywords"]):
+                    trade_obj = tdata
+                    break
+
+            if trade_obj:
+                kw_conditions = ["LOWER(jobs.skill_required) LIKE %s OR LOWER(jobs.title) LIKE %s"]
+                kw_params = [f"%{sf}%", f"%{sf}%"]
+                for kw in trade_obj["keywords"]:
+                    kw_conditions.append("LOWER(jobs.skill_required) LIKE %s OR LOWER(jobs.title) LIKE %s")
+                    kw_params.extend([f"%{kw.lower()}%", f"%{kw.lower()}%"])
+                query += " AND (" + " OR ".join(kw_conditions) + ")"
+                params.extend(kw_params)
+            else:
+                query += " AND (LOWER(jobs.skill_required) LIKE %s OR LOWER(jobs.title) LIKE %s)"
+                params.extend([f"%{sf}%", f"%{sf}%"])
 
         if location_filter and location_filter.strip():
             query += " AND LOWER(jobs.location) LIKE %s"

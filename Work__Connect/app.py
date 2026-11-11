@@ -420,7 +420,13 @@ def trade_sector(trade_key):
     if not trade_meta:
         return redirect(url_for("browse_jobs"))
 
-    jobs = get_all_jobs(status_filter="Open", skill_filter=trade_meta["name_en"].split("/")[0].strip())
+    all_open_jobs = get_all_jobs(status_filter="Open")
+    jobs = []
+    for j in all_open_jobs:
+        job_trade = get_trade_for_skill(j["skill_required"])
+        if job_trade["key"] == trade_key:
+            jobs.append(j)
+
     current_worker_id = session.get("user_id") if session.get("role") == "worker" else None
     for j in jobs:
         j["trade_image"] = trade_meta["image"]
