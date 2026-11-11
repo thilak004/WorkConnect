@@ -201,8 +201,11 @@
                     <div style="font-size: 14px; color: #475569; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                         <span>🏢 {{ job.employer_name }}</span>
                         {% if job.employer_phone %}
-                            <a href="tel:{{ job.employer_phone }}" style="background: #eef2ff; color: #3730a3; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-decoration: none; border: 1px solid #c7d2fe;">
-                                📞 Call Employer: {{ job.employer_phone }}
+                            <a href="tel:{{ job.employer_phone }}" style="background: #eef2ff; color: #3730a3; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; text-decoration: none; border: 1px solid #c7d2fe; display: inline-flex; align-items: center; gap: 4px;">
+                                📞 Call: {{ job.employer_phone }}
+                            </a>
+                            <a href="https://wa.me/91{{ job.employer_phone.replace(' ', '').replace('-', '') }}?text=Hi%2C%20I%20am%20interested%20in%20your%20job%20posting%20{{ job.title }}%20on%20WorkConnect" target="_blank" style="background: #f0fdf4; color: #166534; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; text-decoration: none; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; gap: 4px;">
+                                💬 WhatsApp
                             </a>
                         {% endif %}
                         {% if job.is_verified %}
@@ -271,7 +274,8 @@
                             data-location="{{ job.location }}"
                             data-wage="{{ job.daily_wage }}"
                             data-description="{{ job.description }}"
-                            data-language="{{ active_lang }}">
+                            data-language="{{ active_lang }}"
+                            onclick="speakJobDetails()">
                         🔊 {{ t('listen_job') }}
                     </button>
 
@@ -332,5 +336,45 @@
             window.speechSynthesis.speak(utterance);
         }
     </script>
+
+    <!-- Mobile Bottom App Bar -->
+    <nav class="mobile-bottom-bar" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-bottom-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span class="icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-bottom-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span class="icon">🔍</span>
+            <span>Explore</span>
+        </a>
+        {% if user_role == 'employer' %}
+        <a href="{{ url_for('post_job') }}" class="mobile-bottom-item {% if request.endpoint == 'post_job' %}active{% endif %}">
+            <span class="icon">＋</span>
+            <span>Post Job</span>
+        </a>
+        <a href="{{ url_for('employer_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
+            <span class="icon">🏢</span>
+            <span>Dashboard</span>
+        </a>
+        {% elif user_role == 'worker' %}
+        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
+            <span class="icon">🎙️</span>
+            <span>Voice AI</span>
+        </a>
+        <a href="{{ url_for('worker_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
+            <span class="icon">👤</span>
+            <span>Dashboard</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
+            <span class="icon">🎙️</span>
+            <span>Voice Reg</span>
+        </a>
+        <a href="{{ url_for('login') }}" class="mobile-bottom-item {% if request.endpoint == 'login' %}active{% endif %}">
+            <span class="icon">👤</span>
+            <span>Sign In</span>
+        </a>
+        {% endif %}
+    </nav>
 </body>
 </html>

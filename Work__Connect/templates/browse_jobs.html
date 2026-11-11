@@ -381,6 +381,11 @@
                 {% endif %}
             </div>
         </div>
+        <div style="padding: 8px 12px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 6px; flex-wrap: wrap;">
+            <button onclick="sendQuickPrompt('Find high wage electrician jobs')" style="font-size: 11px; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; border-radius: 12px; padding: 4px 8px; cursor: pointer; font-weight: 600;">⚡ High wage jobs</button>
+            <button onclick="sendQuickPrompt('How do I register by voice?')" style="font-size: 11px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; border-radius: 12px; padding: 4px 8px; cursor: pointer; font-weight: 600;">🎙️ Voice Reg</button>
+            <button onclick="sendQuickPrompt('How to apply for a job?')" style="font-size: 11px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; border-radius: 12px; padding: 4px 8px; cursor: pointer; font-weight: 600;">✓ How to apply</button>
+        </div>
         <div class="ai-chat-input-bar">
             <input type="text" id="ai-user-query" class="ai-chat-input" placeholder="{{ t('ai_assistant_placeholder') }}" onkeydown="if(event.key==='Enter') sendAIMessage()">
             <button class="ai-chat-send" onclick="sendAIMessage()">{{ t('send') }}</button>
@@ -388,6 +393,10 @@
     </div>
 
     <script>
+        function sendQuickPrompt(txt) {
+            document.getElementById('ai-user-query').value = txt;
+            sendAIMessage();
+        }
         const activeLang = '{{ active_lang }}';
 
         // Audio Playback for Job Descriptions (Step 5)
@@ -510,5 +519,45 @@
             });
         }
     </script>
+
+    <!-- Mobile Bottom App Bar -->
+    <nav class="mobile-bottom-bar" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-bottom-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span class="icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-bottom-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span class="icon">🔍</span>
+            <span>Explore</span>
+        </a>
+        {% if user_role == 'employer' %}
+        <a href="{{ url_for('post_job') }}" class="mobile-bottom-item {% if request.endpoint == 'post_job' %}active{% endif %}">
+            <span class="icon">＋</span>
+            <span>Post Job</span>
+        </a>
+        <a href="{{ url_for('employer_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
+            <span class="icon">🏢</span>
+            <span>Dashboard</span>
+        </a>
+        {% elif user_role == 'worker' %}
+        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
+            <span class="icon">🎙️</span>
+            <span>Voice AI</span>
+        </a>
+        <a href="{{ url_for('worker_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
+            <span class="icon">👤</span>
+            <span>Dashboard</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
+            <span class="icon">🎙️</span>
+            <span>Voice Reg</span>
+        </a>
+        <a href="{{ url_for('login') }}" class="mobile-bottom-item {% if request.endpoint == 'login' %}active{% endif %}">
+            <span class="icon">👤</span>
+            <span>Sign In</span>
+        </a>
+        {% endif %}
+    </nav>
 </body>
 </html>

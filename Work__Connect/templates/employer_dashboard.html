@@ -1440,5 +1440,45 @@
             }
         });
     </script>
+
+    <!-- Mobile Bottom App Bar -->
+    <nav class="mobile-bottom-bar" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-bottom-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span class="icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-bottom-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span class="icon">🔍</span>
+            <span>Explore</span>
+        </a>
+        {% if user_role == 'employer' %}
+        <a href="{{ url_for('post_job') }}" class="mobile-bottom-item {% if request.endpoint == 'post_job' %}active{% endif %}">
+            <span class="icon">＋</span>
+            <span>Post Job</span>
+        </a>
+        <a href="{{ url_for('employer_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
+            <span class="icon">🏢</span>
+            <span>Dashboard</span>
+        </a>
+        {% elif user_role == 'worker' %}
+        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
+            <span class="icon">🎙️</span>
+            <span>Voice AI</span>
+        </a>
+        <a href="{{ url_for('worker_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
+            <span class="icon">👤</span>
+            <span>Dashboard</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
+            <span class="icon">🎙️</span>
+            <span>Voice Reg</span>
+        </a>
+        <a href="{{ url_for('login') }}" class="mobile-bottom-item {% if request.endpoint == 'login' %}active{% endif %}">
+            <span class="icon">👤</span>
+            <span>Sign In</span>
+        </a>
+        {% endif %}
+    </nav>
 </body>
 </html>
