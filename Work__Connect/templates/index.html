@@ -101,6 +101,22 @@
 
             <!-- Auth Controls (Step 1) -->
             {% if current_user %}
+                <div style="position: relative; display: inline-block;">
+                    <button onclick="toggleHomeNotifDropdown(event)" style="position: relative; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 4px;" title="Notifications">
+                        🔔 <span id="home-notif-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 1px 6px; font-size: 10px; font-weight: 700; {% if unread_notifications_count == 0 %}display: none;{% endif %}">{{ unread_notifications_count }}</span>
+                    </button>
+
+                    <div id="home-notif-panel" style="display: none; position: absolute; right: 0; top: 40px; width: 340px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; z-index: 1000; padding: 16px; text-align: left;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                            <strong>Notifications</strong>
+                            <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}#notifs" style="font-size: 12px; color: #2864c9; text-decoration: none; font-weight: 700;">View All →</a>
+                        </div>
+                        <div id="home-notif-list" style="max-height: 250px; overflow-y: auto; font-size: 13px;">
+                            <div style="color: #64748b; text-align: center; padding: 10px;">Loading notifications...</div>
+                        </div>
+                    </div>
+                </div>
+
                 <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: #1e3a8a; background: #e0e7ff; padding: 5px 12px; border-radius: 12px; text-decoration: none;">
                     👤 {{ current_user.name }}
                 </a>
@@ -148,6 +164,25 @@
             </div>
             <a href="{{ url_for('worker_voice_register') }}" class="btn-apply-big" style="background: #047857; padding: 10px 20px; font-size: 14px;">
                 🎤 {{ t('voice_start') }} →
+            </a>
+        </div>
+        {% endif %}
+
+        {% if user_role != 'worker' %}
+        <div class="voice-hero-banner" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid #93c5fd; margin-top: 15px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="font-size: 36px;">🏢</div>
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1e40af;">
+                        Employer Voice AI Registration
+                    </h3>
+                    <p style="margin: 2px 0 0 0; font-size: 13px; color: #1d4ed8;">
+                        Speak your business details in Telugu, Hindi, or English to register instantly as an employer.
+                    </p>
+                </div>
+            </div>
+            <a href="{{ url_for('employer_voice_register') }}" class="btn-apply-big" style="background: #2563eb; padding: 10px 20px; font-size: 14px;">
+                🎙️ Start Employer Voice Reg →
             </a>
         </div>
         {% endif %}
@@ -274,7 +309,7 @@
 
             <div class="trade-cards-gallery">
                 {% for trade in available_trades %}
-                    <a href="{{ url_for('browse_jobs', skill=trade.key) }}" class="trade-card-btn">
+                    <a href="{{ url_for('trade_sector', trade_key=trade.key) }}" class="trade-card-btn">
                         <img src="{{ url_for('static', filename=trade.image) }}" alt="{{ trade.name }}" class="trade-card-img">
                         <span class="trade-card-title">{{ trade.name }}</span>
                     </a>
@@ -492,6 +527,60 @@
             })
             .catch(() => {
                 appendAIMessage(messages, 'Assistant temporarily busy. Please try again.', 'bot');
+            });
+        }
+
+        function playNotificationSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3); // A5
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 3.0);
+            } catch(e) {}
+        }
+
+        function toggleHomeNotifDropdown(e) {
+            e.stopPropagation();
+            const panel = document.getElementById('home-notif-panel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                fetchNotificationsList();
+            }
+        }
+
+        function fetchNotificationsList() {
+            fetch('/api/notifications')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const list = document.getElementById('home-notif-list');
+                    if (data.notifications.length === 0) {
+                        list.innerHTML = '<div style="color: #64748b; text-align: center; padding: 20px;">No new notifications.</div>';
+                        return;
+                    }
+                    let html = '';
+                    data.notifications.slice(0, 5).forEach(n => {
+                        html += `<div style="padding: 10px; border-bottom: 1px solid #f1f5f9; background: ${n.is_read ? '#fff' : '#f0fdf4'}; border-radius: 6px; margin-bottom: 6px;">
+                            <div style="font-weight: 700; color: #1e293b; font-size: 13px;">${n.title}</div>
+                            <div style="color: #475569; font-size: 12px; margin-top: 2px;">${n.message}</div>
+                            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">${n.created_at}</div>
+                        </div>`;
+                    });
+                    list.innerHTML = html;
+                    if (data.unread_count > 0) {
+                        playNotificationSound();
+                    }
+                }
             });
         }
     </script>

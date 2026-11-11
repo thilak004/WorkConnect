@@ -147,7 +147,7 @@
 
             <div class="trade-cards-gallery">
                 {% for trade in available_trades %}
-                    <a href="{{ url_for('browse_jobs', skill=trade.key) }}" class="trade-card-btn {% if skill_filter == trade.key %}active{% endif %}">
+                    <a href="{{ url_for('trade_sector', trade_key=trade.key) }}" class="trade-card-btn {% if skill_filter == trade.key %}active{% endif %}">
                         <img src="{{ url_for('static', filename=trade.image) }}" alt="{{ trade.name }}" class="trade-card-img">
                         <span class="trade-card-title">{{ trade.name }}</span>
                     </a>

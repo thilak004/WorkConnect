@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="{{ active_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Voice Registration | WorkConnect</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .voice-container {
+            max-width: 680px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2864c9, #10b981);
+            width: 15%;
+            transition: width 0.3s ease;
+        }
+        .question-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 36px 30px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .question-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 12px 0;
+            line-height: 1.35;
+        }
+        .question-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .control-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-replay { background: #f1f5f9; color: #334155; }
+        .btn-replay:hover { background: #e2e8f0; }
+        .btn-edit { background: #fef3c7; color: #b45309; }
+        .btn-confirm { background: #10b981; color: #ffffff; }
+        .btn-confirm:hover { background: #059669; }
+        .summary-card {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body style="background: #f7f9fd;">
+
+    <header class="navbar" style="background: #ffffff; border-bottom: 1px solid #e3eaf2; padding: 0 4%; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+        <a href="{{ url_for('home') }}" style="font-size: 18px; font-weight: 800; color: #172b4d; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+            Work<span style="color: #2864c9;">Connect</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="lang-selector">
+                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
+                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
+                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
+            </div>
+            <a href="{{ url_for('employer_register') }}" style="font-size: 13px; font-weight: 700; color: #536780; text-decoration: none;">
+                Switch to Manual Form
+            </a>
+        </div>
+    </header>
+
+    <main class="voice-container">
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: #ecfdf5; color: #047857; padding: 4px 12px; border-radius: 14px; font-size: 12px; font-weight: 800; margin-bottom: 8px;">
+                🎙️ EMPLOYER VOICE REGISTRATION
+            </div>
+            <h1 style="font-size: 24px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0;">
+                Register Employer by Voice
+            </h1>
+            <p style="font-size: 14px; color: #64748b; margin: 0;">
+                Speak your business details in Telugu, Hindi, or English to register instantly.
+            </p>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="step-progress"></div>
+        </div>
+
+        <!-- Wizard Step Card -->
+        <div class="question-card" id="wizard-card">
+            <div style="font-size: 12px; font-weight: 800; color: #2864c9; text-transform: uppercase;" id="step-counter">
+                Step 1 of 6
+            </div>
+
+            <div class="question-title" id="question-text">
+                What is your employer or business name?
+            </div>
+            <div class="question-subtitle" id="question-hint">
+                Example: Suresh Construction or Raju Farms
+            </div>
+
+            <button class="mic-circle-btn" id="mic-btn" onclick="toggleListening()" title="Speak answer">
+                🎤
+            </button>
+
+            <div class="voice-transcript-box" id="transcript-box">
+                Tap the microphone above and speak your answer...
+            </div>
+
+            <div class="controls-row">
+                <button class="control-btn btn-replay" onclick="replayQuestion()">
+                    🔊 Replay Question
+                </button>
+                <button class="control-btn btn-replay" onclick="toggleListening()">
+                    🎤 Speak Again
+                </button>
+                <button class="control-btn btn-edit" onclick="manualTypeAnswer()">
+                    ✏️ Type Answer
+                </button>
+                <button class="control-btn btn-confirm" id="btn-next" onclick="confirmAndNext()">
+                    ✓ Confirm & Next →
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary & Final Confirmation Card -->
+        <div class="question-card" id="summary-card" style="display: none;">
+            <div style="font-size: 40px; margin-bottom: 10px;">🎉</div>
+            <h2 style="font-size: 22px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0;">
+                Registration Ready!
+            </h2>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">
+                Review your employer profile details below before finalizing your registration.
+            </p>
+
+            <form method="POST" action="{{ url_for('employer_register') }}" id="voice-register-form">
+                <div class="summary-card">
+                    <div class="summary-item">
+                        <span style="color: #64748b;">Employer Name:</span>
+                        <strong id="sum-name">-</strong>
+                        <input type="hidden" name="name" id="form-name">
+                    </div>
+                    <div class="summary-item">
+                        <span style="color: #64748b;">Industry Type:</span>
+                        <strong id="sum-type">-</strong>
+                        <input type="hidden" name="type" id="form-type">
+                    </div>
+                    <div class="summary-item">
+                        <span style="color: #64748b;">Location:</span>
+                        <strong id="sum-loc">-</strong>
+                        <input type="hidden" name="location" id="form-loc">
+                    </div>
+                    <div class="summary-item">
+                        <span style="color: #64748b;">Mobile Phone:</span>
+                        <strong id="sum-phone">-</strong>
+                        <input type="hidden" name="phone" id="form-phone">
+                    </div>
+                    <div class="summary-item">
+                        <span style="color: #64748b;">Email Address:</span>
+                        <strong id="sum-email">-</strong>
+                        <input type="email" name="email" id="form-email" required placeholder="you@example.com" style="width: 100%; margin-top: 8px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                    </div>
+                    <div class="summary-item" style="border-bottom: none; display: block; text-align: left;">
+                        <label for="voice-password" style="display: block; color: #64748b; margin-bottom: 8px;">Create password (at least 8 characters):</label>
+                        <input type="password" name="password" id="voice-password" minlength="8" required autocomplete="new-password" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                        <span id="pwd-err" style="color: #dc2626; font-size: 11px; display: none; margin-top: 4px;">Password must be at least 8 characters.</span>
+
+                        <label for="voice-confirm-password" style="display: block; color: #64748b; margin: 12px 0 8px;">Confirm password:</label>
+                        <input type="password" name="confirm_password" id="voice-confirm-password" minlength="8" required autocomplete="new-password" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-apply-big" style="width: 100%; font-size: 16px;">
+                    ✓ Complete Employer Registration & Post Jobs →
+                </button>
+            </form>
+        </div>
+
+    </main>
+
+    <script>
+        const activeLang = '{{ active_lang }}';
+
+        const QUESTIONS = [
+            {
+                id: 'name',
+                en: "What is your employer or business name?",
+                te: "మీ సంస్థ లేదా యజమాని పేరు ఏమిటి?",
+                hi: "आपकी कंपनी या नियोक्ता का नाम क्या है?",
+                hint: "Example: Suresh Construction or Raju Farms"
+            },
+            {
+                id: 'type',
+                en: "What is your industry type? (For example: Farmer, Construction, Transport, Institution, or Individual)",
+                te: "మీ రంగం ఏమిటి? ఉదాహరణకు: రైతు, భవన నిర్మాణం, రవాణా, సంస్థ లేదా వ్యక్తి.",
+                hi: "आपका व्यवसाय किस प्रकार का है? जैसे: किसान, निर्माण, परिवहन, संस्थान या व्यक्ति।",
+                hint: "Example: Construction, Farmer, Transport"
+            },
+            {
+                id: 'location',
+                en: "Which town or village is your business located in?",
+                te: "మీ వ్యాపారం ఏ ఊరు లేదా ప్రాంతంలో ఉంది?",
+                hi: "आपका व्यवसाय किस शहर या गाँव में स्थित है?",
+                hint: "Example: Narasapur, Vijayawada, Hyderabad"
+            },
+            {
+                id: 'phone',
+                en: "What is your mobile phone number?",
+                te: "మీ మొబైల్ ఫోన్ నంబర్ చెప్పండి.",
+                hi: "आपका मोबाइल फोन नंबर क्या है?",
+                hint: "Example: 9876543210"
+            },
+            {
+                id: 'email',
+                en: "What is your email address?",
+                te: "మీ ఈమెయిల్ చిరునామా చెప్పండి.",
+                hi: "आपका ईमेल पता क्या है?",
+                hint: "Example: contact@business.com"
+            },
+            {
+                id: 'password',
+                en: "Create a password of at least 8 characters.",
+                te: "కనీసం 8 అక్షరాలతో పాస్‌వర్డ్ సృష్టించండి.",
+                hi: "कम से कम 8 वर्णों का पासवर्ड बनाएं।",
+                hint: "Example: secret123"
+            }
+        ];
+
+        let currentStep = 0;
+        let answers = {
+            name: '',
+            type: '',
+            location: '',
+            phone: '',
+            email: '',
+            password: ''
+        };
+
+        let isListening = false;
+        let recognition = null;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = (activeLang === 'te') ? 'te-IN' : ((activeLang === 'hi') ? 'hi-IN' : 'en-IN');
+
+            recognition.onstart = () => {
+                isListening = true;
+                document.getElementById('mic-btn').classList.add('listening');
+                document.getElementById('transcript-box').innerText = "Listening... Please speak now";
+            };
+
+            recognition.onresult = (e) => {
+                const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+                document.getElementById('transcript-box').innerText = transcript;
+                saveStepAnswer(transcript);
+            };
+
+            recognition.onerror = () => { isListening = false; document.getElementById('mic-btn').classList.remove('listening'); };
+            recognition.onend = () => { isListening = false; document.getElementById('mic-btn').classList.remove('listening'); };
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = (activeLang === 'te') ? 'te-IN' : ((activeLang === 'hi') ? 'hi-IN' : 'en-IN');
+                utter.rate = 0.95;
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function loadQuestion(stepIndex) {
+            const q = QUESTIONS[stepIndex];
+            const text = q.en;
+            document.getElementById('question-text').innerText = text;
+            document.getElementById('question-hint').innerText = q.hint;
+            document.getElementById('step-counter').innerText = `Step ${stepIndex + 1} of ${QUESTIONS.length}`;
+            document.getElementById('step-progress').style.width = `${((stepIndex + 1) / QUESTIONS.length) * 100}%`;
+            document.getElementById('transcript-box').innerText = answers[q.id] || "Tap microphone and speak answer...";
+            setTimeout(() => speakText(text), 300);
+        }
+
+        function replayQuestion() {
+            speakText(QUESTIONS[currentStep].en);
+        }
+
+        function toggleListening() {
+            if (!recognition) { manualTypeAnswer(); return; }
+            if (isListening) { recognition.stop(); } else { try { recognition.start(); } catch(e){} }
+        }
+
+        function saveStepAnswer(val) {
+            const q = QUESTIONS[currentStep];
+            val = val.trim();
+            if (q.id === 'phone') {
+                const digits = val.replace(/\D/g, '');
+                answers[q.id] = digits;
+            } else if (q.id === 'email') {
+                answers[q.id] = val.toLowerCase().replace(/\s+at\s+/g, '@').replace(/\s+dot\s+/g, '.').replace(/\s+/g, '');
+            } else {
+                answers[q.id] = val;
+            }
+        }
+
+        function manualTypeAnswer() {
+            const q = QUESTIONS[currentStep];
+            const userVal = prompt("Please type your answer:", answers[q.id] || "");
+            if (userVal !== null && userVal.trim()) {
+                saveStepAnswer(userVal);
+                document.getElementById('transcript-box').innerText = userVal;
+            }
+        }
+
+        function confirmAndNext() {
+            const q = QUESTIONS[currentStep];
+            if (!answers[q.id]) {
+                alert("Please provide an answer before continuing.");
+                return;
+            }
+            if (q.id === 'password' && answers[q.id].length < 8) {
+                alert("Password must be at least 8 characters.");
+                return;
+            }
+
+            if (currentStep < QUESTIONS.length - 1) {
+                currentStep++;
+                loadQuestion(currentStep);
+            } else {
+                // Populate summary
+                document.getElementById('sum-name').innerText = answers.name;
+                document.getElementById('sum-type').innerText = answers.type;
+                document.getElementById('sum-loc').innerText = answers.location;
+                document.getElementById('sum-phone').innerText = answers.phone || 'Not provided';
+                document.getElementById('sum-email').innerText = answers.email;
+
+                document.getElementById('form-name').value = answers.name;
+                document.getElementById('form-type').value = answers.type;
+                document.getElementById('form-loc').value = answers.location;
+                document.getElementById('form-phone').value = answers.phone;
+                document.getElementById('form-email').value = answers.email;
+                document.getElementById('voice-password').value = answers.password;
+                document.getElementById('voice-confirm-password').value = answers.password;
+
+                document.getElementById('wizard-card').style.display = 'none';
+                document.getElementById('summary-card').style.display = 'block';
+            }
+        }
+
+        // Real-time password validation & show password check
+        document.addEventListener('DOMContentLoaded', () => {
+            loadQuestion(0);
+        });
+    </script>
+</body>
+</html>

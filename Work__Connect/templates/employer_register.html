@@ -23,7 +23,21 @@
         </div>
     </header>
 
-    <main class="registration-main" style="max-width: 580px; margin: 30px auto; padding: 0 20px;">
+    <main class="registration-main" style="max-width: 620px; margin: 30px auto; padding: 0 20px;">
+
+        <!-- Voice Registration Prompt for Employers -->
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 26px;">🎙️</span>
+                <div>
+                    <strong style="color: #065f46; font-size: 14px;">Register by Voice (Employer)</strong>
+                    <div style="font-size: 12px; color: #047857;">Use our voice assistant to register in Telugu, Hindi, or English.</div>
+                </div>
+            </div>
+            <a href="{{ url_for('employer_voice_register') }}" style="background: #047857; color: #ffffff; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none;">
+                🎤 Register by Voice
+            </a>
+        </div>
 
         <header class="registration-heading" style="text-align: center; margin-bottom: 24px;">
             <span class="registration-eyebrow" style="color: #2864c9; font-weight: 800; font-size: 12px;">EMPLOYER PORTAL</span>
@@ -32,6 +46,12 @@
         </header>
 
         <section class="registration-card" style="background: #ffffff; border-radius: 18px; padding: 28px; box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0;">
+            {% if error %}
+                <div style="background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 700;">
+                    {{ error }}
+                </div>
+            {% endif %}
+
             <form action="{{ url_for('employer_register') }}" method="POST" class="registration-form">
 
                 <div class="registration-field" style="margin-bottom: 16px;">
@@ -39,21 +59,34 @@
                     <input id="name" name="name" type="text" placeholder="e.g. Suresh Construction, Raju Farms" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                 </div>
 
-                <div class="registration-field" style="margin-bottom: 16px;">
-                    <label for="email" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Email Address</label>
-                    <input id="email" name="email" type="email" placeholder="e.g. contact@business.com" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                    <div class="registration-field">
+                        <label for="email" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Email Address</label>
+                        <input id="email" name="email" type="email" placeholder="e.g. contact@business.com" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                    </div>
+                    <div class="registration-field">
+                        <label for="phone" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Mobile Phone Number</label>
+                        <input id="phone" name="phone" type="tel" placeholder="e.g. 9876543210" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                    </div>
                 </div>
 
-                <!-- Password & Confirm Password (Step 1) -->
+                <!-- Password & Confirm Password with Show Password & Inline Validation -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
                     <div class="registration-field">
                         <label for="password" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Password</label>
-                        <input id="password" name="password" type="password" placeholder="Create password" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                        <input id="password" name="password" type="password" placeholder="At least 8 chars" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                        <span id="password-error" style="color: #dc2626; font-size: 11px; display: none; margin-top: 4px; font-weight: 700;">Password must be at least 8 characters.</span>
                     </div>
                     <div class="registration-field">
                         <label for="confirm_password" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Confirm Password</label>
                         <input id="confirm_password" name="confirm_password" type="password" placeholder="Repeat password" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
+                </div>
+
+                <!-- Show Password Toggle -->
+                <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569;">
+                    <input type="checkbox" id="show-pwd" onclick="togglePasswordVisibility()">
+                    <label for="show-pwd" style="cursor: pointer; font-weight: 600;">Show password</label>
                 </div>
 
                 <div class="registration-field" style="margin-bottom: 16px;">
@@ -87,5 +120,27 @@
         </section>
     </main>
 
+    <script>
+        function togglePasswordVisibility() {
+            const pwd = document.getElementById('password');
+            const cpwd = document.getElementById('confirm_password');
+            const show = document.getElementById('show-pwd').checked;
+            const type = show ? 'text' : 'password';
+            if (pwd) pwd.type = type;
+            if (cpwd) cpwd.type = type;
+        }
+
+        const passwordInput = document.getElementById('password');
+        const pwdErr = document.getElementById('password-error');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', () => {
+                if (passwordInput.value.length > 0 && passwordInput.value.length < 8) {
+                    pwdErr.style.display = 'block';
+                } else {
+                    pwdErr.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 </html>

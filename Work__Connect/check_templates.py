@@ -4,12 +4,13 @@ sys.stdout.reconfigure(encoding='utf-8')
 templates_dir = 'templates'
 endpoints = [
     'static', 'set_language', 'login', 'logout', 'home', 'worker_register',
-    'worker_voice_register', 'employer_register', 'browse_jobs', 'post_job',
+    'worker_voice_register', 'employer_voice_register', 'employer_register', 'browse_jobs', 'post_job',
     'forgot_password', 'job_details', 'apply_job', 'worker_dashboard', 'worker_applications', 'worker_profile_edit',
     'employer_dashboard', 'employer_applications', 'candidate_matches',
     'save_job_route', 'unsave_job_route', 'schedule_interview_route',
     'toggle_verify_route', 'submit_report_route', 'api_read_notification',
-    'api_read_all_notifications', 'api_ai_chat', 'api_voice_stt', 'api_voice_tts'
+    'api_read_all_notifications', 'api_ai_chat', 'api_voice_stt', 'api_voice_tts',
+    'trade_sector'
 ]
 
 errors = []

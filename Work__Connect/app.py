@@ -326,13 +326,14 @@ def worker_register():
         confirm_password = request.form.get("confirm_password", "").strip()
         skill = request.form.get("skill", "").strip()
         location = request.form.get("location", "").strip()
+        phone = request.form.get("phone", "").strip()
         availability = request.form.get("availability", "Immediate").strip()
 
         try:
             experience = int(request.form.get("experience", "0"))
             wage = int(request.form.get("wage", "0"))
         except ValueError:
-            return "Experience and wage must be valid numbers.", 400
+            return render_template("worker_register.html", error="Experience and wage must be valid numbers.")
 
         rating = None
         if request.form.get("rating"):
@@ -340,19 +341,19 @@ def worker_register():
                 rating = float(request.form.get("rating"))
                 rating = min(5.0, max(1.0, rating))
             except ValueError:
-                return "Rating must be a valid number.", 400
+                return render_template("worker_register.html", error="Rating must be a valid number.")
 
         if not all([name, email, password, confirm_password, skill, location]):
-            return "Please complete all required fields.", 400
+            return render_template("worker_register.html", error="Please complete all required fields.")
 
         if len(password) < 8:
-            return "Password must be at least 8 characters.", 400
+            return render_template("worker_register.html", error="Password must be at least 8 characters.")
 
         if password != confirm_password:
-            return "Passwords do not match. Please try again.", 400
+            return render_template("worker_register.html", error="Passwords do not match. Please try again.")
 
         if experience < 0 or experience > 60 or wage < 0:
-            return "Please enter a valid experience and wage.", 400
+            return render_template("worker_register.html", error="Please enter a valid experience and wage.")
 
         try:
             worker_id = create_worker(
@@ -364,7 +365,8 @@ def worker_register():
                 experience=experience,
                 wage=wage,
                 availability=availability,
-                rating=rating
+                rating=rating,
+                phone=phone
             )
 
             # Auto-login newly registered worker with permanent session
@@ -388,11 +390,7 @@ def worker_register():
             )
 
         except psycopg.IntegrityError:
-            return """
-                <h2>Registration not completed</h2>
-                <p>This email is already registered as a worker on WorkConnect.</p>
-                <a href="/register/worker">Try again</a>
-            """, 400
+            return render_template("worker_register.html", error="This email is already registered as a worker on WorkConnect.")
 
     return render_template("worker_register.html")
 
@@ -404,6 +402,39 @@ def worker_voice_register():
         flash("Unauthorized. This area is reserved for workers.", "danger")
         return redirect(url_for("home"))
     return render_template("voice_register.html")
+
+
+@app.route("/register/employer/voice")
+def employer_voice_register():
+    """Interactive Voice AI Registration Wizard for Employers."""
+    if session.get("role") == "worker":
+        flash("Unauthorized. This area is reserved for employers.", "danger")
+        return redirect(url_for("home"))
+    return render_template("employer_voice_register.html")
+
+
+@app.route("/jobs/sector/<trade_key>")
+def trade_sector(trade_key):
+    """Dedicated trade sector page when selecting a job sector."""
+    trade_meta = TRADE_METADATA.get(trade_key)
+    if not trade_meta:
+        return redirect(url_for("browse_jobs"))
+
+    jobs = get_all_jobs(status_filter="Open", skill_filter=trade_meta["name_en"].split("/")[0].strip())
+    current_worker_id = session.get("user_id") if session.get("role") == "worker" else None
+    for j in jobs:
+        j["trade_image"] = trade_meta["image"]
+        j["trade_icon"] = trade_meta["icon"]
+        j["trade_color"] = trade_meta["color"]
+        j["trade_bg_tint"] = trade_meta["bg_tint"]
+        j["is_saved"] = is_job_saved_by_worker(current_worker_id, j["id"]) if current_worker_id else False
+
+    return render_template(
+        "trade_sector.html",
+        trade=trade_meta,
+        jobs=jobs,
+        trade_key=trade_key
+    )
 
 
 @app.route("/register/employer", methods=["GET", "POST"])
@@ -422,15 +453,16 @@ def employer_register():
         confirm_password = request.form.get("confirm_password", "").strip()
         employer_type = request.form.get("type", "").strip()
         location = request.form.get("location", "").strip()
+        phone = request.form.get("phone", "").strip()
 
         if not all([name, email, password, confirm_password, employer_type, location]):
-            return "Please complete all required fields.", 400
+            return render_template("employer_register.html", error="Please complete all required fields.")
 
         if len(password) < 8:
-            return "Password must be at least 8 characters.", 400
+            return render_template("employer_register.html", error="Password must be at least 8 characters.")
 
         if password != confirm_password:
-            return "Passwords do not match. Please try again.", 400
+            return render_template("employer_register.html", error="Passwords do not match. Please try again.")
 
         try:
             employer_id = create_employer(
@@ -438,7 +470,8 @@ def employer_register():
                 email=email,
                 password=password,
                 employer_type=employer_type,
-                location=location
+                location=location,
+                phone=phone
             )
 
             # Auto-login newly registered employer with permanent session
@@ -462,11 +495,7 @@ def employer_register():
             )
 
         except psycopg.IntegrityError:
-            return """
-                <h2>Registration not completed</h2>
-                <p>This email is already registered as an employer.</p>
-                <a href="/register/employer">Try again</a>
-            """, 400
+            return render_template("employer_register.html", error="This email is already registered as an employer.")
 
     return render_template("employer_register.html")
 
@@ -811,6 +840,7 @@ def worker_profile_edit():
         skill = request.form.get("skill", "").strip()
         location = request.form.get("location", "").strip()
         availability = request.form.get("availability", "Immediate").strip()
+        phone = request.form.get("phone", "").strip()
 
         try:
             experience = int(request.form.get("experience", "0"))
@@ -834,7 +864,8 @@ def worker_profile_edit():
             location=location,
             experience=experience,
             wage=wage,
-            availability=availability
+            availability=availability,
+            phone=phone
         )
 
         session["name"] = name

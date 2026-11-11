@@ -346,7 +346,7 @@ def get_job_by_id(job_id):
     with get_db_connection() as connection:
         row = connection.execute(
             """
-            SELECT jobs.*, employers.name AS employer_name
+            SELECT jobs.*, employers.name AS employer_name, employers.phone AS employer_phone, employers.email AS employer_email
             FROM jobs
             JOIN employers ON jobs.employer_id = employers.id
             WHERE jobs.id = %s
@@ -368,6 +368,7 @@ def get_all_jobs(status_filter="Open", search_query=None, skill_filter=None,
             SELECT
                 jobs.*,
                 employers.name AS employer_name,
+                employers.phone AS employer_phone,
                 (SELECT COUNT(*) FROM applications WHERE job_id = jobs.id AND status IN ('Confirmed', 'Accepted')) AS confirmed_count
             FROM jobs
             JOIN employers ON jobs.employer_id = employers.id
@@ -786,7 +787,7 @@ def insert_application(worker_id, job_id):
 # STEP 1 & 2: USER AUTHENTICATION, PASSWORD HASHING, & PROFILE HELPERS
 # =====================================================================
 
-def create_worker(name, email, password, skill, location, experience=0, wage=0, availability="Immediate", rating=None):
+def create_worker(name, email, password, skill, location, experience=0, wage=0, availability="Immediate", rating=None, phone=""):
     """Create a new worker account with securely hashed password."""
     password_hash = generate_password_hash(password)
     with get_db_connection() as connection:
@@ -794,16 +795,16 @@ def create_worker(name, email, password, skill, location, experience=0, wage=0, 
         cursor.execute(
             """
             INSERT INTO workers
-            (name, email, password_hash, skill, location, experience, wage, availability, rating)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (name, email, password_hash, skill, location, experience, wage, availability, rating, phone)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
             """,
-            (name.strip(), email.strip().lower(), password_hash, skill.strip(), location.strip(), experience, wage, availability.strip(), rating)
+            (name.strip(), email.strip().lower(), password_hash, skill.strip(), location.strip(), experience, wage, availability.strip(), rating, phone.strip())
         )
         return cursor.fetchone()["id"]
 
 
-def create_employer(name, email, password, employer_type, location, is_verified=0):
+def create_employer(name, email, password, employer_type, location, is_verified=0, phone=""):
     """Create a new employer account with securely hashed password."""
     password_hash = generate_password_hash(password)
     with get_db_connection() as connection:
@@ -811,11 +812,11 @@ def create_employer(name, email, password, employer_type, location, is_verified=
         cursor.execute(
             """
             INSERT INTO employers
-            (name, email, password_hash, employer_type, location, is_verified)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            (name, email, password_hash, employer_type, location, is_verified, phone)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id
             """,
-            (name.strip(), email.strip().lower(), password_hash, employer_type.strip(), location.strip(), is_verified)
+            (name.strip(), email.strip().lower(), password_hash, employer_type.strip(), location.strip(), is_verified, phone.strip())
         )
         return cursor.fetchone()["id"]
 
@@ -842,40 +843,40 @@ def verify_employer_credentials(email, password):
     return None
 
 
-def update_worker_profile(worker_id, name, skill, location, experience, wage, availability):
+def update_worker_profile(worker_id, name, skill, location, experience, wage, availability, phone=""):
     """Allow workers to correct and update their profile and preferences (Step 7)."""
     with get_db_connection() as connection:
         connection.execute(
             """
             UPDATE workers
-            SET name = %s, skill = %s, location = %s, experience = %s, wage = %s, availability = %s
+            SET name = %s, skill = %s, location = %s, experience = %s, wage = %s, availability = %s, phone = %s
             WHERE id = %s
             """,
-            (name.strip(), skill.strip(), location.strip(), experience, wage, availability.strip(), worker_id)
+            (name.strip(), skill.strip(), location.strip(), experience, wage, availability.strip(), phone.strip(), worker_id)
         )
         return True
 
 
-def update_employer_profile(employer_id, name, employer_type, location, is_verified=None):
+def update_employer_profile(employer_id, name, employer_type, location, is_verified=None, phone=""):
     """Update employer profile."""
     with get_db_connection() as connection:
         if is_verified is not None:
             connection.execute(
                 """
                 UPDATE employers
-                SET name = %s, employer_type = %s, location = %s, is_verified = %s
+                SET name = %s, employer_type = %s, location = %s, is_verified = %s, phone = %s
                 WHERE id = %s
                 """,
-                (name.strip(), employer_type.strip(), location.strip(), 1 if is_verified else 0, employer_id)
+                (name.strip(), employer_type.strip(), location.strip(), 1 if is_verified else 0, phone.strip(), employer_id)
             )
         else:
             connection.execute(
                 """
                 UPDATE employers
-                SET name = %s, employer_type = %s, location = %s
+                SET name = %s, employer_type = %s, location = %s, phone = %s
                 WHERE id = %s
                 """,
-                (name.strip(), employer_type.strip(), location.strip(), employer_id)
+                (name.strip(), employer_type.strip(), location.strip(), phone.strip(), employer_id)
             )
         return True
 

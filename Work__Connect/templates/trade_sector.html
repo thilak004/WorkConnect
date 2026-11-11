@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="{{ active_lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trade.name_en }} Jobs | WorkConnect</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .site-nav {
+            background: #ffffff;
+            border-bottom: 1px solid #e3eaf2;
+            padding: 0 4%;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .site-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #172b4d;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .site-brand span { color: #2864c9; }
+        .sector-header {
+            background: linear-gradient(135deg, {{ trade.bg_tint }} 0%, #ffffff 100%);
+            border: 2px solid {{ trade.color }};
+            border-radius: 20px;
+            padding: 32px 30px;
+            margin: 24px auto;
+            max-width: 1100px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+        }
+        .sector-thumb {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: #ffffff;
+            padding: 10px;
+            object-fit: contain;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .jobs-card-modern {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .jobs-card-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(40, 100, 201, 0.09);
+        }
+    </style>
+</head>
+<body style="background: #f7f9fd;">
+
+    <header class="site-nav">
+        <a href="{{ url_for('home') }}" class="site-brand">
+            Work<span>Connect</span>
+        </a>
+        <nav class="site-links">
+            <a href="{{ url_for('home') }}" class="site-link">{{ t('nav_home') }}</a>
+            <a href="{{ url_for('browse_jobs') }}" class="site-link">{{ t('nav_browse_jobs') }}</a>
+            {% if user_role == 'employer' %}
+                <a href="{{ url_for('post_job') }}" class="site-link">{{ t('nav_post_job') }}</a>
+                <a href="{{ url_for('employer_dashboard') }}" class="site-link">{{ t('nav_employer_dashboard') }}</a>
+            {% elif user_role == 'worker' %}
+                <a href="{{ url_for('worker_dashboard') }}" class="site-link">{{ t('nav_worker_dashboard') }}</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="site-link" style="color: #2864c9; font-weight: 700;">{{ t('nav_login') }}</a>
+            {% endif %}
+            <div class="lang-selector">
+                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
+                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
+                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="max-width: 1100px; margin: 0 auto; padding: 20px;">
+
+        <!-- Sector Hero Header -->
+        <section class="sector-header">
+            <img src="{{ url_for('static', filename=trade.image) }}" alt="{{ trade.name_en }}" class="sector-thumb">
+            <div>
+                <div style="font-size: 12px; font-weight: 800; color: {{ trade.color }}; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                    Dedicated Job Sector
+                </div>
+                <h1 style="font-size: 26px; font-weight: 850; color: #172b4d; margin: 0 0 6px 0;">
+                    {{ trade.name_en }} {% if active_lang == 'te' %}({{ trade.name_te }}){% elif active_lang == 'hi' %}({{ trade.name_hi }}){% endif %}
+                </h1>
+                <p style="font-size: 14px; color: #536780; margin: 0;">
+                    Explore verified local openings for {{ trade.name_en }}. Listen to job audio descriptions or apply instantly with 1 tap.
+                </p>
+            </div>
+        </section>
+
+        <!-- Jobs Grid -->
+        <div style="margin-top: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0;">
+                    Available {{ trade.name_en }} Opportunities ({{ jobs|length }})
+                </h2>
+                <a href="{{ url_for('browse_jobs') }}" style="font-size: 13px; font-weight: 700; color: #2864c9; text-decoration: none;">
+                    ← View All Sectors
+                </a>
+            </div>
+
+            {% if jobs %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px;">
+                    {% for job in jobs %}
+                        <article class="jobs-card-modern">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-size: 11px; font-weight: 800; color: {{ trade.color }}; text-transform: uppercase;">
+                                        {{ job.skill_required }}
+                                    </span>
+                                    <span style="font-size: 12px; color: #64748b;">🏢 {{ job.employer_name }}</span>
+                                </div>
+                                <h3 style="font-size: 18px; font-weight: 800; color: #172b4d; margin: 0 0 8px 0;">
+                                    <a href="{{ url_for('job_details', job_id=job.id) }}" style="color: inherit; text-decoration: none;">
+                                        {{ job.title }}
+                                    </a>
+                                </h3>
+
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                                    <span class="wage-badge">💰 ₹{{ job.daily_wage }}/day</span>
+                                    <span class="locality-badge">📍 {{ job.location }}</span>
+                                </div>
+
+                                <p style="font-size: 13px; color: #475569; margin: 0 0 16px 0; line-height: 1.45;">
+                                    {{ job.description }}
+                                </p>
+                            </div>
+
+                            <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button type="button" class="btn-audio-speak"
+                                            data-title="{{ job.title }}"
+                                            data-employer="{{ job.employer_name }}"
+                                            data-wage="{{ job.daily_wage }}"
+                                            data-location="{{ job.location }}"
+                                            data-desc="{{ job.description }}"
+                                            onclick="playJobAudioFromBtn(this)">
+                                        🔊 Listen Audio
+                                    </button>
+                                    {% if job.employer_phone %}
+                                        <a href="tel:{{ job.employer_phone }}" style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 8px; text-decoration: none; border: 1px solid #a7f3d0;">
+                                            📞 {{ job.employer_phone }}
+                                        </a>
+                                    {% endif %}
+                                </div>
+
+                                <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn-apply-big">
+                                    ⚡ Apply Now →
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background: #ffffff; border-radius: 16px; padding: 50px 20px; text-align: center; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">🌾</div>
+                    <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0;">No active openings in this sector right now</h3>
+                    <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Check back soon or explore other trade categories.</p>
+                    <a href="{{ url_for('browse_jobs') }}" class="btn-apply-big">Browse All Jobs</a>
+                </div>
+            {% endif %}
+        </div>
+
+    </main>
+
+    <script>
+        const activeLang = '{{ active_lang }}';
+        function playJobAudioFromBtn(btn) {
+            const title = btn.dataset.title || '';
+            const employer = btn.dataset.employer || '';
+            const wage = btn.dataset.wage || '';
+            const location = btn.dataset.location || '';
+            const description = btn.dataset.desc || '';
+
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const text = `Job: ${title} by ${employer} at ${location}. Wage: ${wage} rupees per day. Details: ${description}`;
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = (activeLang === 'te') ? 'te-IN' : ((activeLang === 'hi') ? 'hi-IN' : 'en-IN');
+            window.speechSynthesis.speak(utter);
+        }
+    </script>
+</body>
+</html>
