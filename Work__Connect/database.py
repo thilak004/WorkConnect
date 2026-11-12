@@ -6,13 +6,21 @@ from db import get_db_connection
 
 
 def initialize_database():
-    """Apply the checked-in PostgreSQL schema to the configured database."""
+    """Apply the checked-in PostgreSQL schema to the configured database robustly."""
     schema_path = Path(__file__).resolve().parent / "schema.sql"
-    schema = schema_path.read_text(encoding="utf-8")
-    with get_db_connection() as connection:
-        for statement in schema.split(";"):
-            if statement.strip():
-                connection.execute(statement)
+    if not schema_path.is_file():
+        return
+    try:
+        schema = schema_path.read_text(encoding="utf-8")
+        with get_db_connection() as connection:
+            for statement in schema.split(";"):
+                if statement.strip():
+                    try:
+                        connection.execute(statement)
+                    except Exception:
+                        pass
+    except Exception:
+        pass
 
 
 def compute_match_score(worker, job, lang="en"):

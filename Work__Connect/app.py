@@ -54,11 +54,16 @@ from database import (
     get_interviews_for_worker,
     get_interviews_for_employer,
     submit_report,
-    get_all_reports
+    get_all_reports,
+    initialize_database
 )
 from db import get_db_connection
 
 load_dotenv()
+try:
+    initialize_database()
+except Exception:
+    pass
 
 from translations import get_translation, SUPPORTED_LANGUAGES
 from trade_utils import get_trade_for_skill, get_all_trades_list, TRADE_METADATA
@@ -787,25 +792,45 @@ def worker_dashboard():
     Displays worker's personal profile, live applications, saved jobs, notifications, and scheduled interviews.
     Strict privacy isolation: workers can ONLY view their own data.
     """
-    worker = get_worker_by_id(session["user_id"])
+    try:
+        worker = get_worker_by_id(session["user_id"])
+    except Exception:
+        try:
+            initialize_database()
+            worker = get_worker_by_id(session["user_id"])
+        except Exception as e:
+            flash(f"Database error: {e}", "danger")
+            return redirect(url_for("home"))
+
     if not worker:
         flash("Worker session invalid. Please log in.", "danger")
         return redirect(url_for("login", role="worker"))
 
-    sort_by = request.args.get("sort_by", "date").strip()
-    applications = get_applications_by_worker(worker["email"], sort_by=sort_by)
-    saved_jobs = get_saved_jobs_by_worker(worker["id"])
-    interviews = get_interviews_for_worker(worker["id"])
-    notifications = get_notifications("worker", worker["id"])
+    try:
+        sort_by = request.args.get("sort_by", "date").strip()
+        applications = get_applications_by_worker(worker["email"], sort_by=sort_by)
+        saved_jobs = get_saved_jobs_by_worker(worker["id"])
+        interviews = get_interviews_for_worker(worker["id"])
+        notifications = get_notifications("worker", worker["id"])
+    except Exception as e:
+        try:
+            initialize_database()
+            applications = get_applications_by_worker(worker["email"], sort_by=sort_by)
+            saved_jobs = get_saved_jobs_by_worker(worker["id"])
+            interviews = get_interviews_for_worker(worker["id"])
+            notifications = get_notifications("worker", worker["id"])
+        except Exception as inner_e:
+            flash(f"Error loading dashboard data: {inner_e}", "danger")
+            applications, saved_jobs, interviews, notifications = [], [], [], []
 
     # Attach trade visual metadata to saved jobs
     for sj in saved_jobs:
-        t_meta = get_trade_for_skill(sj["skill_required"])
+        t_meta = get_trade_for_skill(sj.get("skill_required", ""))
         sj["trade_image"] = t_meta["image"]
         sj["trade_icon"] = t_meta["icon"]
         sj["trade_color"] = t_meta["color"]
 
-    trade_meta = get_trade_for_skill(worker["skill"])
+    trade_meta = get_trade_for_skill(worker.get("skill", ""))
 
     return render_template(
         "worker_dashboard.html",
@@ -889,10 +914,21 @@ def employer_dashboard():
     Company profile, verification badge, posted jobs, live applicant counts, and interviews.
     Strict privacy: employers CANNOT see other employers' applicants or private data.
     """
-    with get_db_connection() as connection:
-        employer_row = connection.execute(
-            "SELECT * FROM employers WHERE id = %s", (session["user_id"],)
-        ).fetchone()
+    try:
+        with get_db_connection() as connection:
+            employer_row = connection.execute(
+                "SELECT * FROM employers WHERE id = %s", (session["user_id"],)
+            ).fetchone()
+    except Exception:
+        try:
+            initialize_database()
+            with get_db_connection() as connection:
+                employer_row = connection.execute(
+                    "SELECT * FROM employers WHERE id = %s", (session["user_id"],)
+                ).fetchone()
+        except Exception as e:
+            flash(f"Database error: {e}", "danger")
+            return redirect(url_for("home"))
 
     if not employer_row:
         flash("Employer session invalid. Please log in.", "danger")
@@ -903,33 +939,61 @@ def employer_dashboard():
     selected_job_id = request.args.get("job_id", "").strip()
     sort_by = request.args.get("sort_by", "match").strip()
 
-    job_filter_int = int(selected_job_id) if selected_job_id.isdigit() else None
-    applications = get_applications_by_employer(
-        employer_email=employer["email"],
-        job_id=job_filter_int,
-        status_filter=selected_status if selected_status != "All" else None,
-        sort_by=sort_by
-    )
+    try:
+        job_filter_int = int(selected_job_id) if selected_job_id.isdigit() else None
+        applications = get_applications_by_employer(
+            employer_email=employer["email"],
+            job_id=job_filter_int,
+            status_filter=selected_status if selected_status != "All" else None,
+            sort_by=sort_by
+        )
 
-    with get_db_connection() as connection:
-        employer_jobs = [dict(r) for r in connection.execute(
-            """
-            SELECT id, title, skill_required, description, location, workers_needed,
-                   positions_remaining, daily_wage, status, created_at,
-                   (SELECT COUNT(*) FROM applications WHERE job_id = jobs.id) AS total_applicants
-            FROM jobs
-            WHERE employer_id = %s
-            ORDER BY id DESC
-            """,
-            (employer["id"],)
-        ).fetchall()]
+        with get_db_connection() as connection:
+            employer_jobs = [dict(r) for r in connection.execute(
+                """
+                SELECT id, title, skill_required, description, location, workers_needed,
+                       positions_remaining, daily_wage, status, created_at,
+                       (SELECT COUNT(*) FROM applications WHERE job_id = jobs.id) AS total_applicants
+                FROM jobs
+                WHERE employer_id = %s
+                ORDER BY id DESC
+                """,
+                (employer["id"],)
+            ).fetchall()]
 
-    interviews = get_interviews_for_employer(employer["id"])
-    notifications = get_notifications("employer", employer["id"])
+        interviews = get_interviews_for_employer(employer["id"])
+        notifications = get_notifications("employer", employer["id"])
+    except Exception as e:
+        try:
+            initialize_database()
+            job_filter_int = int(selected_job_id) if selected_job_id.isdigit() else None
+            applications = get_applications_by_employer(
+                employer_email=employer["email"],
+                job_id=job_filter_int,
+                status_filter=selected_status if selected_status != "All" else None,
+                sort_by=sort_by
+            )
+            with get_db_connection() as connection:
+                employer_jobs = [dict(r) for r in connection.execute(
+                    """
+                    SELECT id, title, skill_required, description, location, workers_needed,
+                           positions_remaining, daily_wage, status, created_at,
+                           (SELECT COUNT(*) FROM applications WHERE job_id = jobs.id) AS total_applicants
+                    FROM jobs
+                    WHERE employer_id = %s
+                    ORDER BY id DESC
+                    """,
+                    (employer["id"],)
+                ).fetchall()]
+            interviews = get_interviews_for_employer(employer["id"])
+            notifications = get_notifications("employer", employer["id"])
+        except Exception as inner_e:
+            flash(f"Error loading employer dashboard data: {inner_e}", "danger")
+            applications, employer_jobs, interviews, notifications = [], [], [], []
 
     # Attach trade icons
     for ej in employer_jobs:
-        t_meta = get_trade_for_skill(ej["skill_required"])
+        t_meta = get_trade_for_skill(ej.get("skill_required", ""))
         ej["trade_image"] = t_meta["image"]
         ej["trade_icon"] = t_meta["icon"]
         ej["trade_color"] = t_meta["color"]
