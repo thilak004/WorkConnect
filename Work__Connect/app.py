@@ -1,5 +1,7 @@
 import os
+import sys
 import secrets
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from datetime import timedelta
 from functools import wraps
 from urllib.parse import urlsplit
