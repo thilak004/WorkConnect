@@ -1316,5 +1316,15 @@ def api_voice_tts():
     })
 
 
+@app.errorhandler(Exception)
+def handle_unexpected_error(error):
+    """Global error handler to render professional error page instead of generic 500."""
+    import traceback
+    tb = traceback.format_exc()
+    print("UNHANDLED EXCEPTION:", error)
+    print(tb)
+    return render_template("error.html", error=str(error)), 500
+
+
 if __name__ == "__main__":
     app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
