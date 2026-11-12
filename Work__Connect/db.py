@@ -2,6 +2,7 @@
 
 import os
 from contextlib import contextmanager
+from datetime import datetime
 
 import psycopg
 from dotenv import load_dotenv
@@ -21,14 +22,27 @@ def database_url():
     return url
 
 
+def clean_dict_row(cursor):
+    """Custom row factory that converts datetime objects to string format for template safety."""
+    dict_factory = dict_row(cursor)
+    def make_row(values):
+        row = dict_factory(values)
+        if row:
+            for k, v in row.items():
+                if isinstance(v, datetime):
+                    row[k] = v.strftime('%Y-%m-%d %H:%M:%S')
+        return row
+    return make_row
+
+
 @contextmanager
 def get_db_connection():
-    """Yield a PostgreSQL connection, committing on success and always closing it."""
+    """Yield a PostgreSQL connection with clean datetime formatting, committing on success and closing."""
     connection = psycopg.connect(
         database_url(),
         connect_timeout=10,
         prepare_threshold=None,
-        row_factory=dict_row,
+        row_factory=clean_dict_row,
     )
     try:
         yield connection
