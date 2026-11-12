@@ -1087,6 +1087,20 @@
             </div>
         </section>
 
+        <!-- Quick Action Toolbar -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 22px; margin-bottom: 24px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 4px 18px rgba(0,0,0,0.03);">
+            <strong style="color: #1e293b; font-size: 14px;">Quick Navigation:</strong>
+            <a href="{{ url_for('post_job') }}" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #2864c9; color: white; display: inline-flex; align-items: center; gap: 6px;">
+                ＋ Post New Job
+            </a>
+            <a href="{{ url_for('candidate_matches') }}" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; display: inline-flex; align-items: center; gap: 6px;">
+                🎯 Smart Candidate Matcher
+            </a>
+            <a href="#applicants" onclick="switchEmpTab('applicants')" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+                👥 Review Applicants
+            </a>
+        </div>
+
         <!-- 2. Improved Statistics Cards -->
         <section class="stat-grid-modern">
             <!-- 1: Posted Jobs (Blue) -->
