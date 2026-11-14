@@ -507,10 +507,30 @@
             box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
         }
 
+        function speakText(text, lang) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang === 'te' ? 'te-IN' : (lang === 'hi' ? 'hi-IN' : 'en-IN');
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         function appendAIMessage(messages, text, type) {
             const bubble = document.createElement('div');
             bubble.className = `ai-bubble ${type}`;
             bubble.textContent = text;
+
+            if (type === 'bot') {
+                const speakBtn = document.createElement('button');
+                speakBtn.innerHTML = '🔊 Listen';
+                speakBtn.style.cssText = 'display: block; margin-top: 6px; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; cursor: pointer;';
+                speakBtn.onclick = () => speakText(text, '{{ active_lang }}');
+                bubble.appendChild(speakBtn);
+                speakText(text, '{{ active_lang }}');
+            }
+
             messages.appendChild(bubble);
         }
 

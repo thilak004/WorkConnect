@@ -114,7 +114,17 @@ def _generate_domain_fallback(query, lang, role, context):
     Queries live PostgreSQL jobs, parses trade keywords (EN, TE, HI), minimum wage filters,
     and location filters, and returns context-aware natural language guidance.
     """
-    q_lower = query.lower()
+    q_lower = query.strip().lower()
+
+    # 1. Greetings
+    if q_lower in ["hi", "hello", "hey", "hii", "namaste", "namaskaram", "greetings", "good morning", "good evening"]:
+        if lang == "te":
+            return "నమస్కారం! నేను వర్క్ కనెక్ట్ అసిస్టెంట్‌ని. మీకు ఏ వృత్తిలో పని కావాలి లేదా ఎలాంటి సహాయం కావాలి?"
+        elif lang == "hi":
+            return "नमस्ते! मैं वर्क कनेक्ट सहायक हूँ। आप किस क्षेत्र में काम या सहायता चाहते हैं?"
+        else:
+            return "Hello! I am your WorkConnect Assistant. Ask me about specific trades, daily wages, or finding local work!"
+
     live_jobs = get_all_jobs(status_filter="Open")
     job_count = len(live_jobs)
 
@@ -131,22 +141,21 @@ def _generate_domain_fallback(query, lang, role, context):
         match_score = 0
         job_skill = j.get("skill_required", "").lower()
         job_title = j.get("title", "").lower()
+        job_desc = j.get("description", "").lower()
         job_loc = j.get("location", "").lower()
         job_wage = int(j.get("daily_wage", 0))
 
-        if matched_trade and (matched_trade["key"] in job_skill or job_skill in matched_trade["key"] or matched_trade["key"] in job_title):
-            match_score += 3
+        if matched_trade and (matched_trade["key"] in job_skill or matched_trade["key"] in job_title or matched_trade["key"] in job_desc or job_skill in matched_trade["key"]):
+            match_score += 10
         elif any(kw in q_lower for kw in job_skill.split()) or any(kw in q_lower for kw in job_title.split()):
-            match_score += 2
+            match_score += 5
 
         if min_wage > 0 and job_wage >= min_wage:
-            match_score += 2
-        elif min_wage == 0:
-            match_score += 1
+            match_score += 3
 
         # Check location mentions in query
         if any(loc_word in q_lower for loc_word in job_loc.split()):
-            match_score += 2
+            match_score += 4
 
         if match_score > 0:
             filtered_jobs.append((match_score, j))
@@ -155,15 +164,15 @@ def _generate_domain_fallback(query, lang, role, context):
     filtered_jobs.sort(key=lambda x: x[0], reverse=True)
     matched_jobs = [j for score, j in filtered_jobs]
 
-    # If specific job search intent or matched jobs found
-    if matched_jobs or any(k in q_lower for k in ["job", "work", "find", "vacancy", "పని", "ఉద్యోగం", "काम", "नौकरी", "electrician", "mason", "driver", "painter", "farm"]):
+    # If specific trade or search intent found
+    if matched_jobs or any(k in q_lower for k in ["job", "work", "find", "vacancy", "mason", "electrician", "driver", "painter", "plumber", "carpenter", "helper", "farm", "పని", "ఉద్యోగం", "మేస్త్రీ", "డ్రైవర్", "काम", "नौकरी", "राजमिस्त्री", "ड्राइवर"]):
         target_jobs = matched_jobs if matched_jobs else live_jobs[:3]
         if target_jobs:
             first_job = target_jobs[0]
             if lang == "te":
-                return f"RAG సెర్చ్ ద్వారా {len(target_jobs)} సరిపోయే పనులు కనుగొనబడ్డాయి! ఉదాహరణకు: '{first_job['title']}' ({first_job['location']}) - రోజువారీ కూలీ ₹{first_job['daily_wage']}. వెంటనే 'Browse Jobs' లో దరఖాస్తు చేయండి."
+                return f"RAG సెర్చ్ ద్వారా {len(target_jobs)} సరిపోయే పనులు కనుగొనబడ్డాయి! అగ్ర ఫలితం: '{first_job['title']}' ({first_job['location']}) - రోజువారీ కూలీ ₹{first_job['daily_wage']}. వెంటనే 'Browse Jobs' లో దరఖాస్తు చేయండి."
             elif lang == "hi":
-                return f"RAG सर्च द्वारा {len(target_jobs)} मेल खाती नौकरियां मिलीं! उदाहरण: '{first_job['title']}' ({first_job['location']}) - दैनिक मजदूरी ₹{first_job['daily_wage']}। 'Browse Jobs' पर आवेदन करें।"
+                return f"RAG सर्च द्वारा {len(target_jobs)} मेल खाती नौकरियां मिलीं! शीर्ष परिणाम: '{first_job['title']}' ({first_job['location']}) - दैनिक मजदूरी ₹{first_job['daily_wage']}। 'Browse Jobs' पर आवेदन करें।"
             else:
                 return f"Found {len(target_jobs)} matching open jobs via RAG semantic search! Top result: '{first_job['title']}' in {first_job['location']} at ₹{first_job['daily_wage']}/day. Visit 'Browse Jobs' to apply."
 
