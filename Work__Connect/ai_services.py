@@ -136,7 +136,34 @@ def _generate_domain_fallback(query, lang, role, context):
         else:
             return "I am WorkConnect AI, your smart assistant designed to help workers find local jobs and employers hire skilled people across India."
 
-    # Location / Place queries ("at which place", "where", "location")
+    # FAQ Guide from app_faq.txt
+    if "apply" in q_lower:
+        return (
+            "HOW TO APPLY FOR A JOB:\n"
+            "1. Log in to your Worker account.\n"
+            "2. Go to the 'Recommended Jobs' dashboard.\n"
+            "3. Use the search bar or distance filter to find a job that matches your skills.\n"
+            "4. Click on the job card to view details (wage, location, date).\n"
+            "5. Click the 'Apply' button.\n"
+            "6. The employer will review your profile. You will get a notification if you are shortlisted."
+        )
+    if "post" in q_lower or "requirement" in q_lower:
+        return (
+            "HOW TO POST A REQUIREMENT (FOR EMPLOYERS):\n"
+            "1. Log in to your Employer account.\n"
+            "2. Click the '+' button on the bottom navigation bar.\n"
+            "3. Fill in the job details: Title, Skill Required, Number of Workers, Date, and Wage.\n"
+            "4. Set the location using the map or by typing the village/city name.\n"
+            "5. Click 'Post Requirement'. The matching engine will instantly show you a list of suitable workers."
+        )
+    if "update" in q_lower or "profile" in q_lower:
+        return (
+            "HOW TO UPDATE YOUR PROFILE:\n"
+            "1. Go to the 'Profile' tab.\n"
+            "2. Click 'Edit Profile'.\n"
+            "3. You can add new skills, update your expected wage, or change your availability dates.\n"
+            "4. Click 'Save' to ensure the matching engine uses your latest information."
+        )
     if any(k in q_lower for k in ["place", "where", "location", "city", "town", "village", "ఎక్కడ", "ఏ ప్రాంతం", "स्थान", "कहां", "जगह"]):
         locations = sorted(list(set(j.get("location", "") for j in get_all_jobs(status_filter="Open") if j.get("location"))))
         loc_str = ", ".join(locations[:5]) if locations else "Narasapur, Kakinada, Vijayawada, Palakol"
