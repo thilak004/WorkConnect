@@ -611,6 +611,32 @@
             } catch(e) {}
         }
 
+        // Automatic background polling for new unread notifications
+        let lastUnreadCount = {{ unread_notifications_count | default(0) }};
+        setInterval(() => {
+            fetch('/api/notifications')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const newCount = data.unread_count;
+                        const badge = document.getElementById('home-notif-badge');
+                        if (badge) {
+                            if (newCount > 0) {
+                                badge.innerText = newCount;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+                        if (newCount > lastUnreadCount) {
+                            playNotificationSound();
+                        }
+                        lastUnreadCount = newCount;
+                    }
+                })
+                .catch(() => {});
+        }, 20000);
+
         function toggleHomeNotifDropdown(e) {
             e.stopPropagation();
             const panel = document.getElementById('home-notif-panel');

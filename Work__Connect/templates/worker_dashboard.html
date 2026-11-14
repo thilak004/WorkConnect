@@ -681,6 +681,40 @@
             }
         }
 
+        function playNotificationSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3); // A5
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 3.0);
+            } catch(e) {}
+        }
+
+        let lastUnreadCount = {{ unread_notifications_count | default(0) }};
+        setInterval(() => {
+            fetch('/api/notifications')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const newCount = data.unread_count;
+                        if (newCount > lastUnreadCount) {
+                            playNotificationSound();
+                        }
+                        lastUnreadCount = newCount;
+                        updateBadges(newCount);
+                    }
+                })
+                .catch(() => {});
+        }, 20000);
+
         function toggleAIChat() {
             const box = document.getElementById('ai-chat-box');
             box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
