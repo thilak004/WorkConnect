@@ -1,14 +1,20 @@
-How to apply for a job:
-1. Go to 'Browse Jobs' from the navigation bar.
-2. Filter jobs by your trade or location.
-3. Click 'Apply Now' on any open job listing.
+HOW TO APPLY FOR A JOB:
+1. Log in to your Worker account.
+2. Go to the "Recommended Jobs" dashboard.
+3. Use the search bar or distance filter to find a job that matches your skills.
+4. Click on the job card to view details (wage, location, date).
+5. Click the "Apply" button. 
+6. The employer will review your profile. You will get a notification if you are shortlisted.
 
-How to post a requirement:
-1. Sign in as an Employer.
-2. Click 'Post a Job' in the top navigation.
-3. Fill in job title, required skill, daily wage, and location, then click submit.
+HOW TO POST A REQUIREMENT (FOR EMPLOYERS):
+1. Log in to your Employer account.
+2. Click the "+" button on the bottom navigation bar.
+3. Fill in the job details: Title, Skill Required, Number of Workers, Date, and Wage.
+4. Set the location using the map or by typing the village/city name.
+5. Click "Post Requirement". The matching engine will instantly show you a list of suitable workers.
 
-How to update a worker profile:
-1. Go to your Worker Dashboard.
-2. Click 'Edit Profile & Preferences'.
-3. Update your skill, experience, wage expectations, or phone number and save changes.
+HOW TO UPDATE YOUR PROFILE:
+1. Go to the "Profile" tab.
+2. Click "Edit Profile".
+3. You can add new skills, update your expected wage, or change your availability dates.
+4. Click "Save" to ensure the matching engine uses your latest information.
