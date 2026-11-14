@@ -205,14 +205,23 @@ def _generate_domain_fallback(query, lang, role, context):
         else:
             return "Daily wages on WorkConnect range from ₹500 to ₹1,200/day. Set your expected wage in your profile to match with top-paying opportunities."
 
-    # Voice registration / profile
-    if any(k in q_lower for k in ["register", "sign up", "voice", "profile", "నమోదు", "రిజిస్టర్", "స్వరం", "पंजीकरण", "प्रोफाइल"]):
+    # Profile improvement
+    if any(k in q_lower for k in ["improve profile", "get hired", "profile tips", "ప్రొఫైల్ మెరుగుపరచడం", "प्रोफाइल सुधार"]):
         if lang == "te":
-            return "మీరు హోమ్‌పేజీలో 'Register by Voice' బటన్ నొక్కి, తెలుగులో మాట్లాడి కేవలం 1 నిమిషంలో మీ ప్రొఫైల్ సృష్టించుకోవచ్చు."
+            return "మీ ప్రొఫైల్‌ను మెరుగుపరచుకోవడానికి: সঠিক వృత్తిని ఎంచుకోండి, మీ పని అనుభవాన్ని నూతనంగా ఉంచండి, మరియు మీ ఫోన్ నంబర్‌ను అప్‌డేట్ చేయండి."
         elif lang == "hi":
-            return "आप होमपेज पर 'Register by Voice' पर क्लिक करके हिंदी में बोलकर 1 मिनट में अपनी प्रोफाइल बना सकते हैं।"
+            return "अपनी प्रोफाइल सुधारने के लिए: सही ट्रेड चुनें, अपने अनुभव के वर्षों को अपडेट करें, और अपना मोबाइल नंबर सही रखें।"
         else:
-            return "You can register in under 1 minute using our Voice AI Assistant by clicking 'Register by Voice' on the homepage."
+            return "To improve your profile and get higher match scores, ensure your primary trade, correct experience years, and mobile phone number are up to date in 'Edit Profile & Preferences'."
+
+    # Job posting help for employers
+    if any(k in q_lower for k in ["post a job", "create job", "how to post", "పని పోస్ట్", "नौकरी पोस्ट"]):
+        if lang == "te":
+            return "యజమానులు 'Post a Job' బటన్ ద్వారా కొత్త పనిని పోస్ట్ చేయవచ్చు. పని పేరు, అవసరమైన వృత్తి, రోజువారీ కూలీ మరియు స్థానాన్ని నమోదు చేయండి."
+        elif lang == "hi":
+            return "नियोक्ता 'Post a Job' पर क्लिक करके नया काम पोस्ट कर सकते हैं। काम का शीर्षक, आवश्यक ट्रेड, दैनिक मजदूरी और स्थान दर्ज करें।"
+        else:
+            return "Employers can post a new job by clicking 'Post a Job' in the navigation bar, specifying the title, trade, daily wage, and location."
 
     # General fallback
     if lang == "te":
