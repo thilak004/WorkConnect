@@ -125,6 +125,26 @@ def _generate_domain_fallback(query, lang, role, context):
         else:
             return "Hello! I am your WorkConnect Assistant. Ask me about specific trades, daily wages, or finding local work!"
 
+    # Identity queries ("who are you", "what are you")
+    if any(k in q_lower for k in ["who are you", "what are you", "your name", "నీవు ఎవరు", "మీరు ఎవరు", "आप कौन हैं", "तुम्हारा नाम"]):
+        if lang == "te":
+            return "నేను వర్క్ కనెక్ట్ AI అసిస్టెంట్‌ని. కార్మికులకు స్థానిక పనులను కనుగొనడంలో మరియు యజమానులకు నైపుణ్యం గల కార్మికులను నియమించుకోవడంలో నేను సహాయపడతాను."
+        elif lang == "hi":
+            return "मैं वर्क कनेक्ट AI सहायक हूँ, जो श्रमिकों को स्थानीय नौकरियां खोजने और नियोक्ताओं को कुशल लोगों को काम पर रखने में मदद करता है।"
+        else:
+            return "I am WorkConnect AI, your smart assistant designed to help workers find local jobs and employers hire skilled people across India."
+
+    # Location / Place queries ("at which place", "where", "location")
+    if any(k in q_lower for k in ["place", "where", "location", "city", "town", "village", "ఎక్కడ", "ఏ ప్రాంతం", "स्थान", "कहां", "जगह"]):
+        locations = sorted(list(set(j.get("location", "") for j in get_all_jobs(status_filter="Open") if j.get("location"))))
+        loc_str = ", ".join(locations[:5]) if locations else "Narasapur, Kakinada, Vijayawada, Palakol"
+        if lang == "te":
+            return f"వర్క్ కనెక్ట్‌లో వివిధ ప్రాంతాలు మరియు గ్రామాలలో పనులు అందుబాటులో ఉన్నాయి (ఉదాహరణకు: {loc_str}). మీరు 'Browse Jobs' పేజీలో మీ ప్రాంతాన్ని ఎంచుకోవచ్చు!"
+        elif lang == "hi":
+            return f"वर्क कनेक्ट पर विभिन्न स्थानों और गांवों में नौकरियां उपलब्ध हैं (जैसे: {loc_str})। आप 'Browse Jobs' पेज पर अपना स्थान चुन सकते हैं!"
+        else:
+            return f"WorkConnect features local job opportunities across various towns and villages (such as {loc_str}). You can also filter by location on the Browse Jobs page!"
+
     live_jobs = get_all_jobs(status_filter="Open")
     job_count = len(live_jobs)
 
