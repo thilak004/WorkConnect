@@ -908,6 +908,44 @@ def worker_profile_edit():
     return render_template("worker_profile_edit.html", worker=worker)
 
 
+@app.route("/employer/profile/edit", methods=["GET", "POST"])
+@employer_required
+def employer_profile_edit():
+    """Allow employers to update their profile and phone number."""
+    with get_db_connection() as connection:
+        employer_row = connection.execute(
+            "SELECT * FROM employers WHERE id = %s", (session["user_id"],)
+        ).fetchone()
+    if not employer_row:
+        flash("Employer not found.", "danger")
+        return redirect(url_for("login", role="employer"))
+    employer = dict(employer_row)
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        employer_type = request.form.get("employer_type", "").strip()
+        location = request.form.get("location", "").strip()
+        phone = request.form.get("phone", "").strip()
+
+        if not all([name, employer_type, location]):
+            flash("Please fill in all required fields.", "danger")
+            return redirect(url_for("employer_profile_edit"))
+
+        update_employer_profile(
+            employer_id=employer["id"],
+            name=name,
+            employer_type=employer_type,
+            location=location,
+            phone=phone
+        )
+
+        session["name"] = name
+        flash("Your employer profile has been updated successfully!", "success")
+        return redirect(url_for("employer_dashboard"))
+
+    return render_template("employer_profile_edit.html", employer=employer)
+
+
 @app.route("/employer/dashboard")
 @employer_required
 def employer_dashboard():

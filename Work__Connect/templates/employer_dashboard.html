@@ -1077,6 +1077,9 @@
                         </button>
                     </form>
                 {% endif %}
+                <a href="{{ url_for('employer_profile_edit') }}" class="btn-verify-badge" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; text-decoration: none;">
+                    ⚙️ {{ t('edit_profile') }}
+                </a>
                 <a href="{{ url_for('post_job') }}" class="btn-post-job-main">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1095,6 +1098,9 @@
             </a>
             <a href="{{ url_for('candidate_matches') }}" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; display: inline-flex; align-items: center; gap: 6px;">
                 🎯 Smart Candidate Matcher
+            </a>
+            <a href="{{ url_for('employer_profile_edit') }}" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+                ⚙️ {{ t('edit_profile') }}
             </a>
             <a href="#applicants" onclick="switchEmpTab('applicants')" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
                 👥 Review Applicants
