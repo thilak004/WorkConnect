@@ -117,6 +117,17 @@ TRANSLATIONS = {
         "register_employer_title": "Employer Registration",
         "edit_profile": "Edit Profile & Preferences",
         "save_changes": "Save Changes",
+        "show_password": "Show password",
+        "forgot_password": "Forgot password?",
+        "keep_signed_in": "Keep me signed in",
+        "full_name": "Full name",
+        "email_address": "Email address",
+        "mobile_phone": "Mobile Phone Number",
+        "primary_skill": "Primary skill / Trade",
+        "location_label": "Town / Village / Location",
+        "experience_label": "Years of Experience",
+        "expected_wage": "Expected Daily Wage (₹)",
+        "availability_label": "Availability",
 
         # Employer Dashboard
         "employer_dashboard_title": "Employer Management Portal",
@@ -144,7 +155,17 @@ TRANSLATIONS = {
         "ai_assistant_title": "WorkConnect Smart Assistant",
         "ai_assistant_placeholder": "Ask in English, Telugu, or Hindi (e.g., 'Find painter jobs in Kakinada')...",
         "send": "Send",
-        "close": "Close"
+        "close": "Close",
+        "employer_voice_title": "Employer Voice AI Registration",
+        "employer_voice_subtitle": "Speak your business details in Telugu, Hindi, or English to register instantly as an employer.",
+        "employer_voice_start": "Start Employer Voice Reg",
+        "hero_note": "A simple way to connect skills with opportunities",
+        "your_next_step": "YOUR NEXT STEP",
+        "opportunities_await": "Opportunities await.",
+        "one_community": "One connected community",
+        "community_sub": "Workers and employers, together.",
+        "visual_discovery": "VISUAL JOB DISCOVERY",
+        "visual_discovery_sub": "Tap any picture to find all matching local job opportunities."
     },
 
     "te": {
@@ -258,6 +279,17 @@ TRANSLATIONS = {
         "register_employer_title": "యజమానుల రిజిస్ట్రేషన్",
         "edit_profile": "ప్రొఫైల్ వివరాలను మార్చుకోండి",
         "save_changes": "మార్పులను సేవ్ చేయండి",
+        "show_password": "పాస్‌వర్డ్ చూపించు",
+        "forgot_password": "పాస్‌వర్డ్ మర్చిపోయారా?",
+        "keep_signed_in": "లాగిన్ అయి ఉండండి",
+        "full_name": "పూర్తి పేరు",
+        "email_address": "ఈమెయిల్ చిరునామా",
+        "mobile_phone": "మొబైల్ ఫోన్ నంబర్",
+        "primary_skill": "ప్రధాన నైపుణ్యం / వృత్తి",
+        "location_label": "గ్రామం / పట్టణం / ప్రాంతం",
+        "experience_label": "పని అనుభవం (సంవత్సరాలలో)",
+        "expected_wage": "కోరుకునే రోజువారీ కూలీ (₹)",
+        "availability_label": "అందుబాటులో ఉండే సమయం",
 
         # Employer Dashboard
         "employer_dashboard_title": "యజమానుల నిర్వహణ పోర్టల్",
@@ -285,7 +317,17 @@ TRANSLATIONS = {
         "ai_assistant_title": "వర్క్ కనెక్ట్ స్మార్ట్ అసిస్టెంట్",
         "ai_assistant_placeholder": "తెలుగులో అడగండి (ఉదా: 'నర్సాపురంలో ఎలక్ట్రీషియన్ పనులు చూపించు')...",
         "send": "పంపండి",
-        "close": "మూసివేయి"
+        "close": "మూసివేయి",
+        "employer_voice_title": "యజమాని వాయిస్ AI రిజిస్ట్రేషన్",
+        "employer_voice_subtitle": "మీ వ్యాపార వివరాలను తెలుగు, హిందీ లేదా ఇంగ్లీషులో మాట్లాడి యజమానిగా నమోదు చేసుకోండి.",
+        "employer_voice_start": "యజమాని వాయిస్ రిజిస్ట్రేషన్ ప్రారంభించండి",
+        "hero_note": "నైపుణ్యాలను అవకాశాలతో అనుసంధానించే సులభమైన మార్గం",
+        "your_next_step": "మీ తదుపరి అడుగు",
+        "opportunities_await": "అవకాశాలు మీకోసం ఎదురుచూస్తున్నాయి.",
+        "one_community": "ఒక అనుసంధానించబడిన సంఘం",
+        "community_sub": "కూలీలు మరియు యజమానులు, కలిసి.",
+        "visual_discovery": "చిత్రాల ద్వారా పని అన్వేషణ",
+        "visual_discovery_sub": "స్థానిక పనులను కనుగొనడానికి ఏదైనా చిత్రంపై నొక్కండి."
     },
 
     "hi": {
@@ -399,6 +441,17 @@ TRANSLATIONS = {
         "register_employer_title": "नियोक्ता पंजीकरण",
         "edit_profile": "प्रोफाइल विवरण बदलें",
         "save_changes": "बदलाव सहेजें",
+        "show_password": "पासवर्ड दिखाएं",
+        "forgot_password": "पासवर्ड भूल गए?",
+        "keep_signed_in": "साइन इन रहें",
+        "full_name": "पूरा नाम",
+        "email_address": "ईमेल पता",
+        "mobile_phone": "मोबाइल फोन नंबर",
+        "primary_skill": "प्राथमिक कौशल / ट्रेड",
+        "location_label": "स्थान / गांव / शहर",
+        "experience_label": "अनुभव के वर्ष",
+        "expected_wage": "अपेक्षित दैनिक मजदूरी (₹)",
+        "availability_label": "उपलब्धता",
 
         # Employer Dashboard
         "employer_dashboard_title": "नियोक्ता प्रबंधन पोर्टल",
@@ -426,7 +479,17 @@ TRANSLATIONS = {
         "ai_assistant_title": "वर्क कनेक्ट स्मार्ट सहायक",
         "ai_assistant_placeholder": "हिंदी में पूछें (जैसे: 'मुझे नरसपुर में ड्राइवर का काम दिखाओ')...",
         "send": "भेजें",
-        "close": "बंद करें"
+        "close": "बंद करें",
+        "employer_voice_title": "नियोक्ता वॉयस AI पंजीकरण",
+        "employer_voice_subtitle": "एक नियोक्ता के रूप में तुरंत पंजीकरण करने के लिए तेलुगु, हिंदी या अंग्रेजी में अपनी व्यावसायिक विवरण बोलें।",
+        "employer_voice_start": "नियोक्ता वॉयस पंजीकरण शुरू करें",
+        "hero_note": "कौशल को अवसरों से जोड़ने का एक सरल तरीका",
+        "your_next_step": "आपका अगला कदम",
+        "opportunities_await": "अवसर आपका इंतज़ार कर रहे हैं.",
+        "one_community": "एक जुड़ा हुआ समुदाय",
+        "community_sub": "कामगार और नियोक्ता, एकसाथ.",
+        "visual_discovery": "विजुअल जॉब डिस्कवरी",
+        "visual_discovery_sub": "स्थानीय अवसरों का पता लगाने के लिए किसी भी तस्वीर पर टैप करें."
     }
 }
 

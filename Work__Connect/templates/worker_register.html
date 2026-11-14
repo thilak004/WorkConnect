@@ -54,17 +54,17 @@
             <form action="{{ url_for('worker_register') }}" method="POST" class="registration-form">
 
                 <div class="registration-field" style="margin-bottom: 16px;">
-                    <label for="name" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Full name</label>
+                    <label for="name" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('full_name') }}</label>
                     <input id="name" name="name" type="text" placeholder="Enter your full name" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
                     <div class="registration-field">
-                        <label for="email" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Email address</label>
+                        <label for="email" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('email_address') }}</label>
                         <input id="email" name="email" type="email" placeholder="e.g. name@example.com" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
                     <div class="registration-field">
-                        <label for="phone" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Mobile Phone Number</label>
+                        <label for="phone" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('mobile_phone') }}</label>
                         <input id="phone" name="phone" type="tel" placeholder="e.g. 9876543210" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
                 </div>
@@ -72,12 +72,12 @@
                 <!-- Password & Confirm Password with Show Password & Inline Validation -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
                     <div class="registration-field">
-                        <label for="password" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Password</label>
+                        <label for="password" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('password_label') }}</label>
                         <input id="password" name="password" type="password" placeholder="At least 8 chars" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                         <span id="password-error" style="color: #dc2626; font-size: 11px; display: none; margin-top: 4px; font-weight: 700;">Password must be at least 8 characters.</span>
                     </div>
                     <div class="registration-field">
-                        <label for="confirm_password" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Confirm Password</label>
+                        <label for="confirm_password" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('confirm_password_label') }}</label>
                         <input id="confirm_password" name="confirm_password" type="password" placeholder="Repeat password" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
                 </div>
@@ -85,11 +85,11 @@
                 <!-- Show Password Toggle -->
                 <div style="margin-bottom: 16px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569;">
                     <input type="checkbox" id="show-pwd" onclick="togglePasswordVisibility()">
-                    <label for="show-pwd" style="cursor: pointer; font-weight: 600;">Show password</label>
+                    <label for="show-pwd" style="cursor: pointer; font-weight: 600;">{{ t('show_password') }}</label>
                 </div>
 
                 <div class="registration-field" style="margin-bottom: 16px;">
-                    <label for="skill" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Primary skill / Trade</label>
+                    <label for="skill" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('primary_skill') }}</label>
                     <select id="skill" name="skill" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                         <option value="">Select your main trade</option>
                         <option value="Electrician">Electrician / ఎలక్ట్రీషియన్ / इलेक्ट्रीशियन</option>
@@ -104,24 +104,24 @@
                 </div>
 
                 <div class="registration-field" style="margin-bottom: 16px;">
-                    <label for="location" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Location</label>
+                    <label for="location" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('location_label') }}</label>
                     <input id="location" name="location" type="text" placeholder="Town, city, or village (e.g. Narasapur)" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
                     <div class="registration-field">
-                        <label for="experience" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Experience (years)</label>
+                        <label for="experience" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('experience_label') }}</label>
                         <input id="experience" name="experience" type="number" min="0" max="60" value="0" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
 
                     <div class="registration-field">
-                        <label for="wage" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Expected daily wage (₹)</label>
+                        <label for="wage" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('expected_wage') }}</label>
                         <input id="wage" name="wage" type="number" min="0" step="1" placeholder="e.g. 600" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                     </div>
                 </div>
 
                 <div class="registration-field" style="margin-bottom: 22px;">
-                    <label for="availability" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">Availability</label>
+                    <label for="availability" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('availability_label') }}</label>
                     <select id="availability" name="availability" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                         <option value="Immediate" selected>Immediate (Ready now)</option>
                         <option value="Within 1 Week">Within 1 Week</option>
@@ -135,8 +135,7 @@
                 </button>
 
                 <p class="registration-footer" style="text-align: center; margin-top: 18px; font-size: 13px; color: #64748b;">
-                    Already have an account?
-                    <a href="{{ url_for('login', role='worker') }}" style="color: #2864c9; font-weight: 700;">Sign in here</a>
+                    {{ t('already_have_account') }}
                 </p>
 
             </form>

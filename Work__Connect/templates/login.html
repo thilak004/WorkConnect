@@ -137,16 +137,16 @@
                     <label for="password">{{ t('password_label') }}</label>
                     <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                     <label for="show-password" style="display: flex; align-items: center; gap: 6px; margin-top: 7px; color: #64748b; font-size: 12px; font-weight: 600; cursor: pointer;">
-                        <input type="checkbox" id="show-password"> Show password
+                        <input type="checkbox" id="show-password"> {{ t('show_password') }}
                     </label>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-<a href="{{ url_for('forgot_password', role=active_tab) }}" style="color: #2864c9; font-size: 12px; font-weight: 700; text-decoration: none;">Forgot password?</a>
+<a href="{{ url_for('forgot_password', role=active_tab) }}" style="color: #2864c9; font-size: 12px; font-weight: 700; text-decoration: none;">{{ t('forgot_password') }}</a>
                     </div>
                 </div>
 
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; font-size: 12px; color: #64748b;">
                     <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                        <input type="checkbox" name="remember" checked> Keep me signed in
+                        <input type="checkbox" name="remember" checked> {{ t('keep_signed_in') }}
                     </label>
                 </div>
 

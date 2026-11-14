@@ -174,15 +174,15 @@
                 <div style="font-size: 36px;">🏢</div>
                 <div>
                     <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1e40af;">
-                        Employer Voice AI Registration
+                        {{ t('employer_voice_title') }}
                     </h3>
                     <p style="margin: 2px 0 0 0; font-size: 13px; color: #1d4ed8;">
-                        Speak your business details in Telugu, Hindi, or English to register instantly as an employer.
+                        {{ t('employer_voice_subtitle') }}
                     </p>
                 </div>
             </div>
             <a href="{{ url_for('employer_voice_register') }}" class="btn-apply-big" style="background: #2563eb; padding: 10px 20px; font-size: 14px;">
-                🎙️ Start Employer Voice Reg →
+                🎙️ {{ t('employer_voice_start') }} →
             </a>
         </div>
         {% endif %}
@@ -240,7 +240,7 @@
 
                 <div class="hero-note">
                     <span class="check-mark">✓</span>
-                    A simple way to connect skills with opportunities
+                    {{ t('hero_note') }}
                 </div>
 
             </div>
@@ -250,8 +250,8 @@
 
                 <div class="panel-top">
                     <div>
-                        <span class="panel-label">YOUR NEXT STEP</span>
-                        <h2>Opportunities await.</h2>
+                        <span class="panel-label">{{ t('your_next_step') }}</span>
+                        <h2>{{ t('opportunities_await') }}</h2>
                     </div>
                     <span class="panel-symbol">↗</span>
                 </div>
@@ -284,8 +284,8 @@
                     </div>
 
                     <div class="panel-footer-text">
-                        <strong>One connected community</strong>
-                        <p>Workers and employers, together.</p>
+                        <strong>{{ t('one_community') }}</strong>
+                        <p>{{ t('community_sub') }}</p>
                     </div>
                 </div>
 
@@ -297,13 +297,13 @@
         <section style="max-width: 1050px; margin: 30px auto; padding: 0 20px;">
             <div style="text-align: center; margin-bottom: 20px;">
                 <span class="section-label" style="color: #2864c9; font-weight: 800; font-size: 11px; text-transform: uppercase;">
-                    VISUAL JOB DISCOVERY
+                    {{ t('visual_discovery') }}
                 </span>
                 <h2 style="font-size: 24px; font-weight: 850; color: #172b4d; margin: 4px 0;">
                     {{ t('filter_by_trade') }}
                 </h2>
                 <p style="font-size: 13px; color: #64748b; margin: 0;">
-                    Tap any picture to find all matching local job opportunities.
+                    {{ t('visual_discovery_sub') }}
                 </p>
             </div>
 
