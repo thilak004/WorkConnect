@@ -1,0 +1,14 @@
+How to apply for a job:
+1. Go to 'Browse Jobs' from the navigation bar.
+2. Filter jobs by your trade or location.
+3. Click 'Apply Now' on any open job listing.
+
+How to post a requirement:
+1. Sign in as an Employer.
+2. Click 'Post a Job' in the top navigation.
+3. Fill in job title, required skill, daily wage, and location, then click submit.
+
+How to update a worker profile:
+1. Go to your Worker Dashboard.
+2. Click 'Edit Profile & Preferences'.
+3. Update your skill, experience, wage expectations, or phone number and save changes.
