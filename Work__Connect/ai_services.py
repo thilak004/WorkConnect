@@ -81,11 +81,13 @@ def ask_workconnect_assistant(message, lang="en", role="worker", context=None):
             client = genai.Client(api_key=GEMINI_API_KEY)
 
             system_instruction = (
-                "You are 'WorkConnect AI', a helpful, polite, and encouraging voice assistant for blue-collar workers "
-                "and local employers in India. WorkConnect connects electricians, drivers, masons, painters, farm-workers, "
-                "plumbers, carpenters, and helpers with local jobs. "
-                f"Always answer in the user's chosen language: '{lang}' (en = English, te = Telugu, hi = Hindi). "
-                "Keep your answers concise, practical, respectful, and easy to understand. Keep answers to 2-3 short sentences."
+                "You are a helpful, respectful, and concise AI assistant for the WorkConnect platform. "
+                "WorkConnect is a platform connecting local workers (farmers, masons, drivers, electricians, plumbers) with employers. "
+                "Constraints: Do not hallucinate features. Do not promise jobs. Remind users that final hiring is up to the employer. "
+                "Domain Knowledge: If asked about matching, explain the weighted system (Skills 35%, Location 20%, Experience 15%, Wage 15%, Availability 10%, Rating 5%). "
+                "If asked about privacy, cite the Digital Personal Data Protection Act, 2023. "
+                "Formatting: Use bullet points for steps. Keep answers under 100 words unless explaining a complex legal rule. "
+                f"Always answer in the user's chosen language: '{lang}' (en = English, te = Telugu, hi = Hindi)."
             )
 
             response = client.models.generate_content(
@@ -205,8 +207,23 @@ def _generate_domain_fallback(query, lang, role, context):
         else:
             return "Daily wages on WorkConnect range from ₹500 to ₹1,200/day. Set your expected wage in your profile to match with top-paying opportunities."
 
-    # Profile improvement
-    if any(k in q_lower for k in ["improve profile", "get hired", "profile tips", "ప్రొఫైల్ మెరుగుపరచడం", "प्रोफाइल सुधार"]):
+    # Matching system query
+    if any(k in q_lower for k in ["match", "matching", "score", "compatibility", "సరిపోలడం", "मिलान"]):
+        if lang == "te":
+            return "వర్క్ కనెక్ట్ మ్యాచింగ్ సిస్టమ్ బరువులు:\n• నైపుణ్యాలు (Skills): 35%\n• ప్రాంతం (Location): 20%\n• అనుభవం (Experience): 15%\n• కూలీ (Wage): 15%\n• లభ్యత (Availability): 10%\n• రేటింగ్ (Rating): 5%\nగమనిక: తుది నియామకం యజమాని నిర్ణయంపై ఆధారపడి ఉంటుంది."
+        elif lang == "hi":
+            return "वर्क कनेक्ट मिलान प्रणाली वेटेज:\n• कौशल (Skills): 35%\n• स्थान (Location): 20%\n• अनुभव (Experience): 15%\n• मजदूरी (Wage): 15%\n• उपलब्धता (Availability): 10%\n• रेटिंग (Rating): 5%\nनोट: अंतिम भर्ती का निर्णय नियोक्ता का होता है।"
+        else:
+            return "WorkConnect match scoring weighted system:\n• Skills: 35%\n• Location: 20%\n• Experience: 15%\n• Wage: 15%\n• Availability: 10%\n• Rating: 5%\nNote: Final hiring decision rests entirely with the employer."
+
+    # Privacy query
+    if any(k in q_lower for k in ["privacy", "data", "secure", "gdpr", "గోప్యత", "డేటా", "गोपनीयता"]):
+        if lang == "te":
+            return "వర్క్ కనెక్ట్ మీ వ్యక్తిగత డేటాను అత్యంత సురక్షితంగా నిర్వహిస్తుంది. డిజిటల్ పర్సనల్ డేటా ప్రొటెక్షన్ యాక్ట్, 2023 (DPDP Act, 2023) నిబంధనలకు కట్టుబడి మీ సమాచారం రక్షించబడుతుంది."
+        elif lang == "hi":
+            return "वर्क कनेक्ट आपकी व्यक्तिगत डेटा की सुरक्षा सुनिश्चित करता है। हम डिजिटल पर्सनल डेटा प्रोटेक्शन एक्ट, 2023 (DPDP Act, 2023) के नियमों का पालन करते हैं।"
+        else:
+            return "WorkConnect protects your personal data strictly in compliance with the Digital Personal Data Protection Act, 2023 (DPDP Act, 2023)."
         if lang == "te":
             return "మీ ప్రొఫైల్‌ను మెరుగుపరచుకోవడానికి: সঠিক వృత్తిని ఎంచుకోండి, మీ పని అనుభవాన్ని నూతనంగా ఉంచండి, మరియు మీ ఫోన్ నంబర్‌ను అప్‌డేట్ చేయండి."
         elif lang == "hi":
