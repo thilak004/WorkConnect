@@ -431,19 +431,18 @@
         },
 
         // ---------------- Public API (window) ----------------
-        toggle: null, minimize: null, close: null, clear: null,
-        sendMessage: null, sendQuickPrompt: null, startVoice: null, speak: null
+
     };
 
     // Expose to HTML onclick handlers
     window.aiToggle = function() { AI.toggle(); };
-    window.aiMinimize = function() { AI.minimize(); };
-    window.aiClose = function() { AI.close(); };
-    window.aiClear = function() { AI.clear(); };
-    window.aiSendMessage = function() { AI.sendMessage(); };
-    window.aiSendQuickPrompt = function(t) { AI.sendQuickPrompt(t); };
-    window.aiStartVoice = function() { AI.startVoice(); };
-    window.aiSpeakText = function(t) { AI.speak(t); };
+    window.aiMinimize = function() { if (typeof AI.minimize === 'function') AI.minimize(); };
+    window.aiClose = function() { if (typeof AI.close === 'function') AI.close(); };
+    window.aiClear = function() { if (typeof AI.clear === 'function') AI.clear(); };
+    window.aiSendMessage = function() { if (typeof AI.sendMessage === 'function') AI.sendMessage(); };
+    window.aiSendQuickPrompt = function(t) { if (typeof AI.sendQuickPrompt === 'function') AI.sendQuickPrompt(t); };
+    window.aiStartVoice = function() { if (typeof AI.startVoice === 'function') AI.startVoice(); };
+    window.aiSpeakText = function(t) { if (typeof AI.speak === 'function') AI.speak(t); };
 
     // Initialize once DOM is ready
     if (document.readyState === 'loading') {
