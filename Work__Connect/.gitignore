@@ -3,6 +3,7 @@
 !.env.example
 .venv/
 .vscode/
+.claude/
 venv/
 env/
 ENV/
