@@ -391,43 +391,7 @@
         </div>
     </div>
 
-    <!-- Floating AI Assistant Widget (Step 6) -->
-    <button class="floating-ai-btn" onclick="toggleAIChat()" title="Ask WorkConnect Assistant">
-        🤖 {{ t('ai_assistant_btn') }}
-    </button>
-
-    <div class="ai-chat-modal" id="ai-chat-box">
-        <div class="ai-chat-header">
-            <span>🤖 {{ t('ai_assistant_title') }}</span>
-            <span style="cursor: pointer; font-size: 16px;" onclick="toggleAIChat()">✕</span>
-        </div>
-        <div class="ai-chat-messages" id="ai-messages">
-            <div class="ai-bubble bot">
-                {% if active_lang == 'te' %}
-                    నమస్కారం! నేను వర్క్ కనెక్ట్ స్మార్ట్ అసిస్టెంట్‌ని. మీకు నచ్చిన పనుల గురించి లేదా దరఖాస్తు చేసుకోవడం గురించి ఏదైనా అడగండి.
-                {% elif active_lang == 'hi' %}
-                    नमस्ते! मैं वर्क कनेक्ट स्मार्ट सहायक हूँ। नौकरियों, मजदूरी या आवेदन प्रक्रिया के बारे में कुछ भी पूछें।
-                {% else %}
-                    Hello! I am your WorkConnect Smart Assistant. Ask me to find jobs, understand wages, or help you apply.
-                {% endif %}
-            </div>
-        </div>
-        <div style="padding: var(--wc-space-2) var(--wc-space-4); background: var(--wc-surface-hover); border-top: var(--wc-border-width) solid var(--wc-border); display: flex; gap: var(--wc-space-1); flex-wrap: wrap;">
-            <button onclick="sendQuickPrompt('Find high wage electrician jobs')" class="btn btn-ghost btn-sm">
-                ⚡ High wage jobs
-            </button>
-            <button onclick="sendQuickPrompt('How do I register by voice?')" class="btn btn-ghost btn-sm">
-                🎙️ Voice Reg
-            </button>
-            <button onclick="sendQuickPrompt('How to apply for a job?')" class="btn btn-ghost btn-sm">
-                ✓ How to apply
-            </button>
-        </div>
-        <div class="ai-chat-input-bar">
-            <input type="text" id="ai-user-query" class="ai-chat-input form-input" placeholder="{{ t('ai_assistant_placeholder') }}" onkeydown="if(event.key==='Enter') sendAIMessage()">
-            <button class="ai-chat-send" onclick="sendAIMessage()">{{ t('send') }}</button>
-        </div>
-    </div>
+    {% include 'partials/ai_assistant.html' %}
 
     <script>
         function sendQuickPrompt(txt) {
@@ -516,44 +480,6 @@
 
         function closeReportModal() {
             document.getElementById('report-modal').style.display = 'none';
-        }
-
-        // AI Assistant
-        function toggleAIChat() {
-            const box = document.getElementById('ai-chat-box');
-            box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        function appendAIMessage(messages, text, type) {
-            const bubble = document.createElement('div');
-            bubble.className = `ai-bubble ${type}`;
-            bubble.textContent = text;
-            messages.appendChild(bubble);
-        }
-
-        function sendAIMessage() {
-            const input = document.getElementById('ai-user-query');
-            const query = input.value.trim();
-            if (!query) return;
-
-            const messages = document.getElementById('ai-messages');
-            appendAIMessage(messages, query, 'user');
-            input.value = '';
-            messages.scrollTop = messages.scrollHeight;
-
-            fetch('/api/ai/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: query, lang: activeLang })
-            })
-            .then(res => res.json())
-            .then(data => {
-                appendAIMessage(messages, data.reply, 'bot');
-                messages.scrollTop = messages.scrollHeight;
-            })
-            .catch(() => {
-                appendAIMessage(messages, 'Assistant temporarily busy. Please try again.', 'bot');
-            });
         }
 
         // Notification sound

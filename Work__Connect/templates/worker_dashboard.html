@@ -409,26 +409,7 @@
 
     </main>
 
-    <!-- Floating AI Assistant Widget (Step 6) -->
-    <button class="floating-ai-btn" onclick="toggleAIChat()" title="Ask WorkConnect Assistant">
-        🤖 {{ t('ai_assistant_btn') }}
-    </button>
-
-    <div class="ai-chat-modal" id="ai-chat-box">
-        <div class="ai-chat-header">
-            <span>🤖 {{ t('ai_assistant_title') }}</span>
-            <span style="cursor: pointer; font-size: 16px;" onclick="toggleAIChat()">✕</span>
-        </div>
-        <div class="ai-chat-messages" id="ai-messages">
-        <div class="ai-bubble bot">
-            Hello {{ worker.name }}! {{ t('ai_greeting') }}
-        </div>
-        </div>
-        <div class="ai-chat-input-bar">
-            <input type="text" id="ai-user-query" class="ai-chat-input" placeholder="{{ t('ai_assistant_placeholder') }}" onkeydown="if(event.key==='Enter') sendAIMessage()">
-            <button class="ai-chat-send" onclick="sendAIMessage()">{{ t('send') }}</button>
-        </div>
-    </div>
+    {% include 'partials/ai_assistant.html' %}
 
     <script>
         function switchTab(tab) {
@@ -653,42 +634,6 @@
             }
         })();
 
-        function toggleAIChat() {
-            const box = document.getElementById('ai-chat-box');
-            box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        function appendAIMessage(messages, text, type) {
-            const bubble = document.createElement('div');
-            bubble.className = `ai-bubble ${type}`;
-            bubble.textContent = text;
-            messages.appendChild(bubble);
-        }
-
-        function sendAIMessage() {
-            const input = document.getElementById('ai-user-query');
-            const query = input.value.trim();
-            if (!query) return;
-
-            const messages = document.getElementById('ai-messages');
-            appendAIMessage(messages, query, 'user');
-            input.value = '';
-            messages.scrollTop = messages.scrollHeight;
-
-            fetch('/api/ai/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: query, lang: '{{ active_lang }}' })
-            })
-            .then(res => res.json())
-            .then(data => {
-                appendAIMessage(messages, data.reply, 'bot');
-                messages.scrollTop = messages.scrollHeight;
-            })
-            .catch(() => {
-                appendAIMessage(messages, 'Assistant temporarily busy. Please try again.', 'bot');
-            });
-        }
     </script>
 
     <!-- Mobile Bottom App Bar -->

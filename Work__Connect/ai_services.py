@@ -13,9 +13,10 @@ import re
 import json
 import time
 from collections import OrderedDict
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from trade_utils import get_trade_for_skill, TRADE_METADATA
-from database import get_all_jobs
+from database import get_all_jobs, get_job_by_id, get_worker_by_email, get_worker_by_id, get_employer_by_email, get_employer_by_id, get_applications_by_worker, get_applications_by_employer, get_interviews_for_worker, get_interviews_for_employer
 
 # Securely load API key from environment
 load_dotenv()
@@ -25,6 +26,11 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 _AI_CACHE = OrderedDict()
 _MAX_CACHE_SIZE = 1000
 _CACHE_TTL_SECONDS = 900  # 15 minutes
+
+# Rate limiting: per IP + role request timestamps
+_RATE_LIMIT_REQUESTS = {}  # key -> list of timestamps
+_RATE_LIMIT_MAX = 20  # requests per minute
+_RATE_LIMIT_WINDOW = 60  # seconds
 
 # Short-lived cache for open job listings (AI fallback uses this heavily)
 _OPEN_JOBS_CACHE = None
@@ -58,6 +64,21 @@ def _cache_set(key, value):
         _AI_CACHE.popitem(last=False)
 
     _AI_CACHE[key] = (now, value)
+
+
+def _rate_limit_allowed(key):
+    """Simple sliding-window rate limiter. Returns True if request is allowed."""
+    now = time.time()
+    window_start = now - _RATE_LIMIT_WINDOW
+    timestamps = _RATE_LIMIT_REQUESTS.get(key, [])
+    # Keep only timestamps within the window
+    timestamps = [t for t in timestamps if t > window_start]
+    if len(timestamps) >= _RATE_LIMIT_MAX:
+        _RATE_LIMIT_REQUESTS[key] = timestamps
+        return False
+    timestamps.append(now)
+    _RATE_LIMIT_REQUESTS[key] = timestamps
+    return True
 
 
 def get_open_jobs_cached():
@@ -113,11 +134,19 @@ def ask_workconnect_assistant(message, lang="en", role="worker", context=None):
     Conversational AI Assistant (Step 6):
     Answers questions about local jobs, worker registration, wages, and employer hiring.
     Supports English, Telugu, and Hindi.
-    Includes cost-caching, strict timeouts, and graceful domain fallback when no API key is provided.
+    Includes cost-caching, strict timeouts, graceful domain fallback, rate limiting,
+    page-aware assistance, and real database integration.
     """
     clean_msg = message.strip()
     if not clean_msg:
         return "Please ask a question." if lang == "en" else ("దయచేసి ప్రశ్నను అడగండి." if lang == "te" else "कृपया अपना प्रश्न पूछें।")
+
+    # Rate limiting
+    cache_key_for_limit = f"{lang}:{role}:{clean_msg.lower()[:50]}"
+    if not _rate_limit_allowed(cache_key_for_limit):
+        return ("Too many requests. Please wait a moment before asking again." if lang == "en"
+                else " చాలా ök allá మpressions. తిరిగి ప్రయత్నించండి." if lang == "te"
+                else "बहुत अनुरोध। कृपया कुछ पल प्रतीक्षा करें।")
 
     cache_key = f"{lang}:{role}:{clean_msg.lower()}"
     cached = _cache_get(cache_key)
@@ -131,18 +160,24 @@ def ask_workconnect_assistant(message, lang="en", role="worker", context=None):
             client = genai.Client(api_key=GEMINI_API_KEY)
 
             system_instruction = (
-                "You are a helpful, respectful, and concise AI assistant for the WorkConnect platform. "
-                "WorkConnect is a platform connecting local workers (farmers, masons, drivers, electricians, plumbers) with employers. "
-                "Constraints: Do not hallucinate features. Do not promise jobs. Remind users that final hiring is up to the employer. "
-                "Domain Knowledge: If asked about matching, explain the weighted system (Skills 35%, Location 20%, Experience 15%, Wage 15%, Availability 10%, Rating 5%). "
-                "If asked about privacy, cite the Digital Personal Data Protection Act, 2023. "
-                "Formatting: Use bullet points for steps. Keep answers under 100 words unless explaining a complex legal rule. "
+                "You are WorkConnect AI, a friendly, patient, knowledgeable and multilingual employment assistant "
+                "for Indian workers and employers. Your purpose is to make WorkConnect easy to use for people "
+                "with different education levels and digital literacy. You help workers discover jobs and help "
+                "employers hire suitable workers. Always understand the user's role, selected language, current "
+                "page and relevant available database information. Give simple, accurate, practical and respectful "
+                "answers. Use short sentences and step-by-step instructions when needed. Do not invent platform "
+                "features, jobs, salaries, employers or application statuses. If information is unavailable, clearly "
+                "explain that it could not be verified. Guide users to the correct WorkConnect page using valid "
+                "internal links. Never request passwords, OTPs, API keys or confidential account credentials. "
                 f"Always answer in the user's chosen language: '{lang}' (en = English, te = Telugu, hi = Hindi)."
             )
 
+            page_info = f"\nCurrent Page: {context.get('page', 'home') if context else 'home'}"
+            user_info = f"\nUser Role: {role}"
+
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
-                contents=f"User Role: {role}\nLanguage: {lang}\nQuestion: {clean_msg}",
+                contents=f"{user_info}{page_info}\nLanguage: {lang}\nQuestion: {clean_msg}",
                 config={"system_instruction": system_instruction, "max_output_tokens": 250, "temperature": 0.4},
                 timeout=10,
             )
@@ -168,6 +203,7 @@ def _generate_domain_fallback(query, lang, role, context):
     and location filters, and returns context-aware natural language guidance.
     """
     q_lower = query.strip().lower()
+    page = context.get("page", "home") if context else "home"
 
     # 1. Greetings
     if q_lower in ["hi", "hello", "hey", "hii", "namaste", "namaskaram", "greetings", "good morning", "good evening"]:
@@ -186,6 +222,38 @@ def _generate_domain_fallback(query, lang, role, context):
             return "मैं वर्क कनेक्ट AI सहायक हूँ, जो श्रमिकों को स्थानीय नौकरियां खोजने और नियोक्ताओं को कुशल लोगों को काम पर रखने में मदद करता है।"
         else:
             return "I am WorkConnect AI, your smart assistant designed to help workers find local jobs and employers hire skilled people across India."
+
+    # --- Page-aware & Role-aware assistance ---
+    def tpl(en, te, hi):
+        return {"en": en, "te": te, "hi": hi}.get(lang, en)
+
+    if role == "worker" and page in ("worker_dashboard", "worker_applications"):
+        if any(k in q_lower for k in ["application", "applications", "status", "దరఖాస్తు", "ಅರ್ಜಿ", "आवेदन", "स्थितি"]):
+            return tpl(
+                "You can check your application status on the Worker Dashboard under 'My Applications'. Each application shows whether it is Pending, Shortlisted, Rejected, or Confirmed.",
+                "మీ దరఖాస్తు స్థానాన్ని Worker Dashboard లో 'My Applications' Tab లో చూడవచ్చు. ప్రతి దరఖాస్తు Pending, Shortlisted, Rejected లేదా Confirmed గా చూపిస్తుంది.",
+                "आप अपनी आवेदन स्थिति Worker Dashboard के 'My Applications' टैब में देख सकते हैं। प्रत्येक आवेदन Pending, Shortlisted, Rejected या Confirmed दिखाता है।"
+            )
+        if any(k in q_lower for k in ["profile", "update", "skills", "వృత్తి", "నైపుణ్యాలు", "కौशल", "अपडेट"]):
+            return tpl(
+                "Go to 'Edit Profile & Preferences' from your Worker Dashboard to update your skills, experience, expected wage, and phone number. This refreshes your match scores.",
+                "మీ Worker Dashboard lo 'Edit Profile & Preferences' కు వెళ్లి మీ నైపుణ్యాలు, అనుభవం, ఆశించిన కూలీ మరియు ఫోన్ నంబర్‌ను అప్‌డేట్ చేయండి. ఇది మీ మ్యాచ్ స్కోర్స్‌ను రిఫ్రెష్ చేస్తుంది.",
+                "अपना कौशल, अनुभव, अपेक्षित मजदूरी और फोन नंबर अपडेट करने के लिए Worker Dashboard से 'Edit Profile & Preferences' पर जाएं। इससे आपके मिलान स्कोर रीफ्रेश होते हैं।"
+            )
+
+    if role == "employer" and page in ("employer_dashboard", "job_post", "candidate_matches"):
+        if any(k in q_lower for k in ["post a job", "create job", "how to post", "పని పోస్ట్", "నौकरी पोस्ट"]):
+            return tpl(
+                "Employers can post a new job by clicking 'Post a Job' in the navigation bar, specifying the title, trade, daily wage, and location.",
+                "యజమానులు 'Post a Job' బటన్ ద్వారా కొత్త పనిని పోస్ట్ చేయవచ్చు. పని పేరు, అవసరమైన వృత్తి, రోజువారీ కూలీ మరియు స్థానాన్ని నమోదు చేయండి.",
+                "नियोक्ता 'Post a Job' पर क्लिक करके नया काम पोस्ट कर सकते हैं। काम का शीर्षक, आवश्यक ट्रेड, दैनिक मजदूरी और स्थान दर्ज करें।"
+            )
+        if any(k in q_lower for k in ["applications", "applicants", "shortlist", "reject", "దరఖాస్తులు", "దరఖాస్తుదారులు", "আবেদন", "आवेदन", "आवेदक"]):
+            return tpl(
+                "View and manage applications on your Employer Dashboard. You can shortlist, reject, or schedule interviews with applicants for your posted jobs.",
+                "మీ Employer Dashboard లో దరఖాస్తులను చూడండి మరియు నిర్వహించండి. మీరు దరఖాస్తుదారులను షార్ట్‌లistelisting చేయవచ్చు, రిజెక్ట్ చేయవచ్చు లేదా ఇంటర్వ్యూ షెడ్యూల్ చేయవచ్చు.",
+                "अपने Employer Dashboard पर आवेदन देखें और प्रबंधित करें। आप आवेदकों को शॉर्टलिस्ट, रिजेक्ट कर सकते हैं या उनके साथ इंटरव्यू शेड्यूल कर सकते हैं।"
+            )
 
     # FAQ Guide from app_faq.txt
     if "apply" in q_lower:

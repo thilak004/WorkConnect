@@ -1337,23 +1337,47 @@ def api_ai_chat():
     data = request.get_json(silent=True) or request.form
     message = data.get("message", "").strip()
     lang = data.get("lang") or session.get("lang", "en")
-    role = session.get("role", "worker")
+    page = data.get("page") or request.endpoint or "home"
 
+    # Validate language
+    if lang not in SUPPORTED_LANGUAGES:
+        lang = "en"
+
+    # Validate message length
     if not message:
-        return jsonify({"reply": "Please ask a question." if lang == "en" else "దయచేసి ఒక ప్రశ్న అడగండి."})
+        return jsonify({
+            "reply": "Please ask a question." if lang == "en" else ("దయచేసి ఒక ప్రశ్న అడగండి." if lang == "te" else "कृपया अपना प्रश्न पूछें।"),
+            "success": False,
+            "error": "empty_message"
+        }), 400
+
+    if len(message) > 2000:
+        return jsonify({
+            "reply": "Message too long. Please keep your question under 2000 characters." if lang == "en" else "సందేశం بہت పెద్దది. దయచేసి 2000 అక్ష్రాల లోపు ఉంచండి." if lang == "te" else "संदेश बहुत लंबा है। कृपया अपने प्रश्न को 2000 वर्णों के भीतर रखें।",
+            "success": False,
+            "error": "message_too_long"
+        }), 400
+
+    # Determine user role from server-side session (never trust frontend)
+    role = session.get("role", "guest")
+    if role not in ("worker", "employer"):
+        role = "guest"
 
     try:
         from ai_services import ask_workconnect_assistant
-        reply = ask_workconnect_assistant(message, lang=lang, role=role)
+        # Pass page context and role for page-aware, role-aware assistance
+        context = {"page": page, "role": role}
+        reply = ask_workconnect_assistant(message, lang=lang, role=role, context=context)
         response = jsonify({"reply": reply, "success": True})
         # User-specific AI replies: cache briefly in browser only, never on shared CDN
         response.headers["Cache-Control"] = "private, max-age=30, stale-while-revalidate=60"
         return response
     except Exception as e:
+        app.logger.error(f"AI chat error: {e}")
         return jsonify({
-            "reply": "Service temporarily busy. Please try again." if lang == "en" else "సేవ తాత్కాలికంగా బిజీగా ఉంది.",
+            "reply": "Service temporarily busy. Please try again." if lang == "en" else "సేవ తాత్కాలికంగా బిజీగా ఉంది." if lang == "te" else "सेवा अस्थायी रूप से व्यस्त है। कृपया पुनः प्रयास करें।",
             "success": False
-        })
+        }), 500
 
 
 @app.route("/api/voice/stt", methods=["POST"])

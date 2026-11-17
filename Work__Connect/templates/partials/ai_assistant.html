@@ -1,0 +1,455 @@
+{# ============================================================================
+   WorkConnect AI Assistant — Reusable Global Component (Partial)
+   Include this right before </body> in every applicable template.
+   Provides: floating button, expandable chat, voice I/O, multilingual,
+   role-aware, page-aware assistance with conversation memory.
+   ============================================================================ #}
+
+{% set _ai_page = page or (request.endpoint or 'home') %}
+
+<button
+    type="button"
+    class="floating-ai-btn"
+    id="ai-float-btn"
+    onclick="aiToggle()"
+    title="{{ t('ai_assistant_btn') }}"
+    aria-label="{{ t('ai_assistant_btn') }}"
+    aria-expanded="false"
+    aria-controls="ai-chat-box"
+>
+    🤖 {{ t('ai_assistant_btn') }}
+</button>
+
+<div
+    class="ai-chat-modal"
+    id="ai-chat-box"
+    aria-hidden="true"
+    aria-label="{{ t('ai_assistant_title') }}"
+    role="dialog"
+    aria-modal="true"
+>
+    <div class="ai-chat-header">
+        <span>🤖 {{ t('ai_assistant_title') }}</span>
+        <div class="ai-header-actions">
+            <button type="button" onclick="aiMinimize()" title="{{ t('ai_minimize') }}" aria-label="{{ t('ai_minimize') }}">−</button>
+            <button type="button" onclick="aiClear()" title="{{ t('ai_clear') }}" aria-label="{{ t('ai_clear') }}">🗑️</button>
+            <button type="button" onclick="aiClose()" title="{{ t('ai_close') }}" aria-label="{{ t('ai_close') }}">✕</button>
+        </div>
+    </div>
+
+    <div class="ai-chat-messages" id="ai-messages" aria-live="polite"></div>
+
+    <div class="ai-chat-suggestions" id="ai-suggestions"></div>
+
+    <div class="ai-chat-input-bar">
+        <button
+            type="button"
+            id="ai-mic-btn"
+            class="ai-mic-btn"
+            onclick="aiStartVoice()"
+            title="{{ t('ai_voice_speak') }}"
+            aria-label="{{ t('ai_voice_speak') }}"
+        >
+            🎤
+        </button>
+        <input
+            type="text"
+            id="ai-user-query"
+            class="ai-chat-input"
+            placeholder="{{ t('ai_assistant_placeholder') }}"
+            onkeydown="if(event.key==='Enter') aiSendMessage()"
+            autocomplete="off"
+        />
+        <button type="button" class="ai-chat-send" onclick="aiSendMessage()">{{ t('send') }}</button>
+    </div>
+</div>
+
+{# Conversation storage key scoped by role + lang so guest/worker/employer histories stay separate #}
+{% set _ai_storage_key = 'wc_ai_conv_' ~ (user_role or 'guest') ~ '_' ~ (active_lang or 'en') %}
+
+<script>
+(function() {
+    'use strict';
+
+    var AI = {
+        lang: '{{ active_lang or 'en' }}',
+        role: '{{ user_role or 'guest' }}',
+        page: '{{ _ai_page }}',
+        storageKey: '{{ _ai_storage_key }}',
+        maxHistory: 20,
+        isMinimized: false,
+        recognition: null,
+        speaking: false,
+
+        init: function() {
+            this.loadHistory();
+            this.showWelcome();
+            this.showSuggestions();
+            this.restoreMinimizedState();
+        },
+
+        // ---------------- Storage / History ----------------
+        storageGet: function() {
+            try {
+                var raw = sessionStorage.getItem(this.storageKey);
+                if (!raw) return [];
+                var arr = JSON.parse(raw);
+                return Array.isArray(arr) ? arr : [];
+            } catch (e) { return []; }
+        },
+        storageSave: function(hist) {
+            try {
+                sessionStorage.setItem(this.storageKey, JSON.stringify(hist.slice(0, this.maxHistory)));
+            } catch (e) {}
+        },
+        loadHistory: function() {
+            var hist = this.storageGet();
+            var msgs = document.getElementById('ai-messages');
+            if (!msgs) return;
+            msgs.innerHTML = '';
+            hist.forEach(function(item) {
+                this.appendMessageUI(item.text, item.type, item.time, false);
+            }, this);
+        },
+        addToHistory: function(text, type) {
+            var hist = this.storageGet();
+            hist.push({ text: text, type: type, time: new Date().toISOString() });
+            this.storageSave(hist);
+        },
+
+        // ---------------- UI ----------------
+        toggle: function() {
+            var box = document.getElementById('ai-chat-box');
+            var btn = document.getElementById('ai-float-btn');
+            if (!box) return;
+            var showing = box.style.display === 'flex';
+            if (showing) {
+                box.style.display = 'none';
+                btn.setAttribute('aria-expanded', 'false');
+                box.setAttribute('aria-hidden', 'true');
+            } else {
+                box.style.display = 'flex';
+                btn.setAttribute('aria-expanded', 'true');
+                box.setAttribute('aria-hidden', 'false');
+                this.focusInput();
+            }
+        },
+        minimize: function() {
+            var box = document.getElementById('ai-chat-box');
+            if (!box) return;
+            this.isMinimized = !this.isMinimized;
+            box.classList.toggle('ai-minimized', this.isMinimized);
+            sessionStorage.setItem('wc_ai_minimized', this.isMinimized ? '1' : '0');
+        },
+        close: function() {
+            var box = document.getElementById('ai-chat-box');
+            var btn = document.getElementById('ai-float-btn');
+            if (!box) return;
+            box.style.display = 'none';
+            btn.setAttribute('aria-expanded', 'false');
+            box.setAttribute('aria-hidden', 'true');
+        },
+        clear: function() {
+            var msgs = document.getElementById('ai-messages');
+            if (msgs) msgs.innerHTML = '';
+            this.storageSave([]);
+            this.showWelcome();
+        },
+        restoreMinimizedState: function() {
+            try {
+                if (sessionStorage.getItem('wc_ai_minimized') === '1') {
+                    this.isMinimized = true;
+                    var box = document.getElementById('ai-chat-box');
+                    if (box) box.classList.add('ai-minimized');
+                }
+            } catch (e) {}
+        },
+        focusInput: function() {
+            var inp = document.getElementById('ai-user-query');
+            if (inp) inp.focus();
+        },
+
+        // ---------------- Messages ----------------
+        appendMessage: function(text, type, speak) {
+            var msgs = document.getElementById('ai-messages');
+            if (!msgs) return;
+            var time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            this.appendMessageUI(text, type, time, true);
+            this.addToHistory(text, type);
+            msgs.scrollTop = msgs.scrollHeight;
+            if (speak && type === 'bot') this.speak(text);
+        },
+        appendMessageUI: function(text, type, time, persist) {
+            var msgs = document.getElementById('ai-messages');
+            var bubble = document.createElement('div');
+            bubble.className = 'ai-bubble ' + type;
+            bubble.textContent = text;
+
+            var timeEl = document.createElement('div');
+            timeEl.className = 'ai-message-time';
+            timeEl.textContent = time;
+            bubble.appendChild(timeEl);
+
+            if (type === 'bot') {
+                var speakBtn = document.createElement('button');
+                speakBtn.className = 'ai-voice-play';
+                speakBtn.textContent = '🔊';
+                speakBtn.title = 'Listen';
+                speakBtn.onclick = (function(t) { return function() { AI.speak(t); }; })(text);
+                bubble.appendChild(speakBtn);
+            }
+
+            msgs.appendChild(bubble);
+        },
+        showWelcome: function() {
+            var msgs = document.getElementById('ai-messages');
+            if (!msgs || msgs.children.length > 0) return;
+            var welcome = this.getWelcomeMessage();
+            this.appendMessageUI(welcome, 'bot', new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), true);
+            this.speak(welcome);
+        },
+        getWelcomeMessage: function() {
+            var role = this.role;
+            var lang = this.lang;
+            if (lang === 'te') {
+                if (role === 'worker') return "నమస్కారం! నేను వర్క్ కనెక్ట్ AI సహాయకుడు. మీరు పనులు కనుగొనడానికి, ప్రొఫైల్ అప్‌డేట్ చేయడానికి లేదా దరఖాస్తు చేయడానికి నాకు అడగవచ్చు.";
+                if (role === 'employer') return "నమస్కారం! నేను వర్క్ కనెక్ట్ AI సహాయకుడు. మీరు నౌకలు పోస్ట్ చేయడానికి, కార్మికులను కనుగొనడానికి లేదా దరఖాస్తులను నిర్వహించడానికి నాకు అడగవచ్చు.";
+                return "నమస్కారం! నేను వర్క్ కనెక్ట్ AI సహాయకుడు. వర్క్ కనెక్ట్ గురించి లేదా రిజిస్ట్రేషన్ గురించి ఏదైనా అడగవచ్చు.";
+            }
+            if (lang === 'hi') {
+                if (role === 'worker') return "नमस्ते! मैं वर्क कनेक्ट AI सहायक हूँ। आप नौकरियां खोजने, प्रोफाइल अपडेट करने या आवेदन करने के बारे में पूछ सकते हैं।";
+                if (role === 'employer') return "नमस्ते! मैं वर्क कनेक्ट AI सहायक हूँ। आप नौकरी पोस्ट करने, कर्मचारी खोजने या आवेदन प्रबंधित करने के बारे में पूछ सकते हैं।";
+                return "नमस्ते! मैं वर्क कनेक्ट AI सहायक हूँ। वर्क कनेक्ट या पंजीकरण के बारे में कुछ भी पूछ सकते हैं।";
+            }
+            if (role === 'worker') return "Hello! I'm WorkConnect AI. I can help you find jobs, update your profile, and apply for work. You can type or speak in English, Telugu or Hindi.";
+            if (role === 'employer') return "Hello! I'm WorkConnect AI. I can help you post jobs, find workers, and manage applications. You can type or speak in English, Telugu or Hindi.";
+            return "Hello! I'm WorkConnect AI. I can help you find jobs, hire workers, and understand how to use WorkConnect. You can type or speak in English, Telugu or Hindi.";
+        },
+
+        // ---------------- Suggestions ----------------
+        showSuggestions: function() {
+            var cont = document.getElementById('ai-suggestions');
+            if (!cont) return;
+            cont.innerHTML = '';
+            var items = this.getSuggestions();
+            if (!items || items.length === 0) { cont.style.display = 'none'; return; }
+            cont.style.display = 'flex';
+            items.forEach(function(item) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-ghost btn-sm ai-suggestion-btn';
+                btn.textContent = item.label;
+                btn.onclick = function() { AI.sendQuickPrompt(item.query); };
+                cont.appendChild(btn);
+            });
+        },
+        getSuggestions: function() {
+            var role = this.role;
+            var page = this.page;
+            var lang = this.lang;
+            var t = function(key, en) {
+                // inline minimal translations for suggestions
+                return en;
+            };
+
+            var common = [];
+            if (lang === 'te') common = [
+                { label: 'భాష మార్చండి', query: 'Change language' },
+                { label: 'ఈ పేజీ గురించి', query: 'Help with this page' }
+            ];
+            if (lang === 'hi') common = [
+                { label: 'भाषा बदलें', query: 'Change language' },
+                { label: 'इस पेज के बारे में मदद', query: 'Help with this page' }
+            ];
+            if (lang === 'en') common = [
+                { label: 'Change language', query: 'Change language' },
+                { label: 'Help with this page', query: 'Help with this page' }
+            ];
+
+            var roleItems = [];
+            if (role === 'worker') {
+                roleItems = lang === 'te'
+                    ? [ { label: 'నచ్చిన పనులను చూపించు', query: 'Find jobs near me' }, { label: 'எளிய'} ]
+                    : [];
+                if (lang !== 'te') {
+                    roleItems = lang === 'hi'
+                        ? [ { label: 'मेरे पास नौकरियां खोजें', query: 'Find jobs near me' }, { label: 'अपना प्रोफाइल कैसे अपडेट करें', query: 'How do I update my profile?' } ]
+                        : [ { label: 'Find jobs near me', query: 'Find jobs near me' }, { label: 'How do I update my profile?', query: 'How do I update my profile?' } ];
+                }
+            } else if (role === 'employer') {
+                roleItems = lang === 'hi'
+                    ? [ { label: 'नौकरी कैसे पोस्ट करें', query: 'How do I post a job?' }, { label: 'कार्मिक कैसे खोजें', query: 'How do I find workers?' } ]
+                    : [ { label: 'How do I post a job?', query: 'How do I post a job?' }, { label: 'How do I find workers?', query: 'How do I find workers?' } ];
+            }
+
+            var pageItems = [];
+            if (page === 'browse_jobs') {
+                pageItems = lang === 'hi' ? [ { label: 'मेरे पास नौकरियां', query: 'Find jobs near me' }, { label: 'दैनिक मजदूरी क्या है?', query: 'What is the daily wage?' } ]
+                    : [ { label: 'Find jobs near me', query: 'Find jobs near me' }, { label: 'What is the daily wage?', query: 'What is the daily wage?' } ];
+            } else if (page === 'job_details') {
+                pageItems = lang === 'hi' ? [ { label: 'मैं कैसे आवेदन करूं?', query: 'How do I apply for this job?' } ]
+                    : [ { label: 'How do I apply for this job?', query: 'How do I apply for this job?' } ];
+            } else if (page === 'employer_dashboard') {
+                pageItems = lang === 'hi' ? [ { label: 'नौकरी कैसे पोस्ट करें', query: 'How do I post a job?' }, { label: 'आवेदन कैसे प्रबंधित करें', query: 'How do I manage applications?' } ]
+                    : [ { label: 'How do I post a job?', query: 'How do I post a job?' }, { label: 'How do I manage applications?', query: 'How do I manage applications?' } ];
+            } else if (page === 'candidate_matches') {
+                pageItems = lang === 'hi' ? [ { label: 'मिलान स्कोर कैसे गणना होता है', query: 'How is the matching score calculated?' } ]
+                    : [ { label: 'How is the matching score calculated?', query: 'How is the matching score calculated?' } ];
+            } else if (page === 'job_post') {
+                pageItems = lang === 'hi' ? [ { label: 'नौकरी विवरण में क्या दर्ज करें', query: 'What should I enter in the job description?' } ]
+                    : [ { label: 'What should I enter in the job description?', query: 'What should I enter in the job description?' } ];
+            } else if (page === 'worker_dashboard') {
+                pageItems = lang === 'hi' ? [ { label: 'मेरे आवेदनों की स्थिति क्या है', query: 'What is my application status?' } ]
+                    : [ { label: 'What is my application status?', query: 'What is my application status?' } ];
+            } else if (page === 'worker_profile_edit') {
+                pageItems = lang === 'hi' ? [ { label: 'अपने कौशल कैसे अपडेट करें', query: 'How do I update my skills?' } ]
+                    : [ { label: 'How do I update my skills?', query: 'How do I update my skills?' } ];
+            }
+
+            return roleItems.concat(pageItems).concat(common);
+        },
+
+        // ---------------- Voice ----------------
+        startVoice: function() {
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                this.appendMessage('Speech recognition is not supported in this browser. Please type your message.', 'bot', false);
+                return;
+            }
+            if (this.recognition) { try { this.recognition.stop(); } catch(e) {} }
+            var micBtn = document.getElementById('ai-mic-btn');
+            var recognition = new SpeechRecognition();
+            this.recognition = recognition;
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = this.lang === 'te' ? 'te-IN' : (this.lang === 'hi' ? 'hi-IN' : 'en-IN');
+
+            if (micBtn) {
+                micBtn.classList.add('ai-listening');
+                micBtn.title = 'Listening...';
+            }
+
+            recognition.onresult = (function(_this) {
+                return function(event) {
+                    var text = event.results[event.results.length - 1][0].transcript;
+                    var inp = document.getElementById('ai-user-query');
+                    if (inp) inp.value = text;
+                };
+            })(this);
+
+            recognition.onend = (function(_this) {
+                return function() {
+                    if (_this.recognition) _this.recognition = null;
+                    var micBtn = document.getElementById('ai-mic-btn');
+                    if (micBtn) {
+                        micBtn.classList.remove('ai-listening');
+                        micBtn.title = 'Speak your question';
+                    }
+                };
+            })(this);
+
+            recognition.onerror = (function(_this) {
+                return function() {
+                    if (_this.recognition) _this.recognition = null;
+                    var micBtn = document.getElementById('ai-mic-btn');
+                    if (micBtn) {
+                        micBtn.classList.remove('ai-listening');
+                        micBtn.title = 'Speak your question';
+                    }
+                };
+            })(this);
+
+            try { recognition.start(); } catch(e) {
+                if (micBtn) {
+                    micBtn.classList.remove('ai-listening');
+                    micBtn.title = 'Speak your question';
+                }
+                this.appendMessage('Could not start microphone. Please type your message instead.', 'bot', false);
+            }
+        },
+        speak: function(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            this.speaking = true;
+            var utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = this.lang === 'te' ? 'te-IN' : (this.lang === 'hi' ? 'hi-IN' : 'en-IN');
+            utterance.rate = 0.95;
+            utterance.onend = (function(_this) { return function() { _this.speaking = false; }; })(this);
+            utterance.onerror = (function(_this) { return function() { _this.speaking = false; }; })(this);
+            try { window.speechSynthesis.speak(utterance); } catch(e) { this.speaking = false; }
+        },
+
+        // ---------------- API ----------------
+        sendMessage: function() {
+            var inp = document.getElementById('ai-user-query');
+            if (!inp) return;
+            var query = inp.value.trim();
+            if (!query) return;
+            this.appendMessage(query, 'user', false);
+            inp.value = '';
+            this.showTyping(true);
+
+            fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: query, lang: this.lang, page: this.page })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                AI.showTyping(false);
+                if (data && data.success !== false && data.reply) {
+                    AI.appendMessage(data.reply, 'bot', true);
+                } else {
+                    AI.appendMessage('Assistant temporarily busy. Please try again.', 'bot', false);
+                }
+                AI.showSuggestions();
+            })
+            .catch(function() {
+                AI.showTyping(false);
+                AI.appendMessage('Assistant temporarily busy. Please try again.', 'bot', false);
+                AI.showSuggestions();
+            });
+        },
+        sendQuickPrompt: function(txt) {
+            var inp = document.getElementById('ai-user-query');
+            if (inp) inp.value = txt;
+            this.sendMessage();
+        },
+        showTyping: function(show) {
+            var box = document.getElementById('ai-typing');
+            if (show && !box) {
+                box = document.createElement('div');
+                box.id = 'ai-typing';
+                box.className = 'ai-bubble bot ai-typing';
+                box.innerHTML = '<span class="ai-typing-dot"></span><span class="ai-typing-dot"></span><span class="ai-typing-dot"></span>';
+                var msgs = document.getElementById('ai-messages');
+                if (msgs) msgs.appendChild(box);
+                msgs.scrollTop = msgs.scrollHeight;
+            } else if (!show && box) {
+                box.remove();
+            }
+        },
+
+        // ---------------- Public API (window) ----------------
+        toggle: null, minimize: null, close: null, clear: null,
+        sendMessage: null, sendQuickPrompt: null, startVoice: null, speak: null
+    };
+
+    // Expose to HTML onclick handlers
+    window.aiToggle = function() { AI.toggle(); };
+    window.aiMinimize = function() { AI.minimize(); };
+    window.aiClose = function() { AI.close(); };
+    window.aiClear = function() { AI.clear(); };
+    window.aiSendMessage = function() { AI.sendMessage(); };
+    window.aiSendQuickPrompt = function(t) { AI.sendQuickPrompt(t); };
+    window.aiStartVoice = function() { AI.startVoice(); };
+    window.aiSpeakText = function(t) { AI.speak(t); };
+
+    // Initialize once DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { AI.init(); });
+    } else {
+        AI.init();
+    }
+})();
+</script>
