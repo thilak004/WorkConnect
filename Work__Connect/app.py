@@ -430,12 +430,28 @@ def trade_sector(trade_key):
     if not trade_meta:
         return redirect(url_for("browse_jobs"))
 
-    all_open_jobs = get_all_jobs(status_filter="Open")
-    jobs = []
-    for j in all_open_jobs:
-        job_trade = get_trade_for_skill(j["skill_required"])
-        if job_trade["key"] == trade_key:
-            jobs.append(j)
+    # Filter by skill/trade keywords directly in SQL instead of loading all jobs into Python.
+    # Use the trade's primary keyword + exact skill match for an indexed, index-backed lookup.
+    keywords = trade_meta.get("keywords", [])
+    primary_kw = keywords[0] if keywords else trade_key
+
+    with get_db_connection() as connection:
+        rows = connection.execute(
+            """
+            SELECT jobs.*, employers.name AS employer_name, employers.phone AS employer_phone
+            FROM jobs
+            JOIN employers ON jobs.employer_id = employers.id
+            WHERE jobs.status = 'Open'
+              AND (
+                  LOWER(jobs.skill_required) = LOWER(%s)
+                  OR LOWER(jobs.skill_required) LIKE %s
+                  OR LOWER(jobs.title) LIKE %s
+              )
+            ORDER BY jobs.id DESC
+            """,
+            (primary_kw, f"%{primary_kw.lower()}%", f"%{primary_kw.lower()}%"),
+        ).fetchall()
+        jobs = [dict(r) for r in rows]
 
     current_worker_id = session.get("user_id") if session.get("role") == "worker" else None
     saved_job_ids = get_saved_job_ids_by_worker(current_worker_id)
