@@ -5,413 +5,409 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ t('nav_worker_dashboard') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        .dashboard-container { max-width: 1100px; margin: var(--wc-space-8) auto; padding: 0 var(--wc-space-4); }
-        .profile-banner {
-            background: linear-gradient(135deg, var(--wc-primary-dark) 0%, var(--wc-primary) 100%);
-            border-radius: var(--wc-radius-xl);
-            padding: var(--wc-space-5) var(--wc-space-6);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: var(--wc-space-5);
-            margin-bottom: var(--wc-space-6);
-            box-shadow: var(--wc-shadow-lg);
-        }
-        .profile-info { display: flex; align-items: center; gap: var(--wc-space-4); }
-        .profile-avatar {
-            width: 64px; height: 64px; border-radius: var(--wc-radius-md);
-            background: #ffffff; display: flex; align-items: center; justify-content: center;
-            font-size: 28px; box-shadow: var(--wc-shadow-md); flex-shrink: 0;
-        }
-        .profile-meta-pills { display: flex; flex-wrap: wrap; gap: var(--wc-space-2); margin-top: var(--wc-space-3); }
-        .profile-pill {
-            background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(4px);
-            padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);
-            font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-semibold);
-        }
-        .tabs-header {
-            display: flex; gap: var(--wc-space-2); border-bottom: 2px solid var(--wc-border);
-            margin-bottom: var(--wc-space-6); overflow-x: auto;
-        }
-        .tab-btn {
-            padding: var(--wc-space-2) var(--wc-space-4); font-size: var(--wc-text-sm);
-            font-weight: var(--wc-font-weight-bold); color: var(--wc-text-muted);
-            text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -2px;
-            transition: all var(--wc-transition-fast); white-space: nowrap;
-        }
-        .tab-btn:hover { color: var(--wc-primary); }
-        .tab-btn.active { color: var(--wc-primary); border-bottom-color: var(--wc-primary); }
-        .app-card {
-            background: var(--wc-surface); border-radius: var(--wc-radius-lg);
-            padding: var(--wc-space-5); margin-bottom: var(--wc-space-4);
-            border: var(--wc-border-width) solid var(--wc-border); box-shadow: var(--wc-shadow);
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--wc-space-4);
-        }
-        .status-badge {
-            display: inline-flex; align-items: center; gap: var(--wc-space-1);
-            padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);
-            font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-extrabold);
-        }
-        .status-pending { background: var(--wc-warning-bg); color: var(--wc-warning); border: var(--wc-border-width) solid #fde68a; }
-        .status-shortlisted { background: var(--wc-info-bg); color: #4338ca; border: var(--wc-border-width) solid #c7d2fe; }
-        .status-confirmed { background: var(--wc-success-bg); color: #15803d; border: var(--wc-border-width) solid #bbf7d0; }
-        .status-rejected { background: var(--wc-danger-bg); color: var(--wc-danger); border: var(--wc-border-width) solid #fecaca; }
-    </style>
 </head>
-<body style="background: var(--wc-background);">
 
-    <!-- Site Navigation (Phase 1 design system) -->
-    <header class="navbar">
-        <a class="brand" href="{{ url_for('home') }}">
-            <div class="brand-name">Work<span>Connect</span></div>
-        </a>
-        <nav class="nav-links">
-            <a class="nav-link" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
-            <a class="nav-link" href="{{ url_for('browse_jobs') }}">{{ t('nav_browse_jobs') }}</a>
-            <a class="nav-link active" href="{{ url_for('worker_dashboard') }}">{{ t('nav_worker_dashboard') }}</a>
+<body class="{% if user_role == 'worker' %}theme-worker{% elif user_role == 'employer' %}theme-employer{% else %}theme-public{% endif %} app-layout">
+    <a href="#main-content" class="wc-sr-only wc-sr-only-focusable">Skip to main content</a>
 
-            <!-- Language Switcher -->
-            <div class="lang-selector">
-                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
-                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
-                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
+    <!-- ============ WORKER SIDEBAR NAVIGATION (Desktop) ============ -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">Work<span>Connect</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-item {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">
+                🏠 {{ t('nav_home') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}" href="{{ url_for('browse_jobs') }}">
+                🔍 {{ t('nav_browse_jobs') }}
+            </a>
+            <a class="sidebar-item active" href="{{ url_for('worker_dashboard') }}">
+                ⭐ {{ t('nav_recommended_jobs') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'worker_dashboard' %}active{% endif %}" href="{{ url_for('worker_dashboard') }}#apps">
+                📋 {{ t('my_applications') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'worker_dashboard' %}active{% endif %}" href="{{ url_for('worker_dashboard') }}#saved">
+                {{ t('nav_saved_jobs') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'worker_dashboard' %}active{% endif %}" href="{{ url_for('worker_dashboard') }}#notifs">
+                🔔 {{ t('nav_notifications') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'worker_profile_edit' %}active{% endif %}" href="{{ url_for('worker_profile_edit') }}">
+                👤 {{ t('nav_profile') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('worker_voice_register') }}">
+                🎤 {{ t('hero_voice_reg') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('browse_jobs') }}">
+                🤖 {{ t('ai_title') }}
+            </a>
+<a class="sidebar-item {% if request.endpoint == 'worker_profile_edit' %}active{% endif %}" href="{{ url_for('worker_profile_edit') }}">
+    ⚙️ {{ t('nav_settings') }}
+</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="sidebar-item" style="color: var(--wc-danger); border: var(--wc-border-width) solid var(--wc-danger);">
+                {{ t('nav_logout') }}
+            </a>
+        </div>
+    </aside>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="main-content" id="main-content">
+
+        <!-- Top bar: title + theme toggle + notifications + profile -->
+        <header class="wc-container" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--wc-space-4); padding: var(--wc-space-6) var(--wc-space-4) var(--wc-space-4); margin-bottom: var(--wc-space-6); border-bottom: var(--wc-border-width) solid var(--wc-border);">
+            <div>
+                <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">{{ t('dashboard_welcome') }}, {{ worker.name }}</h1>
+                <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: var(--wc-space-1) 0 0 0;">Here is what is happening with your WorkConnect profile today.</p>
             </div>
 
-            <!-- Notifications Bell & Modern Dropdown -->
-            <div class="notif-bell-container" id="notif-bell-wrapper">
-                <button type="button" id="notif-bell-btn" class="notif-bell-badge" onclick="toggleNotifDropdown(event)" title="Notifications" aria-label="Notifications">
+            <div style="display: flex; align-items: center; gap: var(--wc-space-3); flex-wrap: wrap;">
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+
+                <div class="notif-bell-badge" id="notif-bell-wrapper" onclick="toggleNotifDropdown(event)" title="Notifications" aria-label="Notifications" style="background: transparent; border: none; cursor: pointer;">
                     🔔
                     <span id="notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
-                </button>
+                </div>
 
-                <!-- Notification Dropdown Panel -->
                 <div id="notif-dropdown-panel" class="notif-dropdown-panel" style="display: none;">
                     <div class="notif-panel-header">
                         <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
-                            <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">Notifications</span>
+                            <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
                             <span id="panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
                                 <span id="panel-unread-num">{{ unread_notifications_count }}</span> unread
                             </span>
                         </div>
                         <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
-                            <button type="button" id="btn-mark-all-dropdown" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">✓ Mark all read</button>
+                            <button type="button" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">✓ {{ t('mark_all_as_read') }}</button>
                             <button type="button" onclick="closeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
                         </div>
                     </div>
-
                     <div id="notif-items-list" class="notif-items-scroll">
                         {% if notifications %}
                             {% for n in notifications %}
-                                <div class="notif-card {% if not n.is_read %}unread{% else %}read{% endif %}" id="dropdown-notif-{{ n.id }}">
-                                    <div class="notif-card-header">
-                                        <span class="notif-primary-msg">
-                                            {% if not n.is_read %}<span class="notif-unread-dot" id="dropdown-dot-{{ n.id }}">●</span>{% endif %}
-                                            {{ n.title }}
-                                        </span>
-                                        <span class="notif-timestamp">
-                                            🕒 {{ n.time_display or n.created_at }}
-                                        </span>
+                                <div class="notif-card {% if not n.is_read %}unread{% else %}read{% endif %}" id="notif-{{ n.id }}">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--wc-space-1);">
+                                        <span style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm);">{{ n.title }}</span>
+                                        <span style="font-size: var(--wc-text-xs); color: var(--wc-text-muted);">{{ n.time_display or n.created_at }}</span>
                                     </div>
-                                    <div class="notif-job-meta">
-                                        <div class="notif-job-title">{{ n.job_title or n.title }}</div>
-                                        <div class="notif-job-sub">
-                                            <span>🏢 {{ n.company_name or 'WorkConnect Partner' }}</span>
-                                            <span>📍 {{ n.location or 'Local' }}</span>
-                                        </div>
-                                        <div class="notif-msg-text">{{ n.message }}</div>
-                                    </div>
-                                    <div class="notif-action-row">
-                                        <a href="{{ n.link }}{% if '?' in n.link %}&{% else %}?{% endif %}notif_id={{ n.id }}" class="btn-view-job" onclick="handleNotificationClick({{ n.id }})">👁️ View Job</a>
-                                        {% if not n.is_read %}
-                                            <button type="button" class="btn-mark-single-read" id="dropdown-mark-read-{{ n.id }}" onclick="markNotificationRead({{ n.id }}, event)">Mark as read</button>
-                                        {% endif %}
-                                    </div>
+                                    <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-bottom: var(--wc-space-2);">{{ n.message }}</div>
+                                    <a href="{{ n.link }}{% if '?' in n.link %}&{% else %}?{% endif %}notif_id={{ n.id }}" class="btn btn-primary btn-sm">{{ t('view_job_details') }}</a>
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <div class="notif-empty-state">
+                            <div class="empty-state" style="padding: var(--wc-space-4);">
                                 <div style="font-size: 32px; margin-bottom: var(--wc-space-2);">🔔</div>
-                                <div style="font-weight: 750; color: var(--wc-heading); font-size: var(--wc-text-sm);">No notifications yet</div>
-                                <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-top: var(--wc-space-1);">You will receive instant alerts when employers post new job opportunities.</div>
+                                <div style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm);">{{ t('no_notifications_yet') }}</div>
                             </div>
                         {% endif %}
                     </div>
-
-                    <div class="notif-panel-footer">
-                        <a href="#notifs" onclick="switchTab('notifications'); closeNotifDropdown();" style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">View All Notifications in Tab →</a>
-                    </div>
                 </div>
+
+                <a href="{{ url_for('worker_profile_edit') }}" class="nav-cta">{{ worker.name }}</a>
             </div>
-
-            <!-- Logout -->
-            <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
-        </nav>
-    </header>
-
-    <main class="dashboard-container">
+        </header>
 
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
+                <div class="wc-container" style="margin-bottom: var(--wc-space-4);">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
-        <!-- Worker Personal Profile Header Banner -->
-        <section class="profile-banner">
-            <div class="profile-info">
-                <div class="profile-avatar">
-                    <img src="{{ url_for('static', filename=trade_meta.image) }}" alt="{{ worker.skill }}" style="width: 44px; height: 44px; border-radius: 10px;">
-                </div>
-                <div>
-                    <h1 style="font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.3px;">
-                        {{ worker.name }}
-                    </h1>
-                    <div style="font-size: 13px; opacity: 0.9; margin-top: 2px;">
-                        {{ worker.email }} • {{ t('role_worker') }}
+        <!-- ============ STAT CARDS ROW ============ -->
+        <section class="wc-container" style="margin-bottom: var(--wc-space-6);">
+            <div class="wc-grid-4" style="gap: var(--wc-space-3);">
+                <a href="#apps" class="stat-card card card-padded" style="text-decoration: none; color: inherit; border-left: 4px solid var(--wc-primary);">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('my_applications') }}</div>
+                        <div class="stat-value">{{ applications|length }}</div>
+                        <div class="stat-trend">▲ Active applications</div>
                     </div>
-                    <div class="profile-meta-pills">
-                        <span class="profile-pill">🛠️ {{ worker.skill }}</span>
-                        <span class="profile-pill">📍 {{ worker.location }}</span>
-                        <span class="profile-pill">⏳ {{ worker.experience }} {{ t('match_exp_good') }}</span>
-                        <span class="profile-pill">💰 ₹{{ worker.wage }}/day</span>
-                        <span class="profile-pill">⚡ {{ worker.availability }}</span>
+                </a>
+                <a href="#saved" class="stat-card card card-padded" style="text-decoration: none; color: inherit; border-left: 4px solid var(--wc-secondary);">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('nav_saved_jobs') }}</div>
+                        <div class="stat-value">{{ saved_jobs|length }}</div>
+                        <div class="stat-trend">Jobs you bookmarked</div>
+                    </div>
+                </a>
+                <a href="#interviews" class="stat-card card card-padded" style="text-decoration: none; color: inherit; border-left: 4px solid var(--wc-info);">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('interviews_title') }}</div>
+                        <div class="stat-value">{{ interviews|length }}</div>
+                        <div class="stat-trend">Scheduled meetings</div>
+                    </div>
+                </a>
+                <div class="stat-card card card-padded" style="border-left: 4px solid var(--wc-accent);">
+                    <div class="stat-icon">🔔</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('nav_notifications') }}</div>
+                        <div class="stat-value">{{ notifications|length }}</div>
+                        <div class="stat-trend">{% if unread_notifications_count > 0 %}{{ unread_notifications_count }} unread{% else %}All caught up{% endif %}</div>
                     </div>
                 </div>
-            </div>
-
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <a href="{{ url_for('worker_profile_edit') }}" style="background: #ffffff; color: #1e3a8a; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 750; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                    ✏️ {{ t('edit_profile') }}
-                </a>
-                <a href="{{ url_for('browse_jobs') }}" style="background: rgba(255,255,255,0.2); color: #ffffff; border: 1px solid rgba(255,255,255,0.4); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none;">
-                    🔍 {{ t('hero_explore_jobs') }}
-                </a>
             </div>
         </section>
 
-        <!-- Navigation Tabs for Dashboard -->
-        <div class="tabs-header">
-            <a href="#apps" class="tab-btn active" id="btn-tab-apps" onclick="switchTab('apps')">
-                📋 {{ t('my_applications') }} ({{ applications|length }})
-            </a>
-            <a href="#saved" class="tab-btn" id="btn-tab-saved" onclick="switchTab('saved')">
-                ⭐ {{ t('nav_saved_jobs') }} ({{ saved_jobs|length }})
-            </a>
-            <a href="#interviews" class="tab-btn" id="btn-tab-interviews" onclick="switchTab('interviews')">
-                📅 {{ t('interviews_title') }} ({{ interviews|length }})
-            </a>
-            <a href="#notifs" class="tab-btn" id="btn-tab-notifications" onclick="switchTab('notifications')">
-                🔔 {{ t('nav_notifications') }} ({{ notifications|length }})
-            </a>
-        </div>
+        <!-- ============ PROFILE COMPLETION ============ -->
+        <section class="wc-container" style="margin-bottom: var(--wc-space-6);">
+            <div class="card card-padded" style="background: var(--wc-secondary-bg); border-color: #67e8f9;">
+                <div style="display: flex; align-items: center; gap: var(--wc-space-3); margin-bottom: var(--wc-space-4);">
+                    <div style="font-size: var(--wc-text-xl);">👤</div>
+                    <div>
+                        <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">{{ t('profile_completion') }}</h3>
+                        <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0;">Keep your profile complete so employers can match you with the right jobs.</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: var(--wc-space-2); flex-wrap: wrap;">
+                    <span class="badge badge-info" style="font-size: var(--wc-text-xs);">🛠️ {{ worker.skill }}</span>
+                    <span class="badge badge-info" style="font-size: var(--wc-text-xs);">📍 {{ worker.location }}</span>
+                    <span class="badge badge-info" style="font-size: var(--wc-text-xs);">💰 ₹{{ worker.wage }}/day</span>
+                    <span class="badge badge-info" style="font-size: var(--wc-text-xs);">⚡ {{ worker.availability }}</span>
+                </div>
+                <a href="{{ url_for('worker_profile_edit') }}" class="btn btn-primary btn-sm" style="margin-top: var(--wc-space-4);">✏️ {{ t('edit_profile') }}</a>
+            </div>
+        </section>
 
-        <!-- TAB 1: APPLICATIONS LIST -->
-        <div id="tab-content-apps">
-            {% if applications %}
-                {% for app in applications %}
-                    <div class="app-card">
-                        <div style="flex: 1; min-width: 250px;">
-                            <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-2);">
-                                <h2 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">
-                                    {{ app.job_title }}
-                                </h2>
-                                <span class="status-badge status-{{ app.application_status|lower }}">
+        <!-- ============ RECENTLY POSTED JOBS ============ -->
+        <section class="wc-container" style="margin-bottom: var(--wc-space-6);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--wc-space-4);">
+                <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">{{ t('recently_posted') }}</h2>
+                <a href="{{ url_for('browse_jobs') }}" class="btn btn-outline btn-sm">{{ t('nav_browse_jobs') }} <span>→</span></a>
+            </div>
+
+            <div class="wc-grid-3" style="gap: var(--wc-space-3);">
+                {% if saved_jobs %}
+                    {% for job in saved_jobs[:3] %}
+                        <div class="modern-job-card card card-padded">
+                            <div class="job-card-header">
+                                <div class="job-title-row">
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ job.title }}</h3>
+                                    <div class="job-employer">🏢 {{ job.employer_name }}</div>
+                                </div>
+                                <span class="badge badge-info" style="font-size: var(--wc-text-xs);">Saved</span>
+                            </div>
+                            <div class="job-meta" style="margin-bottom: var(--wc-space-3); flex-wrap: wrap;">
+                                <span class="wage-badge">💰 ₹{{ job.daily_wage }}/day</span>
+                                <span class="locality-badge">📍 {{ job.location }}</span>
+                                <span class="badge badge-neutral" style="font-size: var(--wc-text-xs);">👥 {{ job.positions_remaining }} {{ t('positions_left') }}</span>
+                            </div>
+                            <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0 0 var(--wc-space-3); line-height: var(--wc-line-relaxed);">{{ job.description[:120] }}{% if job.description|length > 120 %}…{% endif %}</p>
+                            <div class="job-actions">
+                                <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn btn-primary btn-sm btn-block">⚡ {{ t('apply_now') }}</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">📭</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">No saved jobs yet</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">Browse jobs and save the ones you like to see them here.</p>
+                        <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">{{ t('hero_explore_jobs') }}</a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ============ TABS: APPLICATIONS / SAVED / INTERVIEWS ============ -->
+        <section class="wc-container">
+            <div class="tabs-header" style="margin-bottom: var(--wc-space-4); border-bottom: var(--wc-border-width) solid var(--wc-border); overflow-x: auto;">
+                <a href="#apps" class="tab-btn active" id="btn-tab-apps" onclick="switchTab('apps')">
+                    📋 {{ t('my_applications') }} ({{ applications|length }})
+                </a>
+                <a href="#saved" class="tab-btn" id="btn-tab-saved" onclick="switchTab('saved')">
+                    ⭐ {{ t('nav_saved_jobs') }} ({{ saved_jobs|length }})
+                </a>
+                <a href="#interviews" class="tab-btn" id="btn-tab-interviews" onclick="switchTab('interviews')">
+                    📅 {{ t('interviews_title') }} ({{ interviews|length }})
+                </a>
+                <a href="#notifs" class="tab-btn" id="btn-tab-notifications" onclick="switchTab('notifications')">
+                    🔔 {{ t('nav_notifications') }} ({{ notifications|length }})
+                </a>
+            </div>
+
+            <!-- TAB: APPLICATIONS -->
+            <div id="tab-content-apps" style="display: block;">
+                {% if applications %}
+                    {% for app in applications %}
+                        <div class="modern-applicant-card card card-padded" style="margin-bottom: var(--wc-space-3);">
+                            <div class="applicant-card-header">
+                                <div class="applicant-info">
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ app.job_title }}</h3>
+                                    <div class="applicant-meta">
+                                        <span>🏢 {{ app.employer_name }}</span>
+                                        <span>📍 {{ app.job_location }}</span>
+                                        <span>💰 ₹{{ app.daily_wage }}/day</span>
+                                        <span>📅 Applied {{ app.applied_at[:10] if app.applied_at else '—' }}</span>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-{{ app.application_status|lower if app.application_status else 'pending' }}" style="white-space: nowrap;">
                                     {% if app.application_status == 'Confirmed' %}✓ {{ t('status_confirmed') }}
                                     {% elif app.application_status == 'Shortlisted' %}⭐ {{ t('status_shortlisted') }}
                                     {% elif app.application_status == 'Rejected' %}✕ {{ t('status_rejected') }}
                                     {% else %}⏳ {{ t('status_pending') }}{% endif %}
                                 </span>
                             </div>
-                            <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap;">
-                                <span>🏢 {{ app.employer_name }}</span>
-                                <span>📍 {{ app.job_location }}</span>
-                                <span>💰 ₹{{ app.daily_wage }}/day</span>
-                                <span>📅 Applied: {{ app.applied_at[:10] }}</span>
-                            </div>
 
                             {% if app.match_percentage %}
-                                <div style="margin-top: var(--wc-space-3); display: inline-flex; align-items: center; gap: var(--wc-space-2); background: var(--wc-success-bg); border: var(--wc-border-width) solid #bbf7d0; padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-md); font-size: var(--wc-text-xs); color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">
-                                    <span>🎯 {{ t('match_compatibility') }}: {{ app.match_percentage }}% ({{ app.match_level }})</span>
+                                <div style="margin: var(--wc-space-3) 0; background: var(--wc-success-bg); border: var(--wc-border-width) solid #bbf7d0; padding: var(--wc-space-2) var(--wc-space-3); border-radius: var(--wc-radius-md); font-size: var(--wc-text-xs); color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">
+                                    🎯 {{ t('match_compatibility') }}: {{ app.match_percentage }}% ({{ app.match_level }})
                                 </div>
                             {% endif %}
-                        </div>
 
-                        <div style="text-align: right;">
-                            <a href="{{ url_for('browse_jobs', q=app.job_skill) }}" class="btn btn-ghost btn-sm" style="font-weight: var(--wc-font-weight-bold); color: var(--wc-text-muted);">
-                                {{ t('view_similar_jobs') }}
-                            </a>
+                            <a href="{{ url_for('browse_jobs', q=app.job_skill) }}" class="btn btn-ghost btn-sm">{{ t('view_similar_jobs') }}</a>
                         </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('no_applications_yet') }}</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">{{ t('browse_available_jobs') }}</p>
+                        <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">{{ t('hero_explore_jobs') }}</a>
                     </div>
-                {% endfor %}
-            {% else %}
-                <div style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
-                    <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">{{ t('no_applications_yet') }}</h3>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">{{ t('browse_available_jobs') }}</p>
-                    <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
-                        {{ t('hero_explore_jobs') }} →
-                    </a>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- TAB 2: SAVED JOBS (Step 8) -->
-        <div id="tab-content-saved" style="display: none;">
-            {% if saved_jobs %}
-                {% for job in saved_jobs %}
-                    <div class="app-card">
-                        <div style="display: flex; align-items: center; gap: var(--wc-space-3); flex: 1;">
-                            <img src="{{ url_for('static', filename=job.trade_image) }}" alt="{{ job.skill_required }}" style="width: 48px; height: 48px; border-radius: var(--wc-radius-md);">
-                            <div>
-                                <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">
-                                    {{ job.title }}
-                                </h3>
-                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap;">
-                                    <span>🏢 {{ job.employer_name }}</span>
-                                    <span>📍 {{ job.location }}</span>
-                                    <span style="color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">💰 ₹{{ job.daily_wage }}/day</span>
-                                    <span>👥 {{ job.positions_remaining }} {{ t('positions_left') }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: var(--wc-space-3); align-items: center;">
-                            <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn btn-primary btn-sm">
-                                {{ t('apply_now') }}
-                            </a>
-                            <form method="POST" action="{{ url_for('unsave_job_route', job_id=job.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-outline btn-sm" style="color: var(--wc-danger); border-color: var(--wc-danger);">
-                                    {{ t('remove_saved') }}
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
-                    <div style="font-size: 40px; margin-bottom: 10px;">⭐</div>
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">{{ t('no_saved_jobs_yet') }}</h3>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">{{ t('saved_jobs_description') }}</p>
-                    <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
-                        {{ t('hero_explore_jobs') }}
-                    </a>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- TAB 3: MEETINGS SCHEDULED (Step 8) -->
-        <div id="tab-content-interviews" style="display: none;">
-            {% if interviews %}
-                {% for iv in interviews %}
-                    <div class="app-card" style="border-left: 4px solid #2864c9;">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                <span style="background: #dbeafe; color: #1e40af; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 10px;">{{ t('meeting_scheduled') }}</span>
-                                <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0;">
-                                    {{ iv.job_title }}
-                                </h3>
-                            </div>
-                            <div style="font-size: 13px; color: #475569; margin-top: 6px;">
-                                <strong>{{ t('meeting_date_time') }}</strong> {{ iv.interview_date }} at {{ iv.interview_time }}
-                            </div>
-                            <div style="font-size: 13px; color: #475569; margin-top: 4px;">
-                                <strong>{{ t('meeting_location_venue') }}</strong> 📍 {{ iv.location_or_link }}
-                            </div>
-                            {% if iv.notes %}
-                                <div style="font-size: 12px; color: #64748b; margin-top: 4px; background: #f8fafc; padding: 6px 10px; border-radius: 6px;">
-                                    <strong>{{ t('meeting_notes') }}</strong> {{ iv.notes }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div>
-                            <span style="font-weight: 700; font-size: 13px; color: #047857; background: #ecfdf5; padding: 6px 12px; border-radius: 14px;">
-                                {{ t('confirmed_with_employer') }}: {{ iv.employer_name }}
-                            </span>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
-                    <div style="font-size: 40px; margin-bottom: 10px;">📅</div>
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0;">{{ t('no_interviews') }}</h3>
-                    <p style="font-size: 13px; color: #64748b;">When employers shortlist your application and schedule a meeting or call, details will appear here.</p>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- TAB 4: NOTIFICATIONS -->
-        <div id="tab-content-notifications" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0;">{{ t('recent_notifications') }}</h3>
-                    <span id="tab-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
-                        <span id="tab-unread-num">{{ unread_notifications_count }}</span> unread
-                    </span>
-                </div>
-                <button type="button" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">
-                    {{ t('mark_all_as_read') }}
-                </button>
+                {% endif %}
             </div>
 
-            {% if notifications %}
-                <div id="tab-notifs-container">
-                    {% for n in notifications %}
-                        <div class="notif-card {% if not n.is_read %}unread{% else %}read{% endif %}" id="tab-notif-{{ n.id }}" style="margin-bottom: 12px; border: 1px solid {% if not n.is_read %}#bfdbfe{% else %}#e2e8f0{% endif %}; border-radius: 14px; padding: 14px 18px;">
-                            <div class="notif-card-header">
-                                <span class="notif-primary-msg">
-                                    {% if not n.is_read %}<span class="notif-unread-dot" id="tab-dot-{{ n.id }}">●</span>{% endif %}
-                                    {{ n.title }}
-                                </span>
-                                <span class="notif-timestamp">
-                                    🕒 {{ n.time_display or n.created_at }}
-                                </span>
-                            </div>
-                            <div class="notif-job-meta">
-                                <div class="notif-job-title" style="font-size: 15px;">{{ n.job_title or n.title }}</div>
-                                <div class="notif-job-sub" style="font-size: 13px;">
-                                    <span>🏢 {{ n.company_name or 'WorkConnect Partner' }}</span>
-                                    <span>📍 {{ n.location or 'Local' }}</span>
+            <!-- TAB: SAVED JOBS -->
+            <div id="tab-content-saved" style="display: none;">
+                {% if saved_jobs %}
+                    {% for job in saved_jobs %}
+                        <div class="modern-job-card card card-padded" style="margin-bottom: var(--wc-space-3);">
+                            <div class="job-card-header">
+                                <div class="job-title-row">
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ job.title }}</h3>
+                                    <div class="job-employer">🏢 {{ job.employer_name }}</div>
                                 </div>
-                                <div class="notif-msg-text" style="font-size: 13px;">{{ n.message }}</div>
+                                <span class="badge badge-info" style="font-size: var(--wc-text-xs);">Saved</span>
                             </div>
-                            <div class="notif-action-row">
-                                <a href="{{ n.link }}{% if '?' in n.link %}&{% else %}?{% endif %}notif_id={{ n.id }}" 
-                                   class="btn-view-job"
-                                   onclick="handleNotificationClick({{ n.id }})">
-                                    👁️ View Job Details
-                                </a>
-                                {% if not n.is_read %}
-                                    <button type="button" 
-                                            class="btn-mark-single-read" 
-                                            id="tab-mark-read-{{ n.id }}"
-                                            onclick="markNotificationRead({{ n.id }}, event)">
-                                        Mark as read
-                                    </button>
-                                {% endif %}
+                            <div class="job-meta" style="margin-bottom: var(--wc-space-3); flex-wrap: wrap;">
+                                <span class="wage-badge">💰 ₹{{ job.daily_wage }}/day</span>
+                                <span class="locality-badge">📍 {{ job.location }}</span>
+                                <span class="badge badge-neutral" style="font-size: var(--wc-text-xs);">👥 {{ job.positions_remaining }} {{ t('positions_left') }}</span>
+                            </div>
+                            <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0 0 var(--wc-space-3); line-height: var(--wc-line-relaxed);">{{ job.description[:120] }}{% if job.description|length > 120 %}…{% endif %}</p>
+                            <div class="job-actions" style="gap: var(--wc-space-2);">
+                                <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn btn-primary btn-sm btn-block">⚡ {{ t('apply_now') }}</a>
+                                <form method="POST" action="{{ url_for('unsave_job_route', job_id=job.id) }}" style="display: inline; margin: 0;">
+                                    <button type="submit" class="btn btn-outline btn-sm" style="color: var(--wc-danger); border-color: var(--wc-danger);">{{ t('remove_saved') }}</button>
+                                </form>
                             </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% else %}
-                <div class="notif-empty-state" style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
-                    <div style="font-size: 40px; margin-bottom: 10px;">🔔</div>
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0;">{{ t('no_notifications_yet') }}</h3>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 6px;">{{ t('notifications_will_appear') }}</p>
-                </div>
-            {% endif %}
-        </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">⭐</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('no_saved_jobs_yet') }}</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">{{ t('saved_jobs_description') }}</p>
+                        <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">{{ t('hero_explore_jobs') }}</a>
+                    </div>
+                {% endif %}
+            </div>
 
+            <!-- TAB: INTERVIEWS -->
+            <div id="tab-content-interviews" style="display: none;">
+                {% if interviews %}
+                    {% for iv in interviews %}
+                        <div class="modern-applicant-card card card-padded" style="margin-bottom: var(--wc-space-3); border-left: 4px solid #2864c9;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-2);">
+                                    <span style="background: var(--wc-primary-light); color: var(--wc-primary-dark); font-weight: 800; font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">{{ t('meeting_scheduled') }}</span>
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">{{ iv.job_title }}</h3>
+                                </div>
+                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin-bottom: var(--wc-space-2);">
+                                    <strong>{{ t('meeting_date_time') }}</strong> {{ iv.interview_date }} at {{ iv.interview_time }}
+                                </div>
+                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin-bottom: var(--wc-space-2);">
+                                    <strong>{{ t('meeting_location_venue') }}</strong> 📍 {{ iv.location_or_link }}
+                                </div>
+                                {% if iv.notes %}
+                                    <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); background: var(--wc-surface-hover); padding: var(--wc-space-2) var(--wc-space-3); border-radius: var(--wc-radius-md); margin-bottom: var(--wc-space-2);">
+                                        <strong>{{ t('meeting_notes') }}</strong> {{ iv.notes }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div style="font-weight: 700; color: var(--wc-success); background: var(--wc-success-bg); padding: var(--wc-space-2) var(--wc-space-3); border-radius: var(--wc-radius-md); font-size: var(--wc-text-sm);">
+                                {{ t('confirmed_with_employer') }}: {{ iv.employer_name }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('no_interviews') }}</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">When employers shortlist your application and schedule a meeting or call, details will appear here.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- TAB: NOTIFICATIONS -->
+            <div id="tab-content-notifications" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--wc-space-4);">
+                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">{{ t('recent_notifications') }}</h3>
+                    <button type="button" onclick="markAllNotificationsRead(event)" class="btn btn-outline btn-sm">{{ t('mark_all_as_read') }}</button>
+                </div>
+
+                {% if notifications %}
+                    <div style="display: flex; flex-direction: column; gap: var(--wc-space-2);">
+                        {% for n in notifications %}
+                            <div class="notif-card {% if not n.is_read %}unread{% else %}read{% endif %}" id="tab-notif-{{ n.id }}" style="padding: var(--wc-space-3) var(--wc-space-4); border-radius: var(--wc-radius-lg); border: var(--wc-border-width) solid {% if not n.is_read %}var(--wc-border-hover){% else %}var(--wc-border){% endif %};">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--wc-space-1);">
+                                    <span style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm);">{{ n.title }}</span>
+                                    <span style="font-size: var(--wc-text-xs); color: var(--wc-text-muted);">{{ n.time_display or n.created_at }}</span>
+                                </div>
+                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin-bottom: var(--wc-space-2);">{{ n.message }}</div>
+                                <a href="{{ n.link }}{% if '?' in n.link %}&{% else %}?{% endif %}notif_id={{ n.id }}" class="btn btn-primary btn-sm btn-block">{{ t('view_job_details') }}</a>
+                                {% if not n.is_read %}
+                                    <button type="button" class="btn btn-outline btn-sm btn-block" style="margin-top: var(--wc-space-2); color: var(--wc-primary); border-color: var(--wc-primary);" onclick="markNotificationRead({{ n.id }}, event)">Mark as read</button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🔔</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('no_notifications_yet') }}</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">{{ t('notifications_will_appear') }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
     </main>
 
     {% include 'partials/ai_assistant.html' %}
 
+    <!-- ============ MOBILE BOTTOM NAV ============ -->
+    <nav class="mobile-nav" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-nav-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🔍</span>
+            <span>Jobs</span>
+        </a>
+        <a href="{{ url_for('worker_dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'worker_dashboard' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">👤</span>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('worker_profile_edit') }}" class="mobile-nav-item {% if request.endpoint == 'worker_profile_edit' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">✏️</span>
+            <span>Profile</span>
+        </a>
+    </nav>
+
     <script>
+        // ============ TAB SWITCHING ============
         function switchTab(tab) {
             ['apps', 'saved', 'interviews', 'notifications'].forEach(t => {
                 const el = document.getElementById('tab-content-' + t);
@@ -422,9 +418,20 @@
                     else btn.classList.remove('active');
                 }
             });
+            // Scroll to top of content
+            const main = document.getElementById('main-content');
+            if (main) main.scrollTop = 0;
         }
 
-        // Notification Dropdown Panel Controls
+        // Highlight active tab from URL hash
+        (function() {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && ['apps','saved','interviews','notifications'].includes(hash)) {
+                switchTab(hash);
+            }
+        })();
+
+        // ============ NOTIFICATIONS DROPDOWN ============
         function toggleNotifDropdown(event) {
             if (event) event.stopPropagation();
             const panel = document.getElementById('notif-dropdown-panel');
@@ -439,7 +446,6 @@
             if (panel) panel.style.display = 'none';
         }
 
-        // Close dropdown when clicking outside or pressing ESC
         document.addEventListener('click', function(event) {
             const wrapper = document.getElementById('notif-bell-wrapper');
             const panel = document.getElementById('notif-dropdown-panel');
@@ -451,12 +457,10 @@
         });
 
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeNotifDropdown();
-            }
+            if (event.key === 'Escape') closeNotifDropdown();
         });
 
-        // Mark single notification read
+        // ============ MARK NOTIFICATIONS READ ============
         function markNotificationRead(notifId, event) {
             if (event) event.stopPropagation();
             fetch('/api/notifications/read/' + notifId, { method: 'POST' })
@@ -467,7 +471,6 @@
                 .catch(err => console.error("Error marking notification read:", err));
         }
 
-        // Mark all notifications read
         function markAllNotificationsRead(event) {
             if (event) event.preventDefault();
             fetch('/api/notifications/read-all', { method: 'POST' })
@@ -478,7 +481,6 @@
                 .catch(err => console.error("Error marking all read:", err));
         }
 
-        // Pre-navigation mark as read handler
         function handleNotificationClick(notifId) {
             if (navigator.sendBeacon) {
                 navigator.sendBeacon('/api/notifications/read/' + notifId);
@@ -487,55 +489,32 @@
             }
         }
 
-        // Update UI state for a single notification
         function updateNotificationUIAsRead(notifId, newUnreadCount) {
-            // Dropdown card
-            const dropCard = document.getElementById('dropdown-notif-' + notifId);
-            if (dropCard) {
-                dropCard.classList.remove('unread');
-                dropCard.classList.add('read');
+            const card = document.getElementById('notif-' + notifId);
+            if (card) {
+                card.classList.remove('unread');
+                card.classList.add('read');
+                card.style.borderColor = 'var(--wc-border)';
             }
-            const dropDot = document.getElementById('dropdown-dot-' + notifId);
-            if (dropDot) dropDot.remove();
-            const dropBtn = document.getElementById('dropdown-mark-read-' + notifId);
-            if (dropBtn) dropBtn.remove();
-
-            // Tab card
             const tabCard = document.getElementById('tab-notif-' + notifId);
             if (tabCard) {
                 tabCard.classList.remove('unread');
                 tabCard.classList.add('read');
-                tabCard.style.borderColor = '#e2e8f0';
+                tabCard.style.borderColor = 'var(--wc-border)';
             }
-            const tabDot = document.getElementById('tab-dot-' + notifId);
-            if (tabDot) tabDot.remove();
-            const tabBtn = document.getElementById('tab-mark-read-' + notifId);
-            if (tabBtn) tabBtn.remove();
-
-            // Update badge counts
             updateBadges(newUnreadCount);
         }
 
-        // Update UI state for all notifications
         function updateAllNotificationsUIAsRead() {
-            // Dropdown
-            document.querySelectorAll('#notif-items-list .notif-card').forEach(card => {
-                card.classList.remove('unread');
-                card.classList.add('read');
+            document.querySelectorAll('#notif-items-list .notif-card').forEach(c => {
+                c.classList.remove('unread');
+                c.classList.add('read');
             });
-            document.querySelectorAll('#notif-items-list .notif-unread-dot').forEach(d => d.remove());
-            document.querySelectorAll('#notif-items-list .btn-mark-single-read').forEach(b => b.remove());
-
-            // Tab
-            document.querySelectorAll('#tab-notifs-container .notif-card').forEach(card => {
-                card.classList.remove('unread');
-                card.classList.add('read');
-                card.style.borderColor = '#e2e8f0';
+            document.querySelectorAll('#tab-content-notifications .notif-card').forEach(c => {
+                c.classList.remove('unread');
+                c.classList.add('read');
+                c.style.borderColor = 'var(--wc-border)';
             });
-            document.querySelectorAll('#tab-notifs-container .notif-unread-dot').forEach(d => d.remove());
-            document.querySelectorAll('#tab-notifs-container .btn-mark-single-read').forEach(b => b.remove());
-
-            // Update badges to 0
             updateBadges(0);
         }
 
@@ -551,14 +530,9 @@
                 panelNum.innerText = count;
                 panelPill.style.display = count > 0 ? 'inline-block' : 'none';
             }
-            const tabPill = document.getElementById('tab-unread-pill');
-            const tabNum = document.getElementById('tab-unread-num');
-            if (tabPill && tabNum) {
-                tabNum.innerText = count;
-                tabPill.style.display = count > 0 ? 'inline-block' : 'none';
-            }
         }
 
+        // ============ NOTIFICATION SOUND ============
         function playNotificationSound() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -570,8 +544,8 @@
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3); // A5
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
                 gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
                 osc.connect(gain);
@@ -598,7 +572,7 @@
                 .catch(() => {});
         }, 20000);
 
-        // Theme toggle - Dark/Light mode
+        // ============ THEME TOGGLE ============
         function toggleTheme() {
             const html = document.documentElement;
             const btn = document.getElementById('theme-toggle');
@@ -617,7 +591,6 @@
             }
         }
 
-        // Restore theme preference on page load
         (function() {
             const savedTheme = localStorage.getItem('wc-theme');
             const btn = document.getElementById('theme-toggle');
@@ -638,47 +611,7 @@
                 }
             }
         })();
-
     </script>
 
-    <!-- Mobile Bottom App Bar -->
-    <nav class="mobile-bottom-bar" aria-label="Mobile Navigation">
-        <a href="{{ url_for('home') }}" class="mobile-bottom-item {% if request.endpoint == 'home' %}active{% endif %}">
-            <span class="icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="{{ url_for('browse_jobs') }}" class="mobile-bottom-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
-            <span class="icon">🔍</span>
-            <span>Explore</span>
-        </a>
-        {% if user_role == 'employer' %}
-        <a href="{{ url_for('post_job') }}" class="mobile-bottom-item {% if request.endpoint == 'post_job' %}active{% endif %}">
-            <span class="icon">＋</span>
-            <span>Post Job</span>
-        </a>
-        <a href="{{ url_for('employer_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
-            <span class="icon">🏢</span>
-            <span>Dashboard</span>
-        </a>
-        {% elif user_role == 'worker' %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice AI</span>
-        </a>
-        <a href="{{ url_for('worker_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Dashboard</span>
-        </a>
-        {% else %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice Reg</span>
-        </a>
-        <a href="{{ url_for('login') }}" class="mobile-bottom-item {% if request.endpoint == 'login' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Sign In</span>
-        </a>
-        {% endif %}
-    </nav>
 </body>
 </html>

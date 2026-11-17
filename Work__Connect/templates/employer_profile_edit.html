@@ -6,72 +6,141 @@
     <title>{{ t('edit_profile') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body style="background: var(--wc-background);">
 
-    <!-- Navigation Header -->
-    <header class="navbar">
-        <a class="brand" href="{{ url_for('home') }}">
-            <div class="brand-name">Work<span>Connect</span></div>
-        </a>
-        <div style="display: flex; align-items: center; gap: var(--wc-space-3);">
-            <div class="lang-selector">
-                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
-                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
-                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
-            </div>
-            <a href="{{ url_for('employer_dashboard') }}" class="nav-link">← {{ t('nav_employer_dashboard') }}</a>
+<body class="{% if user_role == 'worker' %}theme-worker{% elif user_role == 'employer' %}theme-employer{% else %}theme-public{% endif %} app-layout">
+    <a href="#main-content" class="wc-sr-only wc-sr-only-focusable">Skip to main content</a>
+
+    <!-- ============ EMPLOYER SIDEBAR NAVIGATION (Desktop) ============ -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">Work<span>Connect</span></div>
         </div>
-    </header>
+        <nav class="sidebar-nav">
+            <a class="sidebar-item" href="{{ url_for('home') }}">
+                🏠 {{ t('nav_home') }}
+            </a>
+            <a class="sidebar-item active" href="{{ url_for('employer_dashboard') }}">
+                🏢 {{ t('nav_company_profile') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('employer_dashboard') }}#jobs">
+                📋 {{ t('nav_manage_jobs') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('employer_dashboard') }}#applicants">
+                👥 {{ t('nav_applicants') }}
+            </a>
+            <a class="sidebar-item active" href="{{ url_for('employer_profile_edit') }}">
+    🏢 {{ t('nav_company_profile') }}
+</a>
+<a class="sidebar-item active" href="{{ url_for('employer_profile_edit') }}">
+    ⚙️ {{ t('nav_settings') }}
+</a>
+<a class="sidebar-item" href="{{ url_for('candidate_matches') }}">
+    🎯 {{ t('nav_ai_hiring') }}
+</a>
+<a class="sidebar-item" href="{{ url_for('post_job') }}">
+    ＋ {{ t('nav_post_job') }}
+</a>
+            <a class="sidebar-item" href="{{ url_for('post_job') }}">
+                ＋ {{ t('nav_post_job') }}
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="sidebar-item" style="color: var(--wc-danger); border: var(--wc-border-width) solid var(--wc-danger);">
+                {{ t('nav_logout') }}
+            </a>
+        </div>
+    </aside>
 
-    <main class="wc-container" style="max-width: 580px; padding: var(--wc-space-10) 0;">
-        <div class="card card-padded">
-            <h1 style="font-size: 22px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0;">
-                {{ t('edit_profile') }}
-            </h1>
-            <p style="font-size: 13px; color: #64748b; margin: 0 0 22px 0;">
-                Update your company or contractor profile and contact phone number.
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="main-content" id="main-content">
+
+        <header class="wc-container" style="padding: var(--wc-space-6) var(--wc-space-4) var(--wc-space-4); margin-bottom: var(--wc-space-6); border-bottom: var(--wc-border-width) solid var(--wc-border);">
+            <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-3);">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.location.href='{{ url_for('employer_dashboard') }}'" style="padding: var(--wc-space-1) var(--wc-space-3); font-size: var(--wc-text-sm);">
+                    ← {{ t('nav_employer_dashboard') }}
+                </button>
+            </div>
+            <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('edit_profile') }}</h1>
+            <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0; margin-bottom: var(--wc-space-4);">
+                {{ t('employer_profile_edit_desc') }}
             </p>
+        </header>
 
-            <form method="POST" action="{{ url_for('employer_profile_edit') }}">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="wc-container" style="margin-bottom: var(--wc-space-4);">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="wc-container" style="max-width: 640px;">
+            <form method="POST" action="{{ url_for('employer_profile_edit') }}" class="card card-padded" style="max-width: 100%;">
+
                 <div class="form-field">
-                    <label class="form-label">Company / Contractor Name</label>
+                    <label class="form-label">{{ t('label_company_name') }}</label>
                     <input type="text" name="name" class="form-input" value="{{ employer.name }}" required>
                 </div>
 
                 <div class="form-field">
-                    <label class="form-label">Mobile Phone Number</label>
-                    <input type="tel" name="phone" class="form-input" value="{{ employer.phone or '' }}" placeholder="e.g. 9876543210">
+                    <label class="form-label">{{ t('label_phone') }}</label>
+                    <input type="tel" name="phone" class="form-input" value="{{ employer.phone or '' }}" placeholder="{{ t('placeholder_phone') }}">
                 </div>
 
                 <div class="form-field">
-                    <label class="form-label">Employer Type</label>
+                    <label class="form-label">{{ t('label_employer_type') }}</label>
                     <select name="employer_type" class="form-select" required>
                         <option value="Contractor" {% if employer.employer_type == 'Contractor' %}selected{% endif %}>Contractor / కాంట్రాక్టర్ / ठेकेदार</option>
                         <option value="Builder" {% if employer.employer_type == 'Builder' %}selected{% endif %}>Builder / బిల్డర్ / बिल्डर</option>
                         <option value="Business Owner" {% if employer.employer_type == 'Business Owner' %}selected{% endif %}>Business Owner / వ్యాపార యజమాని / व्यावसायिक स्वामी</option>
                         <option value="Household" {% if employer.employer_type == 'Household' %}selected{% endif %}>Household / గృహ అవసరం / घरेलू कार्य</option>
-                        <option value="Other" {% if employer.employer_type == 'Other' %}selected{% endif %}>Other / ఇతరులు / अन्य</option>
+                        <option value="Other" {% if employer.employer_type == 'Other' %}selected{% endif %}>Other / ప్రత్యామ్నాయం / अन्य</option>
                     </select>
                 </div>
 
                 <div class="form-field">
-                    <label class="form-label">Location (City / Town / Village)</label>
-                    <input type="text" name="location" class="form-input" value="{{ employer.location }}" required>
+                    <label class="form-label">{{ t('label_location') }}</label>
+                    <input type="text" name="location" class="form-input" value="{{ employer.location }}" required placeholder="{{ t('placeholder_location') }}">
                 </div>
 
                 <div style="display: flex; gap: var(--wc-space-3); margin-top: var(--wc-space-6);">
-                    <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
                         ✓ {{ t('save_changes') }}
                     </button>
-                    <a href="{{ url_for('employer_dashboard') }}" class="btn btn-outline btn-lg" style="flex: 1;">
-                        Cancel
+                    <a href="{{ url_for('employer_dashboard') }}" class="btn btn-outline btn-lg btn-block">
+                        {{ t('cancel') }}
                     </a>
                 </div>
+
             </form>
         </div>
+
     </main>
 
     {% include 'partials/ai_assistant.html' %}
+
+    <!-- ============ MOBILE BOTTOM NAV ============ -->
+    <nav class="mobile-nav" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-nav-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🔍</span>
+            <span>Jobs</span>
+        </a>
+        <a href="{{ url_for('post_job') }}" class="mobile-nav-item {% if request.endpoint == 'post_job' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">＋</span>
+            <span>Post Job</span>
+        </a>
+        <a href="{{ url_for('employer_dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'employer_dashboard' or request.endpoint == 'employer_profile_edit' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏢</span>
+            <span>Dashboard</span>
+        </a>
+    </nav>
 
 </body>
 </html>

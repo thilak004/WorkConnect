@@ -5,282 +5,187 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ t('nav_candidate_matcher') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        .site-nav {
-            background: #ffffff;
-            border-bottom: 1px solid #e3eaf2;
-            padding: 0 4%;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .site-brand {
-            font-size: 18px;
-            font-weight: 800;
-            color: #172b4d;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .site-brand span { color: #2864c9; }
-        .site-links {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .site-link {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #536780;
-            text-decoration: none;
-            transition: all 0.15s ease;
-        }
-        .site-link:hover, .site-link.active {
-            color: #2864c9;
-            background: #eef4fc;
-        }
-        .candidate-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 22px;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 14px;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .modal-box {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px 28px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
-            border: 1px solid #e2e8f0;
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-            margin: auto;
-            box-sizing: border-box;
-            animation: modalFadeIn 0.2s ease-out;
-        }
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.96) translateY(-8px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        .form-control {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            font-family: inherit;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-control:focus {
-            outline: none;
-            border-color: #2864c9;
-            box-shadow: 0 0 0 3px rgba(40, 100, 201, 0.12);
-        }
-        .modal-close-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
-            line-height: 1;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 4px 6px;
-            border-radius: 6px;
-            transition: color 0.15s, background-color 0.15s;
-        }
-        .modal-close-btn:hover {
-            color: #1e293b;
-            background-color: #f1f5f9;
-        }
-    </style>
 </head>
 
-<body class="employer-dashboard-page" style="background: var(--wc-background);">
+<body class="{% if user_role == 'worker' %}theme-worker{% elif user_role == 'employer' %}theme-employer{% else %}theme-public{% endif %} app-layout">
+    <a href="#main-content" class="wc-sr-only wc-sr-only-focusable">Skip to main content</a>
 
-    <!-- Universal Site Navigation -->
-    <header class="navbar">
-        <a class="brand" href="{{ url_for('home') }}">
-            <div class="brand-name">Work<span>Connect</span></div>
-        </a>
-        <nav class="nav-links">
-            <a class="nav-link" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
-            <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
-            <a class="nav-link" href="{{ url_for('employer_dashboard') }}">{{ t('nav_employer_dashboard') }}</a>
-            <a class="nav-link active" style="background: var(--wc-primary-light); color: var(--wc-primary); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius); font-weight: var(--wc-font-weight-bold);">{{ t('nav_candidate_matcher') }}</a>
-
-            <!-- Language Switcher -->
-            <div class="lang-selector">
-                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
-                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
-                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
-            </div>
-
-            <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
+    <!-- ============ EMPLOYER SIDEBAR NAVIGATION (Desktop) ============ -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">Work<span>Connect</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-item" href="{{ url_for('home') }}">
+                🏠 {{ t('nav_home') }}
+            </a>
+            <a class="sidebar-item active" href="{{ url_for('candidate_matches') }}">
+                🎯 {{ t('nav_ai_hiring') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('employer_dashboard') }}">
+                📋 {{ t('nav_manage_jobs') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('post_job') }}">
+                ＋ {{ t('nav_post_job') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('employer_dashboard') }}#applicants">
+                👥 {{ t('nav_applicants') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'employer_profile_edit' %}active{% endif %}" href="{{ url_for('employer_profile_edit') }}">
+    🏢 {{ t('nav_company_profile') }}
+</a>
+<a class="sidebar-item {% if request.endpoint == 'employer_profile_edit' %}active{% endif %}" href="{{ url_for('employer_profile_edit') }}">
+    ⚙️ {{ t('nav_settings') }}
+</a>
         </nav>
-    </header>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="sidebar-item" style="color: var(--wc-danger); border: var(--wc-border-width) solid var(--wc-danger);">
+                {{ t('nav_logout') }}
+            </a>
+        </div>
+    </aside>
 
-    <main class="dashboard-main wc-container" style="padding: var(--wc-space-10) 0 var(--wc-space-12);">
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="main-content" id="main-content">
+
+        <header class="wc-container" style="padding: var(--wc-space-6) var(--wc-space-4) var(--wc-space-4); margin-bottom: var(--wc-space-6); border-bottom: var(--wc-border-width) solid var(--wc-border);">
+            <div style="display: flex; align-items: center; gap: var(--wc-space-3); flex-wrap: wrap;">
+                <div class="lang-selector">
+                    <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
+                    <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
+                    <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
+                </div>
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('logout') }}" class="nav-cta">{{ t('nav_logout') }}</a>
+            </div>
+        </header>
 
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
+                <div class="wc-container" style="margin-bottom: var(--wc-space-4);">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
-        <header class="dashboard-heading" style="text-align: center; margin-bottom: var(--wc-space-6);">
-            <p class="dashboard-eyebrow" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs);">SMART JOB MATCHING (STEP 7)</p>
-            <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: var(--wc-space-2) 0 var(--wc-space-3);">Worker Compatibility Recommendations</h1>
-            <p style="font-size: var(--wc-text-base); color: var(--wc-text-muted); max-width: 650px; margin: 0 auto;">
-                Our intelligent scoring engine scans all registered workers and ranks the best candidates for your job requirements with detailed multilingual explanations.
-            </p>
-        </header>
+        <div class="wc-container">
+            <header class="dashboard-heading" style="text-align: center; margin-bottom: var(--wc-space-6);">
+                <p class="dashboard-eyebrow" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs);">
+                    Smart Job Matching
+                </p>
+                <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: var(--wc-space-2) 0 var(--wc-space-3);">
+                    {{ t('worker_recommendations') }}
+                </h1>
+                <p style="font-size: var(--wc-text-base); color: var(--wc-text-muted); max-width: 650px; margin: 0 auto;">
+                    {{ t('candidate_matches_desc') }}
+                </p>
+            </header>
 
-        <!-- Employer & Job Selector Panel -->
-        <section class="card card-padded" style="margin-bottom: var(--wc-space-6); box-shadow: var(--wc-shadow); border: var(--wc-border-width) solid var(--wc-border);">
-
-            <form method="GET" action="{{ url_for('candidate_matches') }}" style="display: flex; gap: var(--wc-space-3); align-items: flex-end; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 250px;">
-                    <label class="form-label">Select One of Your Posted Jobs:</label>
-                    <select name="job_id" onchange="this.form.submit()" class="form-select">
-                        {% for j in employer_jobs %}
-                            <option value="{{ j.id }}" {% if selected_job and selected_job.id == j.id %}selected{% endif %}>
-                                #{{ j.id }} - {{ j.title }} ({{ j.skill_required }} | 📍 {{ j.location }} | 💰 ₹{{ j.daily_wage }}/day)
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    🎯 Find Top Candidates
-                </button>
-            </form>
-
-            {% if selected_job %}
-                <div style="margin-top: var(--wc-space-4); padding: var(--wc-space-3) var(--wc-space-4); background: var(--wc-info-bg); border: var(--wc-border-width) solid #c7d2fe; border-radius: var(--wc-radius-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--wc-space-3);">
-                    <div>
-                        <strong style="color: var(--wc-primary-dark); font-size: var(--wc-text-sm);">Active Job: {{ selected_job.title }}</strong>
-                        <div style="font-size: var(--wc-text-xs); color: #4338ca; margin-top: var(--wc-space-1);">
-                            Required Skill: <strong>{{ selected_job.skill_required }}</strong> | Location: <strong>{{ selected_job.location }}</strong> | Wage: <strong>₹{{ selected_job.daily_wage }}/day</strong>
-                        </div>
+            <!-- Employer & Job Selector Panel -->
+            <section class="card card-padded" style="margin-bottom: var(--wc-space-6); box-shadow: var(--wc-shadow); border: var(--wc-border-width) solid var(--wc-border);">
+                <form method="GET" action="{{ url_for('candidate_matches') }}" style="display: flex; gap: var(--wc-space-3); align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <label class="form-label">{{ t('select_your_job') }}</label>
+                        <select name="job_id" onchange="this.form.submit()" class="form-select">
+                            {% for j in employer_jobs %}
+                                <option value="{{ j.id }}" {% if selected_job and selected_job.id == j.id %}selected{% endif %}>
+                                    #{{ j.id }} - {{ j.title }} ({{ j.skill_required }} | 📍 {{ j.location }} | 💰 ₹{{ j.daily_wage }}/day)
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <span style="background: var(--wc-primary); color: #ffffff; font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">
-                        {{ matched_workers|length }} Candidates Analyzed
-                    </span>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        🎯 {{ t('find_top_candidates') }}
+                    </button>
+                </form>
+
+                {% if selected_job %}
+                    <div style="margin-top: var(--wc-space-4); padding: var(--wc-space-3) var(--wc-space-4); background: var(--wc-info-bg); border: var(--wc-border-width) solid #c7d2fe; border-radius: var(--wc-radius-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--wc-space-3);">
+                        <div>
+                            <strong style="color: var(--wc-primary-dark); font-size: var(--wc-text-sm);">{{ t('active_job') }}: {{ selected_job.title }}</strong>
+                            <div style="font-size: var(--wc-text-xs); color: #4338ca; margin-top: var(--wc-space-1);">
+                                {{ t('required_skill') }}: <strong>{{ selected_job.skill_required }}</strong> | {{ t('job_location') }}: <strong>{{ selected_job.location }}</strong> | {{ t('daily_wage') }}: <strong>₹{{ selected_job.daily_wage }}/day</strong>
+                            </div>
+                        </div>
+                        <span style="background: var(--wc-primary); color: #ffffff; font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">
+                            {{ matched_workers|length }} {{ t('candidates_analyzed') }}
+                        </span>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- Matched Candidates List -->
+            {% if matched_workers %}
+                <div style="display: grid; gap: var(--wc-space-4);">
+                    {% for cand in matched_workers %}
+                        <div class="modern-applicant-card card card-padded" style="border-left: 4px solid {% if cand.match_percentage >= 80 %}var(--wc-success){% elif cand.match_percentage >= 60 %}var(--wc-primary){% else %}var(--wc-border-hover){% endif %};">
+                            <div style="flex: 1; min-width: 280px;">
+                                <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-1);">
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">
+                                        {{ cand.name }}
+                                    </h3>
+                                    <span style="background: {% if cand.match_percentage >= 75 %}var(--wc-success-bg); color: var(--wc-success); border: var(--wc-border-width) solid #a7f3d0;{% else %}var(--wc-info-bg); color: var(--wc-info); border: var(--wc-border-width) solid #bfdbfe;{% endif %} font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">
+                                        🎯 {{ cand.match_percentage }}% • {{ cand.match_level }}
+                                    </span>
+                                </div>
+
+                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--wc-space-3);">
+                                    <span>🛠️ <strong>{{ cand.skill }}</strong></span>
+                                    <span>📍 {{ cand.location }}</span>
+                                    <span>⏳ {{ cand.experience }} yrs exp</span>
+                                    <span>💰 Expected: ₹{{ cand.wage }}/day</span>
+                                    <span>⚡ {{ cand.availability }}</span>
+                                </div>
+
+                                {% if cand.match_reasons %}
+                                    <div style="margin-bottom: var(--wc-space-3);">
+                                        <strong style="font-size: var(--wc-text-xs); color: var(--wc-heading);">{{ t('why_this_candidate_matches') }}</strong>
+                                        {% for r in cand.match_reasons %}
+                                            <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-top: var(--wc-space-1);">• {{ r }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <button type="button" class="btn btn-primary btn-sm btn-block" data-schedule-candidate
+                                        data-job-id="{{ selected_job.id }}"
+                                        data-worker-id="{{ cand.id }}"
+                                        data-worker-name="{{ cand.name }}"
+                                        data-job-title="{{ selected_job.title }}">
+                                    📅 {{ t('schedule_meeting') }}
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="card card-padded" style="text-align: center; padding: var(--wc-space-8) var(--wc-space-4);">
+                    <div style="font-size: 40px; margin-bottom: var(--wc-space-3);">🎯</div>
+                    {% if selected_job %}
+                        <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-2);">{{ t('no_candidates_found') }}</h3>
+                        <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted);">{{ t('candidates_will_appear') }}</p>
+                    {% else %}
+                        <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-2);">{{ t('select_job_to_see_candidates') }}</h3>
+                        <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted);">{{ t('candidates_will_appear') }}</p>
+                    {% endif %}
                 </div>
             {% endif %}
-        </section>
-
-        <!-- Matched Candidates List -->
-        {% if matched_workers %}
-            <div style="display: grid; gap: var(--wc-space-4);">
-                {% for cand in matched_workers %}
-                    <div class="candidate-card" style="border-left: 4px solid {% if cand.match_percentage >= 80 %}#22c55e{% elif cand.match_percentage >= 60 %}var(--wc-primary){% else %}var(--wc-border-hover){% endif %};">
-                        <div style="flex: 1; min-width: 280px;">
-                            <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-1);">
-                                <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">
-                                    {{ cand.name }}
-                                </h3>
-                                <span style="background: {% if cand.match_percentage >= 75 %}var(--wc-success-bg); color: var(--wc-success); border: var(--wc-border-width) solid #a7f3d0;{% else %}var(--wc-info-bg); color: var(--wc-info); border: var(--wc-border-width) solid #bfdbfe;{% endif %} font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">
-                                    🎯 {{ cand.match_percentage }}% • {{ cand.match_level }}
-                                </span>
-                            </div>
-
-                            <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--wc-space-3);">
-                                <span>🛠️ <strong>{{ cand.skill }}</strong></span>
-                                <span>📍 {{ cand.location }}</span>
-                                <span>⏳ {{ cand.experience }} yrs exp</span>
-                                <span>💰 Expected: ₹{{ cand.wage }}/day</span>
-                                <span>⚡ {{ cand.availability }}</span>
-                            </div>
-
-                            <!-- Explanations in Active Language (Step 7) -->
-                            {% if cand.match_reasons %}
-                                <div class="match-reasons-list">
-                                    <strong>Why this candidate matches:</strong>
-                                    {% for r in cand.match_reasons %}
-                                        <div style="margin-top: var(--wc-space-1);">{{ r }}</div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Action Button to Schedule Meeting -->
-                        <div>
-                            <button type="button" class="btn btn-primary btn-sm" data-schedule-candidate
-                                    data-job-id="{{ selected_job.id }}"
-                                    data-worker-id="{{ cand.id }}"
-                                    data-worker-name="{{ cand.name }}"
-                                    data-job-title="{{ selected_job.title }}">
-                                📅 Schedule Meeting
-                            </button>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="card card-padded" style="text-align: center; padding: var(--wc-space-8) var(--wc-space-4);">
-                <div style="font-size: 40px; margin-bottom: var(--wc-space-3);">🎯</div>
-                {% if selected_job %}
-                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-2);">No candidates found for this profession.</h3>
-                    <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted);">Workers with the required profession ({{ selected_job.skill_required }}) will appear here ranked by compatibility as they register.</p>
-                {% else %}
-                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-2);">No candidates found for this profession.</h3>
-                    <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted);">Workers will appear here ranked by compatibility as they register.</p>
-                {% endif %}
-            </div>
-        {% endif %}
+        </div>
 
     </main>
+
+    {% include 'partials/ai_assistant.html' %}
 
     <!-- Meeting Modal -->
     <div class="modal-overlay" id="interview-modal" style="display: none;">
         <div class="modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--wc-space-4); border-bottom: var(--wc-border-width) solid var(--wc-border); padding-bottom: var(--wc-space-2);">
                 <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;" id="cand-modal-title">
-                    📅 Schedule Meeting
+                    📅 {{ t('schedule_meeting') }}
                 </h3>
                 <button type="button" class="btn-close-dropdown" onclick="closeInterviewModal()" title="Close">✕</button>
             </div>
@@ -292,60 +197,67 @@
                 <input type="hidden" name="location_or_link" id="cand-location-or-link">
                 <input type="hidden" name="return_to" value="candidate_matches">
 
-                <!-- 1. Meeting Date -->
                 <div style="margin-bottom: var(--wc-space-3);">
-                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Date</label>
+                    <label class="form-label">{{ t('meeting_date') }}</label>
                     <input type="date" name="interview_date" id="cand-date" class="form-input" required>
                 </div>
 
-                <!-- 2. Meeting Time -->
                 <div style="margin-bottom: var(--wc-space-3);">
-                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Time</label>
+                    <label class="form-label">{{ t('meeting_time') }}</label>
                     <input type="time" name="interview_time" id="cand-time" class="form-input" required>
                 </div>
 
-                <!-- 3. Meeting Venue (Optional) -->
                 <div style="margin-bottom: var(--wc-space-3);">
-                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Venue</label>
-                    <input type="text" name="venue" id="cand-venue" class="form-input" placeholder="e.g., Site Office, Narasapur">
+                    <label class="form-label">{{ t('meeting_venue') }}</label>
+                    <input type="text" name="venue" id="cand-venue" class="form-input" placeholder="{{ t('meeting_venue_placeholder') }}">
                 </div>
 
-                <!-- 4. Meeting Phone Number (Optional) -->
                 <div style="margin-bottom: var(--wc-space-3);">
-                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Phone Number</label>
-                    <input type="tel" name="phone" id="cand-phone" class="form-input" placeholder="Enter phone number for phone meeting">
+                    <label class="form-label">{{ t('meeting_phone') }}</label>
+                    <input type="tel" name="phone" id="cand-phone" class="form-input" placeholder="{{ t('meeting_phone_placeholder') }}">
                 </div>
 
-                <!-- 5. Notes -->
                 <div style="margin-bottom: var(--wc-space-4);">
-                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Notes</label>
-                    <textarea name="notes" id="cand-notes" rows="2" class="form-input" placeholder="Instructions or message for candidate..."></textarea>
+                    <label class="form-label">{{ t('meeting_notes') }}</label>
+                    <textarea name="notes" id="cand-notes" rows="2" class="form-input" placeholder="{{ t('meeting_notes_placeholder') }}"></textarea>
                 </div>
 
-                <!-- 6 & 7. Action Buttons -->
                 <div style="display: flex; gap: var(--wc-space-2); margin-top: var(--wc-space-4);">
-                    <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
-                        Send Meeting Request
-                    </button>
-                    <button type="button" onclick="closeInterviewModal()" class="btn btn-outline btn-sm">
-                        Cancel
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">{{ t('send_meeting_request') }}</button>
+                    <button type="button" onclick="closeInterviewModal()" class="btn btn-outline btn-sm">{{ t('btn_cancel') }}</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Mobile Bottom App Bar -->
+    <nav class="mobile-nav" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-nav-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🔍</span>
+            <span>Jobs</span>
+        </a>
+        <a href="{{ url_for('post_job') }}" class="mobile-nav-item {% if request.endpoint == 'post_job' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">＋</span>
+            <span>Post Job</span>
+        </a>
+        <a href="{{ url_for('employer_dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏢</span>
+            <span>Dashboard</span>
+        </a>
+    </nav>
+
     <script>
         function scheduleCandidate(jobId, workerId, workerName, jobTitle) {
             document.getElementById('cand-job-id').value = jobId;
             document.getElementById('cand-worker-id').value = workerId;
-            document.getElementById('cand-modal-title').innerText = `📅 Schedule Meeting with ${workerName}`;
-            
-            // Reset fields
+            document.getElementById('cand-modal-title').innerText = `📅 {{ t('schedule_meeting_with') }} ${workerName}`;
             document.getElementById('cand-venue').value = '';
             document.getElementById('cand-phone').value = '';
             document.getElementById('cand-notes').value = '';
-            
             const modal = document.getElementById('interview-modal');
             modal.style.display = 'flex';
         }
@@ -376,60 +288,90 @@
             document.getElementById('cand-location-or-link').value = parts.length > 0 ? parts.join(' | ') : 'To be coordinated';
         }
 
-        // Close when clicking outside modal box on overlay
         window.addEventListener('click', function(event) {
             const modal = document.getElementById('interview-modal');
-            if (event.target === modal) {
-                closeInterviewModal();
-            }
+            if (event.target === modal) closeInterviewModal();
         });
 
-        // Close on Escape key
         window.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeInterviewModal();
-            }
+            if (event.key === 'Escape') closeInterviewModal();
         });
+
+        function playNotificationSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 3.0);
+            } catch(e) {}
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            const isDark = html.classList.contains('theme-dark');
+
+            if (isDark) {
+                html.classList.remove('theme-dark');
+                html.classList.add('theme-light');
+                btn.textContent = '🌙';
+                localStorage.setItem('wc-theme', 'light');
+            } else {
+                html.classList.remove('theme-light');
+                html.classList.add('theme-dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('wc-theme', 'dark');
+            }
+        }
+
+        (function() {
+            const savedTheme = localStorage.getItem('wc-theme');
+            const btn = document.getElementById('theme-toggle');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+                document.documentElement.classList.remove('theme-light');
+                if (btn) btn.textContent = '☀️';
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                document.documentElement.classList.remove('theme-dark');
+                if (btn) btn.textContent = '🌙';
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('theme-dark');
+                    if (btn) btn.textContent = '☀️';
+                } else {
+                    if (btn) btn.textContent = '🌙';
+                }
+            }
+        })();
+
+        let lastUnreadCount = {{ unread_notifications_count | default(0) }};
+        setInterval(() => {
+            fetch('/api/notifications')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const newCount = data.unread_count;
+                        if (newCount > lastUnreadCount) {
+                            playNotificationSound();
+                        }
+                        lastUnreadCount = newCount;
+                    }
+                })
+                .catch(() => {});
+        }, 20000);
     </script>
 
-    <!-- Mobile Bottom App Bar -->
-    <nav class="mobile-bottom-bar" aria-label="Mobile Navigation">
-        <a href="{{ url_for('home') }}" class="mobile-bottom-item {% if request.endpoint == 'home' %}active{% endif %}">
-            <span class="icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="{{ url_for('browse_jobs') }}" class="mobile-bottom-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
-            <span class="icon">🔍</span>
-            <span>Explore</span>
-        </a>
-        {% if user_role == 'employer' %}
-        <a href="{{ url_for('post_job') }}" class="mobile-bottom-item {% if request.endpoint == 'post_job' %}active{% endif %}">
-            <span class="icon">＋</span>
-            <span>Post Job</span>
-        </a>
-        <a href="{{ url_for('employer_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
-            <span class="icon">🏢</span>
-            <span>Dashboard</span>
-        </a>
-        {% elif user_role == 'worker' %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice AI</span>
-        </a>
-        <a href="{{ url_for('worker_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Dashboard</span>
-        </a>
-        {% else %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice Reg</span>
-        </a>
-        <a href="{{ url_for('login') }}" class="mobile-bottom-item {% if request.endpoint == 'login' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Sign In</span>
-        </a>
-        {% endif %}
-    </nav>
 </body>
 </html>

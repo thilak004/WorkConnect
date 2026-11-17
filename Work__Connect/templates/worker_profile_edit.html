@@ -6,45 +6,95 @@
     <title>{{ t('edit_profile') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body style="background: var(--wc-background);">
 
-    <!-- Navigation Header -->
-    <header class="navbar">
-        <a class="brand" href="{{ url_for('home') }}">
-            <div class="brand-name">Work<span>Connect</span></div>
-        </a>
-        <div style="display: flex; align-items: center; gap: var(--wc-space-3);">
-            <div class="lang-selector">
-                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
-                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
-                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
-            </div>
-            <a href="{{ url_for('worker_dashboard') }}" class="nav-link">← {{ t('nav_worker_dashboard') }}</a>
+<body class="{% if user_role == 'worker' %}theme-worker{% elif user_role == 'employer' %}theme-employer{% else %}theme-public{% endif %} app-layout">
+    <a href="#main-content" class="wc-sr-only wc-sr-only-focusable">Skip to main content</a>
+
+    <!-- ============ WORKER SIDEBAR NAVIGATION (Desktop) ============ -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">Work<span>Connect</span></div>
         </div>
-    </header>
+        <nav class="sidebar-nav">
+            <a class="sidebar-item" href="{{ url_for('home') }}">
+                🏠 {{ t('nav_home') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'worker_profile_edit' %}active{% endif %}" href="{{ url_for('worker_profile_edit') }}">
+    ⚙️ {{ t('nav_settings') }}
+</a>
+                🔍 {{ t('nav_browse_jobs') }}
+            </a>
+            <a class="sidebar-item active" href="{{ url_for('worker_dashboard') }}">
+                👤 {{ t('nav_profile') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('worker_dashboard') }}#apps">
+                📋 {{ t('my_applications') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('worker_dashboard') }}#saved">
+                ⭐ {{ t('nav_saved_jobs') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('worker_dashboard') }}#notifs">
+                🔔 {{ t('nav_notifications') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('worker_voice_register') }}">
+                🎤 {{ t('hero_voice_reg') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'worker_profile_edit' %}active{% endif %}" href="{{ url_for('worker_profile_edit') }}">
+    ⚙️ {{ t('nav_settings') }}
+</a>
+<a class="sidebar-item" href="{{ url_for('browse_jobs') }}">
+    🤖 {{ t('ai_title') }}
+</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="sidebar-item" style="color: var(--wc-danger); border: var(--wc-border-width) solid var(--wc-danger);">
+                {{ t('nav_logout') }}
+            </a>
+        </div>
+    </aside>
 
-    <main class="wc-container" style="max-width: 580px; padding: var(--wc-space-10) 0;">
-        <div class="card card-padded">
-            <h1 style="font-size: 22px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0;">
-                {{ t('edit_profile') }}
-            </h1>
-            <p style="font-size: 13px; color: #64748b; margin: 0 0 22px 0;">
-                Keep your details up to date to receive higher match scores and better wage opportunities.
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="main-content" id="main-content">
+
+        <header class="wc-container" style="padding: var(--wc-space-6) var(--wc-space-4) var(--wc-space-4); margin-bottom: var(--wc-space-6); border-bottom: var(--wc-border-width) solid var(--wc-border);">
+            <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-3);">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="window.location.href='{{ url_for('worker_dashboard') }}'" style="padding: var(--wc-space-1) var(--wc-space-3); font-size: var(--wc-text-sm);">
+                    ← {{ t('nav_worker_dashboard') }}
+                </button>
+            </div>
+            <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('edit_profile') }}</h1>
+            <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0; margin-bottom: var(--wc-space-4);">
+                {{ t('profile_edit_desc') }}
             </p>
+        </header>
 
-            <form method="POST" action="{{ url_for('worker_profile_edit') }}">
-                <div class="form-group">
-                    <label>Full Name</label>
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="wc-container" style="margin-bottom: var(--wc-space-4);">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="wc-container" style="max-width: 640px;">
+            <form method="POST" action="{{ url_for('worker_profile_edit') }}" class="card card-padded" style="max-width: 100%;">
+
+                <div class="form-field">
+                    <label class="form-label">{{ t('label_full_name') }}</label>
                     <input type="text" name="name" class="form-input" value="{{ worker.name }}" required>
                 </div>
 
                 <div class="form-field">
-                    <label class="form-label">Mobile Phone Number</label>
-                    <input type="tel" name="phone" class="form-input" value="{{ worker.phone or '' }}" placeholder="e.g. 9876543210">
+                    <label class="form-label">{{ t('label_phone') }}</label>
+                    <input type="tel" name="phone" class="form-input" value="{{ worker.phone or '' }}" placeholder="{{ t('placeholder_phone') }}">
+                    <p class="form-hint">{{ t('hint_phone') }}</p>
                 </div>
 
                 <div class="form-field">
-                    <label class="form-label">Primary Skill / Trade</label>
+                    <label class="form-label">{{ t('label_skill') }}</label>
                     <select name="skill" class="form-select" required>
                         <option value="Electrician" {% if worker.skill == 'Electrician' %}selected{% endif %}>Electrician / ఎలక్ట్రీషియన్ / इलेक्ट्रीशियन</option>
                         <option value="Mason" {% if worker.skill == 'Mason' %}selected{% endif %}>Mason / మేస్త్రీ / राजमिस्त्री</option>
@@ -57,45 +107,63 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label>Location (City / Town / Village)</label>
-                    <input type="text" name="location" class="form-control" value="{{ worker.location }}" required>
+                <div class="form-field">
+                    <label class="form-label">{{ t('label_location') }}</label>
+                    <input type="text" name="location" class="form-input" value="{{ worker.location }}" required placeholder="{{ t('placeholder_location') }}">
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                    <div class="form-group">
-                        <label>Years of Experience</label>
-                        <input type="number" name="experience" min="0" max="50" class="form-control" value="{{ worker.experience }}" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--wc-space-4);">
+                    <div class="form-field">
+                        <label class="form-label">{{ t('label_experience') }}</label>
+                        <input type="number" name="experience" min="0" max="50" class="form-input" value="{{ worker.experience }}" required>
                     </div>
 
-                    <div class="form-group">
-                        <label>Expected Daily Wage (₹)</label>
-                        <input type="number" name="wage" min="0" class="form-control" value="{{ worker.wage }}" required>
+                    <div class="form-field">
+                        <label class="form-label">{{ t('label_wage') }}</label>
+                        <input type="number" name="wage" min="0" class="form-input" value="{{ worker.wage }}" required>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Availability Status</label>
-                    <select name="availability" class="form-control">
+                <div class="form-field">
+                    <label class="form-label">{{ t('label_availability') }}</label>
+                    <select name="availability" class="form-select">
                         <option value="Immediate" {% if worker.availability == 'Immediate' %}selected{% endif %}>Immediate (చేరడానికి సిద్ధం / तुरंत उपलब्ध)</option>
                         <option value="Within 1 week" {% if worker.availability == 'Within 1 week' %}selected{% endif %}>Within 1 week (ఒక వారంలోపు / 1 सप्ताह के भीतर)</option>
                         <option value="Part-time" {% if worker.availability == 'Part-time' %}selected{% endif %}>Part-time (పార్ట్‌టైమ్ / अंशकालिक)</option>
                     </select>
                 </div>
 
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="submit" class="btn-apply-big" style="flex: 1;">
+                <div style="display: flex; gap: var(--wc-space-3); margin-top: var(--wc-space-6);">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
                         ✓ {{ t('save_changes') }}
                     </button>
-                    <a href="{{ url_for('worker_dashboard') }}" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; font-weight: 700; color: #64748b; text-decoration: none;">
-                        Cancel
+                    <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-lg btn-block">
+                        {{ t('cancel') }}
                     </a>
                 </div>
+
             </form>
         </div>
+
     </main>
 
     {% include 'partials/ai_assistant.html' %}
+
+    <!-- ============ MOBILE BOTTOM NAV ============ -->
+    <nav class="mobile-nav" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-nav-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🔍</span>
+            <span>Jobs</span>
+        </a>
+        <a href="{{ url_for('worker_dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">👤</span>
+            <span>Dashboard</span>
+        </a>
+    </nav>
 
 </body>
 </html>

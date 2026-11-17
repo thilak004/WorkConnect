@@ -1085,9 +1085,20 @@ def employer_dashboard():
 @employer_required
 def employer_applications():
     """
-    Preserve legacy employer applications route.
-    If authenticated, enforces authorization to logged-in employer only.
+    Employer Applications Management.
+    Lets a logged-in employer view all applications across their job postings,
+    filter by job/status, and update application statuses.
     """
+    employer = None
+    if session.get("user_id"):
+        employer = get_employer_by_id(session["user_id"])
+    if not employer and session.get("email"):
+        employer = get_employer_by_email(session["email"])
+
+    if not employer:
+        flash("Employer not found.", "danger")
+        return redirect(url_for("login", role="employer"))
+
     # Handle status update from form if POST
     if request.method == "POST":
         action = request.form.get("action", "view").strip()
@@ -1104,7 +1115,54 @@ def employer_applications():
                 flash(msg, "success")
             else:
                 flash(msg, "danger")
-    return redirect(url_for("employer_dashboard"))
+            return redirect(url_for("employer_applications"))
+
+    employer_email = employer["email"]
+    selected_status = request.args.get("status_filter", "All").strip()
+    selected_job_id = request.args.get("job_id", "").strip()
+    sort_by = request.args.get("sort_by", "match").strip()
+
+    try:
+        job_filter_int = int(selected_job_id) if selected_job_id.isdigit() else None
+        applications = get_applications_by_employer(
+            employer_email=employer_email,
+            job_id=job_filter_int,
+            status_filter=selected_status if selected_status != "All" else None,
+            sort_by=sort_by
+        )
+
+        with get_db_connection() as connection:
+            employer_jobs = [dict(r) for r in connection.execute(
+                """
+                SELECT id, title, skill_required, description, location, workers_needed,
+                       positions_remaining, daily_wage, status, created_at,
+                       (SELECT COUNT(*) FROM applications WHERE job_id = jobs.id) AS total_applicants
+                FROM jobs
+                WHERE employer_id = %s
+                ORDER BY id DESC
+                """,
+                (employer["id"],)
+            ).fetchall()]
+
+        for ej in employer_jobs:
+            t_meta = get_trade_for_skill(ej.get("skill_required", ""))
+            ej["trade_image"] = t_meta["image"]
+            ej["trade_icon"] = t_meta["icon"]
+            ej["trade_color"] = t_meta["color"]
+    except Exception as e:
+        flash(f"Error loading applications: {e}", "danger")
+        applications, employer_jobs = [], []
+
+    return render_template(
+        "employer_applications.html",
+        employer=employer,
+        employer_email=employer_email,
+        employer_jobs=employer_jobs,
+        applications=applications,
+        selected_status=selected_status,
+        selected_job_id=selected_job_id,
+        sort_by=sort_by
+    )
 
 
 @app.route("/employer/candidate-matches", methods=["GET", "POST"])

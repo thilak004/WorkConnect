@@ -13,73 +13,75 @@
           href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
-<body>
+<body class="theme-public">
 
     <!-- Unified site navigation (Phase 1 design system) -->
     <header class="navbar">
-        <a class="brand" href="{{ url_for('home') }}">
-            <div class="brand-name">Work<span>Connect</span></div>
-        </a>
+        <div class="wc-container">
+            <a class="brand" href="{{ url_for('home') }}">
+                <div class="brand-name">Work<span>Connect</span></div>
+            </a>
 
-        <nav class="nav-links">
-            <a class="nav-link active" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
+            <nav class="nav-links">
+                <a class="nav-link active" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
 
-            {% if user_role == 'employer' %}
-                <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
-                <a class="nav-link" href="{{ url_for('employer_dashboard') }}">{{ t('nav_employer_dashboard') }}</a>
-                <a class="nav-link" href="{{ url_for('candidate_matches') }}">{{ t('nav_candidate_matcher') }}</a>
-            {% elif user_role == 'worker' %}
-                <a class="nav-link" href="{{ url_for('browse_jobs') }}">{{ t('nav_browse_jobs') }}</a>
-                <a class="nav-link" href="{{ url_for('worker_dashboard') }}">{{ t('nav_worker_dashboard') }}</a>
-            {% else %}
-                <a class="nav-link" href="{{ url_for('browse_jobs') }}">{{ t('nav_browse_jobs') }}</a>
-                <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
-            {% endif %}
+                {% if user_role == 'employer' %}
+                    <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
+                    <a class="nav-link" href="{{ url_for('employer_dashboard') }}">{{ t('nav_employer_dashboard') }}</a>
+                    <a class="nav-link" href="{{ url_for('candidate_matches') }}">{{ t('nav_candidate_matcher') }}</a>
+                {% elif user_role == 'worker' %}
+                    <a class="nav-link" href="{{ url_for('browse_jobs') }}">{{ t('nav_browse_jobs') }}</a>
+                    <a class="nav-link" href="{{ url_for('worker_dashboard') }}">{{ t('nav_worker_dashboard') }}</a>
+                {% else %}
+                    <a class="nav-link" href="{{ url_for('browse_jobs') }}">{{ t('nav_browse_jobs') }}</a>
+                {% endif %}
 
-            <!-- Language Selector (Step 3) -->
-            <div class="lang-selector">
-                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
-                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
-                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
-            </div>
+                <!-- Language Selector (Step 3) -->
+                <div class="lang-selector">
+                    <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
+                    <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
+                    <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
+                </div>
 
-            <!-- Auth Controls (Step 1) -->
-            {% if current_user %}
-                <div class="notif-bell-container" id="home-notif-wrapper">
-                    <button type="button" id="home-notif-bell" class="notif-bell-badge" onclick="toggleHomeNotifDropdown(event)" title="Notifications" aria-label="Notifications">
-                        🔔
-                        <span id="home-notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
-                    </button>
+                <!-- Auth Controls (Step 1) -->
+                {% if current_user %}
+                    <div class="notif-bell-container" id="home-notif-wrapper">
+                        <button type="button" id="home-notif-bell" class="notif-bell-badge" onclick="toggleHomeNotifDropdown(event)" title="Notifications" aria-label="Notifications">
+                            🔔
+                            <span id="home-notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
+                        </button>
 
-                    <div id="home-notif-panel" class="notif-dropdown-panel" style="display: none;">
-                        <div class="notif-panel-header">
-                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
-                                <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
-                                <span id="home-panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
-                                    <span id="home-panel-unread-num">{{ unread_notifications_count }}</span> unread
-                                </span>
+                        <div id="home-notif-panel" class="notif-dropdown-panel" style="display: none;">
+                            <div class="notif-panel-header">
+                                <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                                    <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
+                                    <span id="home-panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
+                                        <span id="home-panel-unread-num">{{ unread_notifications_count }}</span> unread
+                                    </span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                                    <button type="button" id="home-btn-mark-all" onclick="markAllHomeNotificationsRead(event)" class="btn-mark-all-text">✓ Mark all read</button>
+                                    <button type="button" onclick="closeHomeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
+                                </div>
                             </div>
-                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
-                                <button type="button" id="home-btn-mark-all" onclick="markAllHomeNotificationsRead(event)" class="btn-mark-all-text">✓ Mark all read</button>
-                                <button type="button" onclick="closeHomeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
+                            <div id="home-notif-items-list" class="notif-items-scroll">
+                                <div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">Loading notifications...</div>
                             </div>
-                        </div>
-                        <div id="home-notif-items-list" class="notif-items-scroll">
-                            <div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">Loading notifications...</div>
-                        </div>
-                        <div class="notif-panel-footer">
-                            <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}#notifs" style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">View All Notifications →</a>
+                            <div class="notif-panel-footer">
+                                <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}#notifs" style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">View All Notifications →</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
-                <a href="{{ url_for('logout') }}" class="nav-cta btn-outline">{{ t('nav_logout') }}</a>
-                <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" class="nav-cta">👤 {{ current_user.name }}</a>
-            {% else %}
-                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
-                <a href="{{ url_for('login') }}" class="nav-cta">{{ t('nav_login') }}</a>
-            {% endif %}
-        </nav>
+                    <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+                    <a href="{{ url_for('logout') }}" class="nav-cta btn-outline">{{ t('nav_logout') }}</a>
+                    <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" class="nav-cta">👤 {{ current_user.name }}</a>
+                {% else %}
+                    <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+                    <a href="{{ url_for('login') }}" class="nav-cta">{{ t('nav_login') }}</a>
+                    <a href="{{ url_for('worker_register') }}" class="nav-cta btn-primary">{{ t('register_worker') }}</a>
+                {% endif %}
+            </nav>
+        </div>
     </header>
 
     <main>
@@ -99,322 +101,96 @@
             </div>
         {% endif %}
 
-        <!-- Voice Registration Callout (Step 4) -->
-        {% if user_role != 'employer' %}
-        <div class="card card-padded" style="max-width: 1050px; margin: 0 auto var(--wc-space-6); background: var(--wc-success-bg); border-color: #a7f3d0;">
-            <div style="display: flex; align-items: center; gap: var(--wc-space-4);">
-                <div style="font-size: var(--wc-text-4xl);">🎙️</div>
-                <div>
-                    <h3 style="margin: 0; font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-success);">
-                        {{ t('voice_title') }}
-                    </h3>
-                    <p style="margin: var(--wc-space-1) 0 0; font-size: var(--wc-text-sm); color: #047857;">
-                        {{ t('voice_subtitle') }}
-                    </p>
-                </div>
-            </div>
-            <a href="{{ url_for('worker_voice_register') }}" class="btn btn-primary btn-sm">
-                🎤 {{ t('voice_start') }} <span>→</span>
-            </a>
-        </div>
-        {% endif %}
-
-        {% if user_role != 'worker' %}
-        <div class="card card-padded" style="max-width: 1050px; margin: 0 auto var(--wc-space-6); background: var(--wc-info-bg); border-color: #93c5fd;">
-            <div style="display: flex; align-items: center; gap: var(--wc-space-4);">
-                <div style="font-size: var(--wc-text-4xl);">🏢</div>
-                <div>
-                    <h3 style="margin: 0; font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-info);">
-                        {{ t('employer_voice_title') }}
-                    </h3>
-                    <p style="margin: var(--wc-space-1) 0 0; font-size: var(--wc-text-sm); color: #1d4ed8;">
-                        {{ t('employer_voice_subtitle') }}
-                    </p>
-                </div>
-            </div>
-            <a href="{{ url_for('employer_voice_register') }}" class="btn btn-primary btn-sm">
-                🎙️ {{ t('employer_voice_start') }} <span>→</span>
-            </a>
-        </div>
-        {% endif %}
-
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-
-                <div class="eyebrow">
-                    <span class="status-dot"></span>
-                    {{ t('tagline') }}
-                </div>
-
-                <h1>
-                    {{ t('hero_title') }}
-                </h1>
-
-                <p class="hero-description">
-                    {{ t('hero_subtitle') }}
-                </p>
-
-                <div class="hero-actions">
-                    {% if user_role == 'employer' %}
-                        <a class="btn btn-primary btn-lg"
-                           href="{{ url_for('post_job') }}">
-                            {{ t('hero_post_job') }} <span>→</span>
-                        </a>
-
-                        <a class="btn btn-secondary btn-lg"
-                           href="{{ url_for('employer_dashboard') }}">
-                            {{ t('nav_employer_dashboard') }}
-                        </a>
-                    {% elif user_role == 'worker' %}
-                        <a class="btn btn-primary btn-lg"
-                           href="{{ url_for('browse_jobs') }}">
-                            {{ t('hero_explore_jobs') }} <span>→</span>
-                        </a>
-
-                        <a class="btn btn-secondary btn-lg"
-                           href="{{ url_for('worker_dashboard') }}">
-                            {{ t('nav_worker_dashboard') }}
-                        </a>
-                    {% else %}
-                        <a class="btn btn-primary btn-lg"
-                           href="{{ url_for('browse_jobs') }}">
-                            {{ t('hero_explore_jobs') }} <span>→</span>
-                        </a>
-
-                        <a class="btn btn-secondary btn-lg"
-                           href="{{ url_for('post_job') }}">
-                            {{ t('hero_post_job') }}
-                        </a>
-                    {% endif %}
-                </div>
-
-                <div class="hero-note">
-                    <span class="check-mark">✓</span>
-                    {{ t('hero_note') }}
-                </div>
-
-            </div>
-
-            <!-- Hero Panel -->
-            <div class="hero-panel">
-
-                <div class="panel-top">
-                    <div>
-                        <span class="panel-label">{{ t('your_next_step') }}</span>
-                        <h2>{{ t('opportunities_await') }}</h2>
-                    </div>
-                    <span class="panel-symbol">↗</span>
-                </div>
-
-                <div class="connection-visual" aria-hidden="true">
-                    <div class="person-card">
-                        <div class="person-avatar worker-avatar">W</div>
-                        <span class="person-line line-long"></span>
-                        <span class="person-line line-short"></span>
-                        <span class="person-tag">{{ t('role_worker') }}</span>
-                    </div>
-
-                    <div class="connection-center">
-                        <span>↔</span>
-                    </div>
-
-                    <div class="person-card">
-                        <div class="person-avatar employer-avatar">E</div>
-                        <span class="person-line line-long"></span>
-                        <span class="person-line line-short"></span>
-                        <span class="person-tag">{{ t('role_employer') }}</span>
-                    </div>
-                </div>
-
-                <div class="panel-footer">
-                    <div class="mini-avatars" aria-hidden="true">
-                        <span>W</span>
-                        <span>E</span>
-                        <span>✓</span>
-                    </div>
-
-                    <div class="panel-footer-text">
-                        <strong>{{ t('one_community') }}</strong>
-                        <p>{{ t('community_sub') }}</p>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- VISUAL TRADE PICTURES SHOWCASE (Step 5) -->
-        {% if user_role != 'employer' %}
-        <section class="wc-section" style="max-width: 1050px; margin: 0 auto; padding: 0 var(--wc-space-4);">
-            <div style="text-align: center; margin-bottom: var(--wc-space-6);">
-                <span class="section-label" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); text-transform: uppercase;">
-                    {{ t('visual_discovery') }}
-                </span>
-                <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: var(--wc-space-1) 0;">
-                    {{ t('filter_by_trade') }}
-                </h2>
-                <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0;">
-                    {{ t('visual_discovery_sub') }}
-                </p>
-            </div>
-
-            <div class="wc-grid-4" style="gap: var(--wc-space-3);">
-                {% for trade in available_trades %}
-                    <a href="{{ url_for('trade_sector', trade_key=trade.key) }}" class="trade-card">
-                        <img src="{{ url_for('static', filename=trade.image) }}" alt="{{ trade.name }}" class="trade-card-img" style="background: {{ trade.bg_tint }};">
-                        <span class="trade-card-title">{{ trade.name }}</span>
-                    </a>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
-
-        <!-- Services Section -->
-        <section class="services wc-section" id="services">
+        <!-- HERO SECTION -->
+        <section class="hero-section" style="padding: var(--wc-space-10) var(--wc-space-4); text-align: center;">
             <div class="wc-container">
-                <div class="section-heading">
-                    <span class="section-label">GET STARTED</span>
-                    <h2>{{ t('hero_help_title') }}</h2>
-                    {% if user_role == 'worker' %}
-                        <p>Welcome back, {{ current_user.name }}! {{ t('home_welcome_worker') }}</p>
-                    {% elif user_role == 'employer' %}
-                        <p>Welcome back, {{ current_user.name }}! {{ t('home_welcome_employer') }}</p>
-                    {% else %}
-                        <p>{{ t('home_welcome_guest') }}</p>
-                    {% endif %}
-                </div>
+                <div style="max-width: 700px; margin: 0 auto;">
+                    <div style="display: inline-flex; align-items: center; gap: var(--wc-space-2); background: var(--wc-accent-bg); color: var(--wc-accent); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full); font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); margin-bottom: var(--wc-space-3); text-transform: uppercase; letter-spacing: 0.05em;">
+                        {{ t('tagline') }}
+                    </div>
+                    <h1 style="font-size: var(--wc-text-4xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); line-height: var(--wc-line-tight); margin-bottom: var(--wc-space-4);">{{ t('hero_title') }}</h1>
+                    <p style="font-size: var(--wc-text-lg); color: var(--wc-text-muted); line-height: var(--wc-line-relaxed); margin-bottom: var(--wc-space-6); max-width: 560px; margin-left: auto; margin-right: auto;">{{ t('hero_subtitle') }}</p>
 
-                <div class="wc-grid-3">
+                    <div style="display: flex; flex-direction: column; gap: var(--wc-space-3); margin-bottom: var(--wc-space-8);">
+                        <div style="display: flex; gap: var(--wc-space-2); box-shadow: var(--wc-shadow-lg); border-radius: var(--wc-radius-xl); overflow: hidden; background: #ffffff;">
+                            <input type="text" id="hero-search-q" class="form-input" placeholder="{{ t('search_jobs_placeholder') }}" style="flex: 1; border: none; box-shadow: none; min-height: 56px;">
+                            <button class="btn btn-primary btn-lg" onclick="window.location.href='/jobs?q='+encodeURIComponent(document.getElementById('hero-search-q').value)">
+                                {{ t('search') }} <span>→</span>
+                            </button>
+                        </div>
+                        <div style="display: flex; justify-content: center; gap: var(--wc-space-2); flex-wrap: wrap;">
+                            <a href="{{ url_for('worker_voice_register') }}" class="btn btn-outline btn-sm">🎤 {{ t('hero_voice_reg') }}</a>
+                            <a href="{{ url_for('worker_register') }}" class="btn btn-primary btn-sm">👷 {{ t('register_worker') }}</a>
+                            <a href="{{ url_for('employer_register') }}" class="btn btn-primary btn-sm">🏢 {{ t('register_employer') }}</a>
+                        </div>
+                    </div>
 
-                    {% if user_role == 'worker' %}
-                    <!-- Worker-Only Feature Cards -->
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-purple">⌕</div>
-                        <h3>{{ t('nav_browse_jobs') }}</h3>
-                        <p>Explore jobs with pictures, audio playback, and wage details.</p>
-                        <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
-                            {{ t('hero_explore_jobs') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-teal">✓</div>
-                        <h3>{{ t('nav_worker_dashboard') }}</h3>
-                        <p>View applications, saved jobs, meetings, and notifications.</p>
-                        <a href="{{ url_for('worker_dashboard') }}" class="btn btn-primary btn-sm">
-                            {{ t('nav_worker_dashboard') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-blue">🎤</div>
-                        <h3>Voice AI Registration</h3>
-                        <p>Speak in Telugu, Hindi, or English to update profile or explore opportunities.</p>
-                        <a href="{{ url_for('worker_voice_register') }}" class="btn btn-primary btn-sm">
-                            {{ t('hero_voice_reg') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-green">👤</div>
-                        <h3>{{ t('edit_profile') }}</h3>
-                        <p>Update your trade skills, location, and daily wage expectations.</p>
-                        <a href="{{ url_for('worker_profile_edit') }}" class="btn btn-primary btn-sm">
-                            {{ t('edit_profile') }} <span>→</span>
-                        </a>
-                    </article>
-
-                {% elif user_role == 'employer' %}
-                    <!-- Employer-Only Feature Cards -->
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-green">＋</div>
-                        <h3>{{ t('nav_post_job') }}</h3>
-                        <p>Publish requirements and find verified skilled workers.</p>
-                        <a href="{{ url_for('post_job') }}" class="btn btn-primary btn-sm">
-                            {{ t('hero_post_job') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-red">🏢</div>
-                        <h3>{{ t('nav_employer_dashboard') }}</h3>
-                        <p>Manage applicants, schedule meetings, and get verified badge.</p>
-                        <a href="{{ url_for('employer_dashboard') }}" class="btn btn-primary btn-sm">
-                            {{ t('nav_employer_dashboard') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-purple">🎯</div>
-                        <h3>{{ t('nav_candidate_matcher') }}</h3>
-                        <p>Score-based talent matching with multilingual explanations.</p>
-                        <a href="{{ url_for('candidate_matches') }}" class="btn btn-primary btn-sm">
-                            Discover Candidates <span>→</span>
-                        </a>
-                    </article>
-
-                {% else %}
-                    <!-- Guest Feature Cards -->
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-blue">🎤</div>
-                        <h3>Voice AI Registration</h3>
-                        <p>Speak in Telugu, Hindi, or English to register in under 1 minute.</p>
-                        <a href="{{ url_for('worker_voice_register') }}" class="btn btn-primary btn-sm">
-                            {{ t('hero_voice_reg') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-purple">⌕</div>
-                        <h3>{{ t('nav_browse_jobs') }}</h3>
-                        <p>Explore jobs with pictures, audio playback, and wage details.</p>
-                        <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
-                            {{ t('hero_explore_jobs') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-green">＋</div>
-                        <h3>{{ t('nav_post_job') }}</h3>
-                        <p>Publish requirements and find verified skilled workers.</p>
-                        <a href="{{ url_for('post_job') }}" class="btn btn-primary btn-sm">
-                            {{ t('hero_post_job') }} <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-teal">✓</div>
-                        <h3>Worker Portal</h3>
-                        <p>Sign in to view your applications, saved jobs, and alerts.</p>
-                        <a href="{{ url_for('login', role='worker') }}" class="btn btn-primary btn-sm">
-                            Worker Login <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-red">🏢</div>
-                        <h3>Employer Portal</h3>
-                        <p>Sign in to manage listings, view applicants, and schedule meetings.</p>
-                        <a href="{{ url_for('login', role='employer') }}" class="btn btn-primary btn-sm">
-                            Employer Login <span>→</span>
-                        </a>
-                    </article>
-
-                    <article class="service-card card card-padded">
-                        <div class="service-icon icon-purple">🎯</div>
-                        <h3>{{ t('nav_candidate_matcher') }}</h3>
-                        <p>Score-based talent matching with multilingual explanations.</p>
-                        <a href="{{ url_for('candidate_matches') }}" class="btn btn-primary btn-sm">
-                            Discover Candidates <span>→</span>
-                        </a>
-                    </article>
-
-                {% endif %}
-
+                    <div style="display: flex; justify-content: center; gap: var(--wc-space-3); font-size: var(--wc-text-xs); color: var(--wc-text-muted);">
+                        <span style="display: inline-flex; align-items: center; gap: var(--wc-space-1);">🇮🇳 {{ t('available_in_india') }}</span>
+                        <span style="display: inline-flex; align-items: center; gap: var(--wc-space-1);">🗣️ {{ t('multilingual_support') }}</span>
+                        <span style="display: inline-flex; align-items: center; gap: var(--wc-space-1);">🎤 {{ t('voice_enabled') }}</span>
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- POPULAR CATEGORIES -->
+        <section class="wc-section" style="background: var(--wc-background);">
+            <div class="wc-container">
+                <div style="text-align: center; margin-bottom: var(--wc-space-8);">
+                    <span style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); text-transform: uppercase;">{{ t('visual_discovery') }}</span>
+                    <h2 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin-top: var(--wc-space-2);">{{ t('popular_categories') }}</h2>
+                    <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted);">{{ t('categories_subtitle') }}</p>
+                </div>
+                <div class="wc-grid-4" style="gap: var(--wc-space-3);">
+                    {% for trade in available_trades %}
+                        <a href="{{ url_for('trade_sector', trade_key=trade.key) }}" class="trade-card">
+                            <img src="{{ url_for('static', filename=trade.image) }}" alt="{{ trade.name }}" class="trade-card-img" style="background: {{ trade.bg_tint }};">
+                            <span class="trade-card-title">{{ trade.name }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="wc-section" style="background: #ffffff;">
+            <div class="wc-container">
+                <div style="text-align: center; margin-bottom: var(--wc-space-8);">
+                    <span style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); text-transform: uppercase;">{{ t('how_it_works') }}</span>
+                    <h2 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin-top: var(--wc-space-2);">{{ t('how_it_works_title') }}</h2>
+                </div>
+                <div class="wc-grid-3" style="gap: var(--wc-space-4);">
+                    <div class="card card-padded" style="text-align: center;">
+                        <div style="font-size: var(--wc-text-3xl); margin-bottom: var(--wc-space-3);">🔍</div>
+                        <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin-bottom: var(--wc-space-2);">{{ t('step_search') }}</h3>
+                        <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); line-height: var(--wc-line-relaxed);">{{ t('step_search_desc') }}</p>
+                    </div>
+                    <div class="card card-padded" style="text-align: center;">
+                        <div style="font-size: var(--wc-text-3xl); margin-bottom: var(--wc-space-3);">📝</div>
+                        <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin-bottom: var(--wc-space-2);">{{ t('step_apply') }}</h3>
+                        <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); line-height: var(--wc-line-relaxed);">{{ t('step_apply_desc') }}</p>
+                    </div>
+                    <div class="card card-padded" style="text-align: center;">
+                        <div style="font-size: var(--wc-text-3xl); margin-bottom: var(--wc-space-3);">💼</div>
+                        <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin-bottom: var(--wc-space-2);">{{ t('step_hire') }}</h3>
+                        <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); line-height: var(--wc-line-relaxed);">{{ t('step_hire_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI ASSISTANT SECTION -->
+        <section class="wc-section" style="background: var(--wc-accent-bg);">
+            <div class="wc-container">
+                <div style="display: flex; flex-direction: column; gap: var(--wc-space-4); align-items: center; text-align: center; max-width: 700px; margin: 0 auto;">
+                    <div style="font-size: var(--wc-text-3xl);">🤖</div>
+                    <h3 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">{{ t('ai_title') }}</h3>
+                    <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0; line-height: var(--wc-line-relaxed);">{{ t('ai_subtitle') }}</p>
+                    <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">{{ t('ai_try_now') }} <span>→</span></a>
+                </div>
+            </div>
+        </section>
     </main>
 
     {% include 'partials/ai_assistant.html' %}
@@ -546,7 +322,7 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const list = document.getElementById('home-notif-list');
+                    const list = document.getElementById('home-notif-items-list');
                     if (data.notifications.length === 0) {
                         list.innerHTML = '<div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">No new notifications.</div>';
                         return;
@@ -567,53 +343,6 @@
             });
         }
     </script>
-
-    <footer class="footer">
-        <a class="footer-brand" href="{{ url_for('home') }}">
-            Work<span>Connect</span>
-        </a>
-        <p>{{ t('tagline') }}</p>
-    </footer>
-
-    <!-- Mobile Bottom App Bar -->
-    <nav class="mobile-bottom-bar" aria-label="Mobile Navigation">
-        <a href="{{ url_for('home') }}" class="mobile-bottom-item {% if request.endpoint == 'home' %}active{% endif %}">
-            <span class="icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="{{ url_for('browse_jobs') }}" class="mobile-bottom-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
-            <span class="icon">🔍</span>
-            <span>Explore</span>
-        </a>
-        {% if user_role == 'employer' %}
-        <a href="{{ url_for('post_job') }}" class="mobile-bottom-item {% if request.endpoint == 'post_job' %}active{% endif %}">
-            <span class="icon">＋</span>
-            <span>Post Job</span>
-        </a>
-        <a href="{{ url_for('employer_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
-            <span class="icon">🏢</span>
-            <span>Dashboard</span>
-        </a>
-        {% elif user_role == 'worker' %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice AI</span>
-        </a>
-        <a href="{{ url_for('worker_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Dashboard</span>
-        </a>
-        {% else %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice Reg</span>
-        </a>
-        <a href="{{ url_for('login') }}" class="mobile-bottom-item {% if request.endpoint == 'login' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Sign In</span>
-        </a>
-        {% endif %}
-    </nav>
 
 </body>
 </html>

@@ -5,1428 +5,469 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ t('nav_employer_dashboard') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        /* Employer Dashboard refinements (design-system-based) */
-        .emp-profile-card {
-            background: var(--wc-surface);
-            border: var(--wc-border-width) solid var(--wc-border);
-            border-top: 3px solid var(--wc-primary);
-            border-radius: var(--wc-radius-lg);
-            padding: var(--wc-space-3) var(--wc-space-5);
-            color: var(--wc-heading);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--wc-space-4);
-            flex-wrap: wrap;
-            margin-bottom: var(--wc-space-5);
-            box-shadow: var(--wc-shadow);
-            position: relative;
-        }
-
-        .emp-profile-left {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-4);
-            flex: 1 1 480px;
-            min-width: 0;
-        }
-
-        .emp-avatar-box {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--wc-radius-md);
-            background: var(--wc-primary-light);
-            border: var(--wc-border-width) solid #bfdbfe;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--wc-primary);
-            flex-shrink: 0;
-            box-shadow: var(--wc-shadow-sm);
-        }
-
-        .emp-profile-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .emp-name-row {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-            flex-wrap: wrap;
-            margin-bottom: var(--wc-space-1);
-        }
-
-        .emp-name {
-            font-size: var(--wc-text-xl);
-            font-weight: var(--wc-font-weight-extrabold);
-            color: var(--wc-heading);
-            letter-spacing: -0.3px;
-            margin: 0;
-            line-height: var(--wc-line-tight);
-            word-break: break-word;
-        }
-
-        .verified-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            background: var(--wc-success-bg);
-            color: var(--wc-success);
-            border: var(--wc-border-width) solid #a7f3d0;
-            padding: 2.5px 9px;
-            border-radius: var(--wc-radius-full);
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-            letter-spacing: 0.2px;
-        }
-
-        .emp-profile-meta {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px 12px;
-            font-size: var(--wc-text-sm);
-            color: var(--wc-text-muted);
-            font-weight: var(--wc-font-weight-medium);
-        }
-
-        .meta-item {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            color: var(--wc-text-muted);
-            word-break: break-word;
-        }
-
-        .meta-item svg {
-            color: var(--wc-text-muted);
-            flex-shrink: 0;
-        }
-
-        .meta-dot {
-            color: var(--wc-border-hover);
-            font-size: var(--wc-text-xs);
-            user-select: none;
-        }
-
-        .emp-header-actions {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-            flex-wrap: wrap;
-            margin-left: auto;
-        }
-
-        .btn-verify-badge {
-            padding: var(--wc-space-2) var(--wc-space-3);
-            border-radius: var(--wc-radius);
-            font-size: var(--wc-text-sm);
-            font-weight: var(--wc-font-weight-semibold);
-            cursor: pointer;
-            transition: all var(--wc-transition-fast);
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            white-space: nowrap;
-            text-decoration: none;
-            line-height: var(--wc-line-normal);
-            font-family: inherit;
-            border: var(--wc-border-width) solid transparent;
-        }
-
-        .btn-verify-badge.is-verified {
-            background: var(--wc-success-bg);
-            border-color: #a7f3d0;
-            color: var(--wc-success);
-        }
-
-        .btn-verify-badge.is-verified:hover {
-            background: #d1fae5;
-            border-color: #6ee7b7;
-            transform: translateY(-1px);
-        }
-
-        .btn-verify-badge.is-pending {
-            background: var(--wc-warning-bg);
-            border-color: #fde68a;
-            color: var(--wc-warning);
-        }
-
-        .btn-verify-badge.is-pending:hover {
-            background: #fef3c7;
-            border-color: #fcd34d;
-            transform: translateY(-1px);
-        }
-
-        .pending-indicator {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--wc-warning);
-            flex-shrink: 0;
-            display: inline-block;
-        }
-
-        .status-sep {
-            color: var(--wc-warning);
-            font-size: var(--wc-text-xs);
-            opacity: 0.7;
-        }
-
-        .action-name {
-            color: var(--wc-warning);
-            text-decoration: underline;
-            text-underline-offset: 2px;
-            font-weight: var(--wc-font-weight-bold);
-        }
-
-        .btn-post-job-main {
-            background: var(--wc-primary);
-            color: #ffffff;
-            border: var(--wc-border-width) solid var(--wc-primary-dark);
-            padding: var(--wc-space-2) var(--wc-space-4);
-            border-radius: var(--wc-radius);
-            font-size: var(--wc-text-sm);
-            font-weight: var(--wc-font-weight-bold);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
-            transition: all var(--wc-transition-fast);
-            white-space: nowrap;
-            line-height: var(--wc-line-normal);
-        }
-
-        .btn-post-job-main:hover {
-            background: var(--wc-primary-dark);
-            border-color: #1e40af;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
-            transform: translateY(-1px);
-            color: #ffffff;
-        }
-
-        /* Statistics cards */
-        .stat-grid-modern {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--wc-space-4);
-            margin-bottom: var(--wc-space-6);
-        }
-
-        .stat-card-modern {
-            background: var(--wc-surface);
-            border: var(--wc-border-width) solid var(--wc-border);
-            border-radius: var(--wc-radius-lg);
-            padding: var(--wc-space-4) var(--wc-space-5);
-            box-shadow: var(--wc-shadow);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 104px;
-            transition: all var(--wc-transition-normal);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card-modern:hover {
-            border-color: var(--wc-border-hover);
-            box-shadow: var(--wc-shadow-md);
-            transform: translateY(-2px);
-        }
-
-        .stat-card-modern::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-        }
-
-        .stat-card-blue::before { background: var(--wc-primary); }
-        .stat-card-green::before { background: var(--wc-success); }
-        .stat-card-orange::before { background: var(--wc-warning); }
-        .stat-card-purple::before { background: #7c3aed; }
-
-        .stat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: var(--wc-space-2);
-        }
-
-        .stat-title {
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-            color: var(--wc-text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-icon-pill {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--wc-radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            flex-shrink: 0;
-        }
-
-        .stat-card-blue .stat-icon-pill { background: var(--wc-primary-light); color: var(--wc-primary); }
-        .stat-card-green .stat-icon-pill { background: var(--wc-success-bg); color: var(--wc-success); }
-        .stat-card-orange .stat-icon-pill { background: var(--wc-warning-bg); color: var(--wc-warning); }
-        .stat-card-purple .stat-icon-pill { background: #f5f3ff; color: #7c3aed; }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: 850;
-            line-height: 1;
-            letter-spacing: -0.5px;
-        }
-
-        .stat-card-blue .stat-number { color: #1e40af; }
-        .stat-card-green .stat-number { color: var(--wc-success); }
-        .stat-card-orange .stat-number { color: #92400e; }
-        .stat-card-purple .stat-number { color: #5b21b6; }
-
-        /* Dashboard navigation tabs */
-        .tabs-header-modern {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-            border-bottom: 2px solid var(--wc-border);
-            margin-bottom: var(--wc-space-5);
-            overflow-x: auto;
-            padding-bottom: 0;
-        }
-
-        .tab-btn-modern {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-            padding: var(--wc-space-3) var(--wc-space-4);
-            font-size: var(--wc-text-sm);
-            font-weight: var(--wc-font-weight-semibold);
-            color: var(--wc-text-muted);
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            cursor: pointer;
-            transition: all var(--wc-transition-fast);
-            white-space: nowrap;
-            border-radius: var(--wc-radius-md) var(--wc-radius-md) 0 0;
-        }
-
-        .tab-btn-modern:hover {
-            color: var(--wc-heading);
-            background: var(--wc-surface-hover);
-        }
-
-        .tab-btn-modern.active {
-            color: var(--wc-primary);
-            font-weight: var(--wc-font-weight-bold);
-            border-bottom-color: var(--wc-primary);
-            background: rgba(40, 100, 201, 0.05);
-        }
-
-        .tab-count-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 20px;
-            height: 20px;
-            padding: 0 var(--wc-space-1);
-            border-radius: 10px;
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-            background: var(--wc-border-hover);
-            color: var(--wc-text-muted);
-            transition: all var(--wc-transition-fast);
-        }
-
-        .tab-btn-modern.active .tab-count-badge {
-            background: var(--wc-primary);
-            color: #ffffff;
-        }
-
-        /* Posted job cards */
-        .job-card-modern {
-            background: var(--wc-surface);
-            border: var(--wc-border-width) solid var(--wc-border);
-            border-radius: var(--wc-radius-lg);
-            padding: var(--wc-space-4) var(--wc-space-5);
-            margin-bottom: var(--wc-space-3);
-            box-shadow: var(--wc-shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: var(--wc-space-4);
-            border-left: 4px solid var(--wc-primary);
-            transition: all var(--wc-transition-normal);
-        }
-
-        .job-card-modern:hover {
-            border-color: var(--wc-border-hover);
-            box-shadow: var(--wc-shadow-md);
-            transform: translateY(-1px);
-        }
-
-        .job-card-left {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-4);
-            flex: 1 1 500px;
-            min-width: 0;
-        }
-
-        .job-trade-thumb {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--wc-radius-md);
-            background: var(--wc-surface-hover);
-            border: var(--wc-border-width) solid var(--wc-border);
-            padding: var(--wc-space-1);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .job-trade-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .job-info-block {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .job-title-row {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-            flex-wrap: wrap;
-            margin-bottom: var(--wc-space-1);
-        }
-
-        .job-title-text {
-            font-size: var(--wc-text-lg);
-            font-weight: var(--wc-font-weight-extrabold);
-            color: var(--wc-heading);
-            margin: 0;
-            line-height: var(--wc-line-tight);
-        }
-
-        .job-status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            padding: 2.5px 9px;
-            border-radius: 14px;
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-            letter-spacing: 0.2px;
-        }
-
-        .job-status-open {
-            background: var(--wc-success-bg);
-            color: var(--wc-success);
-            border: var(--wc-border-width) solid #a7f3d0;
-        }
-
-        .job-status-closed {
-            background: var(--wc-surface-hover);
-            color: var(--wc-text-muted);
-            border: var(--wc-border-width) solid var(--wc-border-hover);
-        }
-
-        .status-dot-pulse {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .job-status-open .status-dot-pulse { background: #10b981; }
-        .job-status-closed .status-dot-pulse { background: #94a3b8; }
-
-        .job-meta-row {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px 14px;
-            font-size: var(--wc-text-sm);
-            color: var(--wc-text-muted);
-        }
-
-        .job-meta-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .job-meta-wage { color: var(--wc-success); font-weight: var(--wc-font-weight-bold); }
-        .job-meta-positions { color: var(--wc-primary); font-weight: var(--wc-font-weight-bold); }
-
-        .job-actions-group {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-            flex-wrap: wrap;
-            flex-shrink: 0;
-        }
-
-        .btn-action-matches {
-            padding: var(--wc-space-2) var(--wc-space-3);
-            background: var(--wc-info-bg);
-            color: #4338ca;
-            border: var(--wc-border-width) solid #c7d2fe;
-            border-radius: var(--wc-radius);
-            font-size: var(--wc-text-sm);
-            font-weight: var(--wc-font-weight-bold);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            transition: all var(--wc-transition-fast);
-            white-space: nowrap;
-        }
-
-        .btn-action-matches:hover {
-            background: #e0e7ff;
-            color: #3730a3;
-            border-color: #a5b4fc;
-            transform: translateY(-1px);
-        }
-
-        .btn-action-applicants {
-            padding: var(--wc-space-2) var(--wc-space-3);
-            background: var(--wc-surface-hover);
-            color: var(--wc-heading);
-            border: var(--wc-border-width) solid var(--wc-border);
-            border-radius: var(--wc-radius);
-            font-size: var(--wc-text-sm);
-            font-weight: var(--wc-font-weight-semibold);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            transition: all var(--wc-transition-fast);
-            white-space: nowrap;
-        }
-
-        .btn-action-applicants:hover {
-            background: #f1f5f9;
-            color: #1e293b;
-            border-color: var(--wc-border-hover);
-            transform: translateY(-1px);
-        }
-
-        .applicant-count-pill {
-            background: var(--wc-border-hover);
-            color: var(--wc-heading);
-            padding: 1px 7px;
-            border-radius: 10px;
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-        }
-
-        /* Applicant & meeting rows */
-        .applicant-row-modern {
-            background: var(--wc-surface);
-            border: var(--wc-border-width) solid var(--wc-border);
-            border-radius: var(--wc-radius-lg);
-            padding: var(--wc-space-4) var(--wc-space-5);
-            margin-bottom: var(--wc-space-3);
-            box-shadow: var(--wc-shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: var(--wc-space-4);
-            transition: all var(--wc-transition-normal);
-        }
-
-        .applicant-row-modern:hover {
-            border-color: var(--wc-border-hover);
-            box-shadow: var(--wc-shadow-md);
-        }
-
-        .applicant-info-block {
-            flex: 1 1 450px;
-            min-width: 0;
-        }
-
-        .applicant-title-row {
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-            margin-bottom: var(--wc-space-1);
-            flex-wrap: wrap;
-        }
-
-        .applicant-name {
-            font-size: var(--wc-text-lg);
-            font-weight: var(--wc-font-weight-extrabold);
-            color: var(--wc-heading);
-            margin: 0;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            padding: 3px 10px;
-            border-radius: 14px;
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-        }
-
-        .status-pending { background: var(--wc-warning-bg); color: var(--wc-warning); border: var(--wc-border-width) solid #fde68a; }
-        .status-shortlisted { background: var(--wc-info-bg); color: #4338ca; border: var(--wc-border-width) solid #c7d2fe; }
-        .status-confirmed { background: var(--wc-success-bg); color: #15803d; border: var(--wc-border-width) solid #bbf7d0; }
-        .status-rejected { background: var(--wc-danger-bg); color: var(--wc-danger); border: var(--wc-border-width) solid #fecaca; }
-
-        .applicant-meta-row {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px 14px;
-            font-size: var(--wc-text-sm);
-            color: var(--wc-text-muted);
-        }
-
-        .match-score-badge {
-            margin-top: var(--wc-space-2);
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            background: var(--wc-success-bg);
-            border: var(--wc-border-width) solid #bbf7d0;
-            padding: var(--wc-space-1) var(--wc-space-3);
-            border-radius: var(--wc-radius-md);
-            font-size: var(--wc-text-xs);
-            color: var(--wc-success);
-            font-weight: var(--wc-font-weight-bold);
-        }
-
-        .match-explanation-text {
-            font-size: var(--wc-text-xs);
-            color: var(--wc-text-muted);
-            margin-top: var(--wc-space-1);
-            line-height: 1.4;
-        }
-
-        .applicant-actions-group {
-            display: flex;
-            flex-direction: column;
-            gap: var(--wc-space-2);
-            align-items: flex-end;
-            flex-shrink: 0;
-        }
-
-        .btn-status-action {
-            padding: var(--wc-space-1) var(--wc-space-2);
-            border-radius: var(--wc-radius-sm);
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-            cursor: pointer;
-            transition: all var(--wc-transition-fast);
-            border: var(--wc-border-width) solid transparent;
-        }
-
-        .btn-status-shortlist {
-            background: var(--wc-info-bg);
-            color: #4338ca;
-            border-color: #c7d2fe;
-        }
-        .btn-status-shortlist:hover { background: #c7d2fe; }
-
-        .btn-status-confirm {
-            background: var(--wc-success-bg);
-            color: #15803d;
-            border-color: #bbf7d0;
-        }
-        .btn-status-confirm:hover { background: #bbf7d0; }
-
-        .btn-status-reject {
-            background: var(--wc-danger-bg);
-            color: var(--wc-danger);
-            border-color: #fecaca;
-        }
-        .btn-status-reject:hover { background: #fecaca; }
-
-        .btn-schedule-action {
-            background: #ffffff;
-            border: var(--wc-border-width) solid var(--wc-border);
-            color: var(--wc-heading);
-            padding: var(--wc-space-1) var(--wc-space-3);
-            border-radius: var(--wc-radius);
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: var(--wc-space-1);
-            transition: all var(--wc-transition-fast);
-        }
-
-        .btn-schedule-action:hover {
-            background: var(--wc-surface-hover);
-            border-color: var(--wc-border-hover);
-            color: var(--wc-heading);
-        }
-
-        /* Empty states */
-        .empty-state-modern {
-            background: var(--wc-surface);
-            border-radius: var(--wc-radius-lg);
-            padding: var(--wc-space-8) var(--wc-space-4);
-            text-align: center;
-            border: var(--wc-border-width) solid var(--wc-border);
-            box-shadow: var(--wc-shadow);
-        }
-
-        .empty-icon-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--wc-surface-hover);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin: 0 auto var(--wc-space-3) auto;
-        }
-
-        .empty-state-title {
-            font-size: var(--wc-text-lg);
-            font-weight: var(--wc-font-weight-extrabold);
-            color: var(--wc-heading);
-            margin: 0 0 var(--wc-space-2) 0;
-        }
-
-        .empty-state-text {
-            font-size: var(--wc-text-sm);
-            color: var(--wc-text-muted);
-            margin: 0 auto var(--wc-space-4) auto;
-            max-width: 440px;
-            line-height: var(--wc-line-relaxed);
-        }
-
-        /* Modal styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: var(--wc-z-modal);
-            padding: var(--wc-space-4);
-        }
-
-        .modal-content-modern {
-            background: var(--wc-surface);
-            border-radius: var(--wc-radius-xl);
-            padding: var(--wc-space-5) var(--wc-space-6);
-            width: 480px;
-            max-width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--wc-shadow-xl);
-            border: var(--wc-border-width) solid var(--wc-border);
-        }
-
-        .modal-header-title {
-            font-size: var(--wc-text-lg);
-            font-weight: var(--wc-font-weight-extrabold);
-            color: var(--wc-heading);
-            margin: 0 0 var(--wc-space-4) 0;
-            display: flex;
-            align-items: center;
-            gap: var(--wc-space-2);
-        }
-
-        .form-label-modern {
-            display: block;
-            font-size: var(--wc-text-xs);
-            font-weight: var(--wc-font-weight-bold);
-            color: var(--wc-text-muted);
-            margin-bottom: var(--wc-space-1);
-        }
-
-        .form-input-modern {
-            width: 100%;
-            box-sizing: border-box;
-            padding: var(--wc-space-2) var(--wc-space-3);
-            border-radius: var(--wc-radius);
-            border: var(--wc-border-width) solid var(--wc-border);
-            font-size: var(--wc-text-base);
-            font-family: inherit;
-            color: var(--wc-text);
-            background: var(--wc-surface);
-            transition: all var(--wc-transition-fast);
-        }
-
-        .form-input-modern:focus {
-            outline: none;
-            border-color: var(--wc-primary);
-            box-shadow: 0 0 0 3px rgb(40 100 201 / 0.15);
-        }
-
-        /* Responsive breakpoints */
-        @media (max-width: 960px) {
-            .stat-grid-modern {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 0 var(--wc-space-4);
-                margin-top: var(--wc-space-4);
-            }
-
-            .emp-profile-card {
-                padding: var(--wc-space-3) var(--wc-space-4);
-                flex-direction: column;
-                align-items: stretch;
-                gap: var(--wc-space-3);
-            }
-
-            .emp-profile-left {
-                width: 100%;
-            }
-
-            .emp-header-actions {
-                width: 100%;
-                flex-direction: column;
-                align-items: stretch;
-                gap: var(--wc-space-2);
-                margin-left: 0;
-            }
-
-            .emp-header-actions form {
-                width: 100%;
-                margin: 0;
-            }
-
-            .btn-verify-badge,
-            .btn-post-job-main {
-                width: 100%;
-                box-sizing: border-box;
-                justify-content: center;
-                text-align: center;
-            }
-
-            .job-card-modern {
-                flex-direction: column;
-                align-items: stretch;
-                padding: var(--wc-space-4);
-            }
-
-            .job-card-left {
-                width: 100%;
-            }
-
-            .job-actions-group {
-                width: 100%;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: var(--wc-space-2);
-            }
-
-            .btn-action-matches,
-            .btn-action-applicants {
-                justify-content: center;
-                width: 100%;
-                box-sizing: border-box;
-            }
-
-            .applicant-row-modern {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .applicant-actions-group {
-                align-items: stretch;
-                width: 100%;
-            }
-
-            .applicant-actions-group form {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                width: 100%;
-            }
-
-            .btn-schedule-action {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 520px) {
-            .stat-grid-modern {
-                grid-template-columns: 1fr;
-            }
-
-            .job-actions-group {
-                grid-template-columns: 1fr;
-            }
-
-            .emp-profile-left {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--wc-space-2);
-            }
-
-            .emp-profile-meta {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--wc-space-2);
-            }
-
-            .emp-profile-meta .meta-dot {
-                display: none;
-            }
-
-            .btn-verify-badge.is-pending {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: var(--wc-space-1);
-            }
-        }
-    </style>
 </head>
-<body style="background: var(--wc-background);">
 
-    <!-- Navigation Header -->
-    <header class="navbar">
-        <a class="brand" href="{{ url_for('home') }}">
-            <div class="brand-name">Work<span>Connect</span></div>
-        </a>
-        <nav class="nav-links">
-            <a class="nav-link" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
-            <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
-            <a class="nav-link active" href="{{ url_for('employer_dashboard') }}">{{ t('nav_employer_dashboard') }}</a>
-            <a class="nav-link" href="{{ url_for('candidate_matches') }}" style="background: var(--wc-primary-light); color: var(--wc-primary); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius); font-weight: var(--wc-font-weight-bold);">{{ t('nav_candidate_matcher') }}</a>
+<body class="{% if user_role == 'worker' %}theme-worker{% elif user_role == 'employer' %}theme-employer{% else %}theme-public{% endif %} app-layout">
+    <a href="#main-content" class="wc-sr-only wc-sr-only-focusable">Skip to main content</a>
 
-            <!-- Language Switcher -->
-            <div class="lang-selector">
-                <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
-                <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
-                <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
+    <!-- ============ EMPLOYER SIDEBAR NAVIGATION (Desktop) ============ -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">Work<span>Connect</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-item {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">
+                🏠 {{ t('nav_home') }}
+            </a>
+            <a class="sidebar-item active" href="{{ url_for('employer_dashboard') }}">
+                📊 {{ t('nav_overview') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'post_job' %}active{% endif %}" href="{{ url_for('post_job') }}">
+                ＋ {{ t('nav_post_job') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}" href="{{ url_for('employer_dashboard') }}#jobs">
+                📋 {{ t('nav_manage_jobs') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}" href="{{ url_for('employer_dashboard') }}#applicants">
+                👥 {{ t('nav_applicants') }}
+            </a>
+            <a class="sidebar-item" href="#shortlisted">
+                ⭐ {{ t('nav_shortlisted') }}
+            </a>
+            <a class="sidebar-item" href="#hired">
+                ✓ {{ t('nav_hired') }}
+            </a>
+            <a class="sidebar-item {% if request.endpoint == 'employer_profile_edit' %}active{% endif %}" href="{{ url_for('employer_profile_edit') }}">
+                🏢 {{ t('nav_company_profile') }}
+            </a>
+            <a class="sidebar-item" href="{{ url_for('candidate_matches') }}">
+                🎯 {{ t('nav_ai_hiring') }}
+            </a>
+<a class="sidebar-item {% if request.endpoint == 'employer_profile_edit' %}active{% endif %}" href="{{ url_for('employer_profile_edit') }}">
+    ⚙️ {{ t('nav_settings') }}
+</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="sidebar-item" style="color: var(--wc-danger); border: var(--wc-border-width) solid var(--wc-danger);">
+                {{ t('nav_logout') }}
+            </a>
+        </div>
+    </aside>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="main-content" id="main-content">
+
+        <!-- Top bar: title + theme toggle + notifications + profile -->
+        <header class="wc-container" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--wc-space-4); padding: var(--wc-space-6) var(--wc-space-4) var(--wc-space-4); margin-bottom: var(--wc-space-6); border-bottom: var(--wc-border-width) solid var(--wc-border);">
+            <div>
+                <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">{{ t('dashboard_welcome') }}, {{ employer.name }}</h1>
+                <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: var(--wc-space-1) 0 0 0;">Manage your jobs, applicants, and hiring pipeline here.</p>
             </div>
 
-            {% if current_user %}
-                <div class="notif-bell-container" id="notif-bell-wrapper">
-                    <button type="button" id="notif-bell-btn" class="notif-bell-badge" onclick="toggleNotifDropdown(event)" title="Notifications" aria-label="Notifications">
-                        🔔
-                        <span id="notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
-                    </button>
+            <div style="display: flex; align-items: center; gap: var(--wc-space-3); flex-wrap: wrap;">
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
 
-                    <div id="notif-dropdown-panel" class="notif-dropdown-panel" style="display: none;">
-                        <div class="notif-panel-header">
-                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
-                                <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
-                                <span id="panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
-                                    <span id="panel-unread-num">{{ unread_notifications_count }}</span> unread
-                                </span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
-                                <button type="button" id="btn-mark-all-dropdown" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">✓ Mark all read</button>
-                                <button type="button" onclick="closeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
-                            </div>
+                <div class="notif-bell-badge" id="notif-bell-wrapper" onclick="toggleNotifDropdown(event)" title="Notifications" aria-label="Notifications" style="background: transparent; border: none; cursor: pointer;">
+                    🔔
+                    <span id="notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
+                </div>
+
+                <div id="notif-dropdown-panel" class="notif-dropdown-panel" style="display: none;">
+                    <div class="notif-panel-header">
+                        <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                            <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
+                            <span id="panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
+                                <span id="panel-unread-num">{{ unread_notifications_count }}</span> unread
+                            </span>
                         </div>
-                        <div id="notif-items-list" class="notif-items-scroll">
-                            <div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">Loading notifications...</div>
-                        </div>
-                        <div class="notif-panel-footer">
-                            <a href="#notifs" style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">View All Notifications →</a>
+                        <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                            <button type="button" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">✓ {{ t('mark_all_as_read') }}</button>
+                            <button type="button" onclick="closeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
                         </div>
                     </div>
+                    <div id="notif-items-list" class="notif-items-scroll">
+                        {% if notifications %}
+                            {% for n in notifications %}
+                                <div class="notif-card {% if not n.is_read %}unread{% else %}read{% endif %}" id="notif-{{ n.id }}">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--wc-space-1);">
+                                        <span style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm);">{{ n.title }}</span>
+                                        <span style="font-size: var(--wc-text-xs); color: var(--wc-text-muted);">{{ n.time_display or n.created_at }}</span>
+                                    </div>
+                                    <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-bottom: var(--wc-space-2);">{{ n.message }}</div>
+                                    <a href="{{ n.link }}{% if '?' in n.link %}&{% else %}?{% endif %}notif_id={{ n.id }}" class="btn btn-primary btn-sm">{{ t('view_job_details') }}</a>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state" style="padding: var(--wc-space-4);">
+                                <div style="font-size: 32px; margin-bottom: var(--wc-space-2);">🔔</div>
+                                <div style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm);">{{ t('no_notifications_yet') }}</div>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
-            {% else %}
-                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
-            {% endif %}
-        </nav>
-    </header>
 
-    <main class="dashboard-container wc-container">
+                <a href="{{ url_for('employer_profile_edit') }}" class="nav-cta">{{ employer.name }}</a>
+            </div>
+        </header>
 
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
+                <div class="wc-container" style="margin-bottom: var(--wc-space-4);">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
-        <!-- 1. Improved Employer Profile Header -->
-        <section class="emp-profile-card">
-            <div class="emp-profile-left">
-                <div class="emp-avatar-box" title="Employer Profile">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                        <path d="M9 22v-4h6v4"></path>
-                        <path d="M8 6h.01"></path>
-                        <path d="M16 6h.01"></path>
-                        <path d="M12 6h.01"></path>
-                        <path d="M12 10h.01"></path>
-                        <path d="M12 14h.01"></path>
-                        <path d="M16 10h.01"></path>
-                        <path d="M16 14h.01"></path>
-                        <path d="M8 10h.01"></path>
-                        <path d="M8 14h.01"></path>
-                    </svg>
-                </div>
-                <div class="emp-profile-info">
-                    <div class="emp-name-row">
-                        <h1 class="emp-name">{{ employer.name }}</h1>
-                        {% if employer.is_verified %}
-                            <span class="verified-chip" title="Officially Verified Employer">
-                                {{ t('verified_employer') }}
-                            </span>
-                        {% endif %}
+        <!-- ============ STAT CARDS ROW ============ -->
+        <section class="wc-container" style="margin-bottom: var(--wc-space-6);">
+            <div class="wc-grid-4" style="gap: var(--wc-space-3);">
+                <a href="#jobs" class="stat-card card card-padded" style="text-decoration: none; color: inherit; border-left: 4px solid var(--wc-primary);">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('posted_jobs') }}</div>
+                        <div class="stat-value">{{ employer_jobs|length }}</div>
+                        <div class="stat-trend">Total job postings</div>
                     </div>
-                    <div class="emp-profile-meta">
-                        <span class="meta-item" title="Email address">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <span>{{ employer.email }}</span>
-                        </span>
-                        <span class="meta-dot">•</span>
-                        <span class="meta-item" title="Organization / Industry">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                            <span>{{ employer.employer_type }}{% if 'industry' not in employer.employer_type|lower %} Industry{% endif %}</span>
-                        </span>
-                        <span class="meta-dot">•</span>
-                        <span class="meta-item" title="Location">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            <span>{{ employer.location }}</span>
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="emp-header-actions">
-                {% if employer.is_verified %}
-                    <form method="POST" action="{{ url_for('toggle_verify_route') }}" style="margin: 0; display: inline-flex;">
-                        <button type="submit" class="btn-verify-badge is-verified" title="Status: Verified Employer. Click to toggle.">
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <span>{{ t('verified_employer') }}</span>
-                        </button>
-                    </form>
-                {% else %}
-                    <form method="POST" action="{{ url_for('toggle_verify_route') }}" style="margin: 0; display: inline-flex;">
-                        <button type="submit" class="btn-verify-badge is-pending" title="Click to request verification badge">
-                            <span class="pending-indicator" aria-hidden="true"></span>
-                            <span class="status-name">{{ t('verification_pending') }}</span>
-                            <span class="status-sep" aria-hidden="true">•</span>
-                            <span class="action-name">{{ t('request_verification') }}</span>
-                        </button>
-                    </form>
-                {% endif %}
-                <a href="{{ url_for('employer_profile_edit') }}" class="btn-verify-badge" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; text-decoration: none;">
-                    ⚙️ {{ t('edit_profile') }}
                 </a>
-                <a href="{{ url_for('post_job') }}" class="btn-post-job-main">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span>{{ t('post_new_job') }}</span>
+                <div class="stat-card card card-padded" style="border-left: 4px solid var(--wc-success);">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('total_workers_needed') }}</div>
+                        <div class="stat-value">
+                            {% set total_needed = employer_jobs|sum(attribute='workers_needed') %}
+                            {{ total_needed }}
+                        </div>
+                        <div class="stat-trend">Workers you need</div>
+                    </div>
+                </div>
+                <div class="stat-card card card-padded" style="border-left: 4px solid var(--wc-accent);">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('positions_open') }}</div>
+                        <div class="stat-value">
+                            {% set total_remaining = employer_jobs|sum(attribute='positions_remaining') %}
+                            {{ total_remaining }}
+                        </div>
+                        <div class="stat-trend">Positions still open</div>
+                    </div>
+                </div>
+                <a href="#applicants" class="stat-card card card-padded" style="text-decoration: none; color: inherit; border-left: 4px solid #7c3aed;">
+                    <div class="stat-icon">📥</div>
+                    <div class="stat-body">
+                        <div class="stat-label">{{ t('total_applicants') }}</div>
+                        <div class="stat-value">{{ applications|length }}</div>
+                        <div class="stat-trend">All applications</div>
+                    </div>
                 </a>
             </div>
         </section>
 
-        <!-- Quick Action Toolbar -->
-        <div class="card card-padded" style="margin-bottom: var(--wc-space-6); display: flex; gap: var(--wc-space-3); align-items: center; flex-wrap: wrap;">
-            <strong style="color: var(--wc-heading); font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-bold);">{{ t('quick_navigation') }}:</strong>
-            <a href="{{ url_for('post_job') }}" class="btn btn-primary btn-sm">
-                ＋ {{ t('post_new_job') }}
-            </a>
-            <a href="{{ url_for('candidate_matches') }}" class="btn btn-secondary btn-sm">
-                🎯 {{ t('nav_candidate_matcher') }}
-            </a>
-            <a href="{{ url_for('employer_profile_edit') }}" class="btn btn-ghost btn-sm">
-                ⚙️ {{ t('edit_profile') }}
-            </a>
-            <a href="#applicants" onclick="switchEmpTab('applicants')" class="btn btn-ghost btn-sm">
-                👥 {{ t('manage_applicants') }}
-            </a>
-        </div>
-
-        <!-- 2. Improved Statistics Cards -->
-        <section class="stat-grid-modern">
-            <!-- 1: Posted Jobs (Blue) -->
-            <div class="stat-card-modern stat-card-blue">
-                <div class="stat-header">
-                    <span class="stat-title">{{ t('posted_jobs') }}</span>
-                    <div class="stat-icon-pill" title="Posted Jobs">
-                        📋
-                    </div>
-                </div>
-                <div class="stat-number">{{ employer_jobs|length }}</div>
+        <!-- ============ TABS: JOBS / APPLICANTS / INTERVIEWS ============ -->
+        <section class="wc-container">
+            <div class="tabs-header" style="margin-bottom: var(--wc-space-4); border-bottom: var(--wc-border-width) solid var(--wc-border); overflow-x: auto;">
+                <a href="#jobs" class="tab-btn active" id="btn-tab-jobs" onclick="switchEmpTab('jobs')">
+                    📋 {{ t('posted_jobs') }} ({{ employer_jobs|length }})
+                </a>
+                <a href="#applicants" class="tab-btn" id="btn-tab-applicants" onclick="switchEmpTab('applicants')">
+                    👥 {{ t('manage_applicants') }} ({{ applications|length }})
+                </a>
+                <a href="#interviews" class="tab-btn" id="btn-tab-interviews" onclick="switchEmpTab('interviews')">
+                    📅 {{ t('scheduled_meetings') }} ({{ interviews|length }})
+                </a>
             </div>
 
-            <!-- 2: Total Workers Needed (Green) -->
-            <div class="stat-card-modern stat-card-green">
-                {% set total_needed = employer_jobs|sum(attribute='workers_needed') %}
-                <div class="stat-header">
-                    <span class="stat-title">{{ t('total_workers_needed') }}</span>
-                    <div class="stat-icon-pill" title="{{ t('total_workers_needed') }}">
-                        👥
-                    </div>
-                </div>
-                <div class="stat-number">{{ total_needed }}</div>
-            </div>
-
-            <!-- 3: Positions Open (Orange) -->
-            <div class="stat-card-modern stat-card-orange">
-                {% set total_remaining = employer_jobs|sum(attribute='positions_remaining') %}
-                <div class="stat-header">
-                    <span class="stat-title">{{ t('positions_open') }}</span>
-                    <div class="stat-icon-pill" title="{{ t('positions_open') }}">
-                        🎯
-                    </div>
-                </div>
-                <div class="stat-number">{{ total_remaining }}</div>
-            </div>
-
-            <!-- 4: Total Applicants (Purple) -->
-            <div class="stat-card-modern stat-card-purple">
-                <div class="stat-header">
-                    <span class="stat-title">{{ t('total_applicants') }}</span>
-                    <div class="stat-icon-pill" title="Total Applicants">
-                        📥
-                    </div>
-                </div>
-                <div class="stat-number">{{ applications|length }}</div>
-            </div>
-        </section>
-
-        <!-- 3. Improved Dashboard Navigation Tabs -->
-        <div class="tabs-header-modern" role="tablist">
-            <button class="tab-btn-modern tab-btn active" id="btn-tab-jobs" onclick="switchEmpTab('jobs')" type="button" role="tab" aria-selected="true">
-                <span>📋</span>
-                <span>{{ t('posted_jobs') }}</span>
-                <span class="tab-count-badge">{{ employer_jobs|length }}</span>
-            </button>
-            <button class="tab-btn-modern tab-btn" id="btn-tab-applicants" onclick="switchEmpTab('applicants')" type="button" role="tab" aria-selected="false">
-                <span>👥</span>
-                <span>{{ t('manage_applicants') }}</span>
-                <span class="tab-count-badge">{{ applications|length }}</span>
-            </button>
-            <button class="tab-btn-modern tab-btn" id="btn-tab-interviews" onclick="switchEmpTab('interviews')" type="button" role="tab" aria-selected="false">
-                <span>📅</span>
-                <span>{{ t('scheduled_meetings') }}</span>
-                <span class="tab-count-badge">{{ interviews|length }}</span>
-            </button>
-        </div>
-
-        <!-- TAB 1: POSTED JOBS -->
-        <div id="tab-emp-jobs">
-            {% if employer_jobs %}
-                <div style="display: grid; gap: 12px;">
+            <!-- TAB: POSTED JOBS -->
+            <div id="tab-content-jobs" style="display: block;">
+                {% if employer_jobs %}
                     {% for job in employer_jobs %}
-                        <div class="job-card-modern">
-                            <div class="job-card-left">
-                                <div class="job-trade-thumb">
-                                    <img src="{{ url_for('static', filename=job.trade_image) }}" alt="{{ job.skill_required }}" class="job-trade-img">
+                        <div class="modern-job-card card card-padded" style="margin-bottom: var(--wc-space-3);">
+                            <div class="job-card-header">
+                                <div class="job-title-row">
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ job.title }}</h3>
+                                    <div class="job-employer">🏢 {{ employer.name }}</div>
                                 </div>
-                                <div class="job-info-block">
-                                    <div class="job-title-row">
-                                        <h3 class="job-title-text">{{ job.title }}</h3>
-                                        {% if job.status|lower == 'open' %}
-                                            <span class="job-status-pill job-status-open">
-                                                <span class="status-dot-pulse"></span>
-                                                {{ t('status_open') }}
-                                            </span>
-                                        {% else %}
-                                            <span class="job-status-pill job-status-closed">
-                                                <span class="status-dot-pulse"></span>
-                                                {{ t('status_closed') }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="job-meta-row">
-                                        <span class="job-meta-pill">
-                                            <span>🛠️</span>
-                                            <span><strong>{{ job.skill_required }}</strong></span>
-                                        </span>
-                                        <span class="job-meta-pill">
-                                            <span>📍</span>
-                                            <span>{{ job.location }}</span>
-                                        </span>
-                                        <span class="job-meta-pill job-meta-wage">
-                                            <span>💰</span>
-                                            <span>₹{{ job.daily_wage }} / day</span>
-                                        </span>
-                                        <span class="job-meta-pill job-meta-positions">
-                                            <span>👥</span>
-                                            <span>{{ job.positions_remaining }} / {{ job.workers_needed }} {{ t('positions_left') }}</span>
-                                        </span>
-                                    </div>
-                                </div>
+                                <span class="badge badge-info" style="font-size: var(--wc-text-xs);">{% if job.status|lower == 'open' %}{{ t('status_open') }}{% else %}{{ t('status_closed') }}{% endif %}</span>
                             </div>
-                            <div class="job-actions-group">
-                                <a href="{{ url_for('candidate_matches', job_id=job.id) }}" class="btn-action-matches" title="View AI matched candidates">
-                                    <span>🎯</span>
-                                    <span>{{ t('matched_candidates') }}</span>
-                                </a>
-                                <a href="?job_id={{ job.id }}#applicants" onclick="switchEmpTab('applicants')" class="btn-action-applicants" title="View applicants for this job">
-                                    <span>👥</span>
-                                    <span>{{ t('view_applicants') }}</span>
-                                    <span class="applicant-count-pill">{{ job.total_applicants }}</span>
-                                </a>
+                            <div class="job-meta" style="margin-bottom: var(--wc-space-3); flex-wrap: wrap;">
+                                <span class="wage-badge">💰 ₹{{ job.daily_wage }}/day</span>
+                                <span class="locality-badge">📍 {{ job.location }}</span>
+                                <span class="badge badge-neutral" style="font-size: var(--wc-text-xs);">👥 {{ job.positions_remaining }} / {{ job.workers_needed }} {{ t('positions_left') }}</span>
+                                <span class="badge badge-neutral" style="font-size: var(--wc-text-xs);">📥 {{ job.total_applicants }} applicants</span>
+                            </div>
+                            <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0 0 var(--wc-space-3); line-height: var(--wc-line-relaxed);">{{ job.description[:120] }}{% if job.description|length > 120 %}…{% endif %}</p>
+                            <div class="job-actions">
+                                <a href="{{ url_for('candidate_matches', job_id=job.id) }}" class="btn btn-primary btn-sm btn-block">🎯 {{ t('matched_candidates') }}</a>
                             </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state-modern">
-                    <div class="empty-icon-circle">📋</div>
-                    <h3 class="empty-state-title">No jobs posted yet</h3>
-                    <p class="empty-state-text">Post your first job requirement to start receiving applications and finding AI matched local workers.</p>
-                    <a href="{{ url_for('post_job') }}" class="btn-post-job-main" style="display: inline-flex;">
-                        <span>+</span>
-                        <span>{{ t('post_new_job') }}</span>
-                    </a>
-                </div>
-            {% endif %}
-        </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('no_jobs_posted_yet') }}</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">{{ t('post_first_job_desc') }}</p>
+                        <a href="{{ url_for('post_job') }}" class="btn btn-primary btn-sm">＋ {{ t('post_new_job') }}</a>
+                    </div>
+                {% endif %}
+            </div>
 
-        <!-- TAB 2: MANAGE APPLICANTS (Shortlist, Confirm, Reject, Meeting) -->
-        <div id="tab-emp-applicants" style="display: none;">
-            {% if applications %}
-                <div style="display: grid; gap: 12px;">
+            <!-- TAB: MANAGE APPLICANTS -->
+            <div id="tab-content-applicants" style="display: none;">
+                {% if applications %}
                     {% for app in applications %}
-                        <div class="applicant-row-modern" id="app-row-{{ app.application_id }}">
-                            <div class="applicant-info-block">
-                                <div class="applicant-title-row">
-                                    <h3 class="applicant-name">
-                                        {{ app.worker_name }}
-                                    </h3>
-                                    <span class="status-badge status-{{ app.application_status|lower }}">
-                                        {{ app.application_status }}
-                                    </span>
-                                </div>
-                                <div class="applicant-meta-row">
-                                    <span>Applied for: <strong>{{ app.job_title }}</strong></span>
-                                    <span>🛠️ {{ app.worker_skill }}</span>
-                                    <span>📍 {{ app.worker_location }}</span>
-                                    <span>⏳ {{ app.worker_experience }} yrs exp</span>
-                                    <span>💰 Expected: ₹{{ app.worker_wage }}/day</span>
-                                </div>
-
-                                {% if app.match_percentage %}
-                                    <div class="match-score-badge">
-                                        <span>🎯 Match Score: {{ app.match_percentage }}% ({{ app.match_level }})</span>
+                        <div class="modern-applicant-card card card-padded" style="margin-bottom: var(--wc-space-3);">
+                            <div class="applicant-card-header">
+                                <div class="applicant-info">
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ app.worker_name }}</h3>
+                                    <div class="applicant-meta">
+                                        <span>Applied for: <strong>{{ app.job_title }}</strong></span>
+                                        <span>🛠️ {{ app.worker_skill }}</span>
+                                        <span>📍 {{ app.worker_location }}</span>
+                                        <span>⏳ {{ app.worker_experience }} yrs exp</span>
+                                        <span>💰 Expected: ₹{{ app.worker_wage }}/day</span>
                                     </div>
-                                    {% if app.match_explanation %}
-                                        <div class="match-explanation-text">
-                                            {{ app.match_explanation }}
-                                        </div>
-                                    {% endif %}
-                                {% endif %}
+                                </div>
+                                <span class="status-badge status-{{ app.application_status|lower if app.application_status else 'pending' }}" style="white-space: nowrap;">
+                                    {{ app.application_status }}
+                                </span>
                             </div>
 
-                            <!-- Actions for Employer -->
-                            <div class="applicant-actions-group">
-                                <form method="POST" action="{{ url_for('employer_applications') }}" style="display: flex; gap: 6px; margin: 0;">
-                                    <input type="hidden" name="action" value="update_status">
-                                    <input type="hidden" name="application_id" value="{{ app.application_id }}">
+                            {% if app.match_percentage %}
+                                <div style="margin: var(--wc-space-3) 0; background: var(--wc-success-bg); border: var(--wc-border-width) solid #bbf7d0; padding: var(--wc-space-2) var(--wc-space-3); border-radius: var(--wc-radius-md); font-size: var(--wc-text-xs); color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">
+                                    🎯 {{ t('match_compatibility') }}: {{ app.match_percentage }}% ({{ app.match_level }})
+                                </div>
+                            {% endif %}
 
-                                    <button type="submit" name="status" value="Shortlisted" class="btn-status-action btn-status-shortlist">
-                                        ⭐ Shortlist
-                                    </button>
-                                    <button type="submit" name="status" value="Confirmed" class="btn-status-action btn-status-confirm">
-                                        ✓ Confirm
-                                    </button>
-                                    <button type="submit" name="status" value="Rejected" class="btn-status-action btn-status-reject">
-                                        ✕ Reject
-                                    </button>
-                                </form>
-
-                                <button type="button" class="btn-schedule-action" data-open-interview
-                                        data-job-id="{{ app.job_id }}"
-                                        data-application-id="{{ app.application_id }}"
-                                        data-worker-id="{{ app.worker_id }}"
-                                        data-worker-name="{{ app.worker_name }}"
-                                        data-job-title="{{ app.job_title }}">
-                                    <span>📅</span>
-                                    <span>Schedule Meeting</span>
+                            <div style="display: flex; gap: var(--wc-space-2); align-items: center; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-outline btn-sm" onclick="openInterviewModal('{{ app.application_id }}', '{{ app.job_id }}', '{{ app.worker_id }}', '{{ app.worker_name }}', '{{ app.job_title }}')">
+                                    📅 {{ t('schedule_meeting') }}
                                 </button>
                             </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state-modern">
-                    <div class="empty-icon-circle">👥</div>
-                    <h3 class="empty-state-title">No applications received yet</h3>
-                    <p class="empty-state-text">Workers can apply to your open jobs from the browse jobs portal. Review incoming candidates here.</p>
-                </div>
-            {% endif %}
-        </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('no_applications_yet') }}</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">{{ t('applications_will_appear') }}</p>
+                    </div>
+                {% endif %}
+            </div>
 
-        <!-- TAB 3: SCHEDULED MEETINGS -->
-        <div id="tab-emp-interviews" style="display: none;">
-            {% if interviews %}
-                <div style="display: grid; gap: 12px;">
+            <!-- TAB: SCHEDULED MEETINGS -->
+            <div id="tab-content-interviews" style="display: none;">
+                {% if interviews %}
                     {% for iv in interviews %}
-                        <div class="applicant-row-modern" style="border-left: 4px solid #10b981;">
-                            <div class="applicant-info-block">
-                                <div class="applicant-title-row">
-                                    <h3 class="applicant-name">
-                                        Candidate: {{ iv.worker_name }} ({{ iv.worker_skill }})
-                                    </h3>
-                                    <span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11.5px; font-weight: 750; padding: 3px 10px; border-radius: 12px;">
-                                        ● Scheduled
-                                    </span>
+                        <div class="modern-applicant-card card card-padded" style="margin-bottom: var(--wc-space-3); border-left: 4px solid var(--wc-success);">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-2);">
+                                    <span style="background: var(--wc-success-bg); color: var(--wc-success); font-weight: 800; font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">● {{ t('meeting_scheduled') }}</span>
+                                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">Candidate: {{ iv.worker_name }}</h3>
                                 </div>
-                                <div class="applicant-meta-row" style="margin-bottom: 6px;">
-                                    <span>Job: <strong>{{ iv.job_title }}</strong></span>
-                                    <span>📅 <strong>Date & Time:</strong> {{ iv.interview_date }} at {{ iv.interview_time }}</span>
-                                    <span>📍 <strong>Venue/Mode:</strong> {{ iv.location_or_link }}</span>
+                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin-bottom: var(--wc-space-2);">
+                                    <strong>{{ t('meeting_date_time') }}</strong> {{ iv.interview_date }} at {{ iv.interview_time }}
+                                </div>
+                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin-bottom: var(--wc-space-2);">
+                                    <strong>{{ t('meeting_location_venue') }}</strong> 📍 {{ iv.location_or_link }}
                                 </div>
                                 {% if iv.notes %}
-                                    <div class="match-explanation-text">
-                                        📝 {{ iv.notes }}
+                                    <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); background: var(--wc-surface-hover); padding: var(--wc-space-2) var(--wc-space-3); border-radius: var(--wc-radius-md); margin-bottom: var(--wc-space-2);">
+                                        <strong>{{ t('meeting_notes') }}</strong> {{ iv.notes }}
                                     </div>
                                 {% endif %}
                             </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state-modern">
-                    <div class="empty-icon-circle">📅</div>
-                    <h3 class="empty-state-title">{{ t('no_interviews') }}</h3>
-                    <p class="empty-state-text">Schedule meetings with shortlisted applicants to finalize hiring.</p>
-                </div>
-            {% endif %}
-        </div>
-
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <h2 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">{{ t('no_interviews') }}</h2>
+                        <p style="font-size: var(--wc-text-sm); margin: 0 0 var(--wc-space-4);">Schedule meetings with shortlisted applicants to finalize hiring.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
     </main>
 
-    <!-- Meeting Scheduling Modal (Step 8) -->
-    <div class="modal-overlay" id="interview-modal">
-        <div class="modal-content-modern">
-            <h3 class="modal-header-title" id="modal-candidate-name">
-                <span>📅</span>
-                <span>Schedule Meeting</span>
-            </h3>
-            <form method="POST" action="{{ url_for('schedule_interview_route') }}">
-                <input type="hidden" name="job_id" id="modal-job-id">
-                <input type="hidden" name="application_id" id="modal-app-id">
-                <input type="hidden" name="worker_id" id="modal-worker-id">
+    {% include 'partials/ai_assistant.html' %}
 
-                <div style="margin-bottom: 14px;">
-                    <label class="form-label-modern">Meeting Date</label>
-                    <input type="date" name="interview_date" class="form-input-modern" required>
-                </div>
-
-                <div style="margin-bottom: 14px;">
-                    <label class="form-label-modern">Meeting Time</label>
-                    <input type="time" name="interview_time" class="form-input-modern" required>
-                </div>
-
-                <div style="margin-bottom: 14px;">
-                    <label class="form-label-modern">Location / Workplace Address / Phone Call</label>
-                    <input type="text" name="location_or_link" class="form-input-modern" placeholder="e.g., Site Office, Main Road, Narasapur" required>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label class="form-label-modern">Notes / Instructions for Candidate</label>
-                    <textarea name="notes" class="form-input-modern" rows="2" placeholder="e.g. Please bring ID proof and safety shoes"></textarea>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="btn-post-job-main" style="flex: 1; justify-content: center; padding: 10px;">Confirm & Schedule</button>
-                    <button type="button" onclick="closeInterviewModal()" style="padding: 10px 18px; border: 1px solid #cbd5e1; border-radius: 9px; background: #ffffff; cursor: pointer; font-weight: 700; color: #64748b; font-size: 13px;">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- ============ MOBILE BOTTOM NAV ============ -->
+    <nav class="mobile-nav" aria-label="Mobile Navigation">
+        <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('browse_jobs') }}" class="mobile-nav-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🔍</span>
+            <span>Jobs</span>
+        </a>
+        <a href="{{ url_for('post_job') }}" class="mobile-nav-item {% if request.endpoint == 'post_job' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">＋</span>
+            <span>Post Job</span>
+        </a>
+        <a href="{{ url_for('employer_dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
+            <span style="font-size: var(--wc-text-xl);">🏢</span>
+            <span>Dashboard</span>
+        </a>
+    </nav>
 
     <script>
+        // ============ TAB SWITCHING ============
         function switchEmpTab(tab) {
             ['jobs', 'applicants', 'interviews'].forEach(t => {
-                const el = document.getElementById('tab-emp-' + t);
+                const el = document.getElementById('tab-content-' + t);
                 const btn = document.getElementById('btn-tab-' + t);
                 if (el) el.style.display = (t === tab) ? 'block' : 'none';
                 if (btn) {
-                    if (t === tab) {
-                        btn.classList.add('active');
-                        btn.setAttribute('aria-selected', 'true');
-                    } else {
-                        btn.classList.remove('active');
-                        btn.setAttribute('aria-selected', 'false');
-                    }
+                    if (t === tab) btn.classList.add('active');
+                    else btn.classList.remove('active');
                 }
             });
+            const main = document.getElementById('main-content');
+            if (main) main.scrollTop = 0;
         }
 
-        function openInterviewModal(jobId, appId, workerId, workerName, jobTitle) {
-            document.getElementById('modal-job-id').value = jobId;
-            document.getElementById('modal-app-id').value = appId;
-            document.getElementById('modal-worker-id').value = workerId;
-            const heading = document.getElementById('modal-candidate-name');
-            const icon = document.createElement('span');
-            const title = document.createElement('span');
-            icon.textContent = '📅';
-            title.textContent = `Meeting with ${workerName} for ${jobTitle}`;
-            heading.replaceChildren(icon, title);
-            document.getElementById('interview-modal').style.display = 'flex';
+        // Highlight active tab from URL hash
+        (function() {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && ['jobs','applicants','interviews'].includes(hash)) {
+                switchEmpTab(hash);
+            }
+        })();
+
+        // ============ NOTIFICATIONS DROPDOWN ============
+        function toggleNotifDropdown(event) {
+            if (event) event.stopPropagation();
+            const panel = document.getElementById('notif-dropdown-panel');
+            if (!panel) return;
+            const isVisible = panel.style.display === 'block';
+            panel.style.display = isVisible ? 'none' : 'block';
         }
 
-        function closeInterviewModal() {
-            document.getElementById('interview-modal').style.display = 'none';
+        function closeNotifDropdown(event) {
+            if (event) event.stopPropagation();
+            const panel = document.getElementById('notif-dropdown-panel');
+            if (panel) panel.style.display = 'none';
         }
 
-        document.querySelectorAll('[data-open-interview]').forEach(button => {
-            button.addEventListener('click', () => {
-                const data = button.dataset;
-                openInterviewModal(
-                    data.jobId,
-                    data.applicationId,
-                    data.workerId,
-                    data.workerName,
-                    data.jobTitle
-                );
-            });
-        });
-
-        // Support direct linking to tabs (e.g. #applicants or #interviews)
-        window.addEventListener('DOMContentLoaded', () => {
-            const hash = window.location.hash;
-            const urlParams = new URLSearchParams(window.location.search);
-            if (hash === '#applicants' || urlParams.has('job_id') || urlParams.has('status_filter')) {
-                switchEmpTab('applicants');
-            } else if (hash === '#interviews') {
-                switchEmpTab('interviews');
+        document.addEventListener('click', function(event) {
+            const wrapper = document.getElementById('notif-bell-wrapper');
+            const panel = document.getElementById('notif-dropdown-panel');
+            if (panel && panel.style.display === 'block') {
+                if (wrapper && !wrapper.contains(event.target)) {
+                    panel.style.display = 'none';
+                }
             }
         });
 
-        // Theme toggle - Dark/Light mode
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeNotifDropdown();
+        });
+
+        // ============ MARK NOTIFICATIONS READ ============
+        function markNotificationRead(notifId, event) {
+            if (event) event.stopPropagation();
+            fetch('/api/notifications/read/' + notifId, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    updateNotificationUIAsRead(notifId, data.unread_count);
+                })
+                .catch(err => console.error("Error marking notification read:", err));
+        }
+
+        function markAllNotificationsRead(event) {
+            if (event) event.preventDefault();
+            fetch('/api/notifications/read-all', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    updateAllNotificationsUIAsRead();
+                })
+                .catch(err => console.error("Error marking all read:", err));
+        }
+
+        function handleNotificationClick(notifId) {
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/api/notifications/read/' + notifId);
+            } else {
+                fetch('/api/notifications/read/' + notifId, { method: 'POST' }).catch(() => {});
+            }
+        }
+
+        function updateNotificationUIAsRead(notifId, newUnreadCount) {
+            const card = document.getElementById('notif-' + notifId);
+            if (card) {
+                card.classList.remove('unread');
+                card.classList.add('read');
+                card.style.borderColor = 'var(--wc-border)';
+            }
+            updateBadges(newUnreadCount);
+        }
+
+        function updateAllNotificationsUIAsRead() {
+            document.querySelectorAll('#notif-items-list .notif-card').forEach(c => {
+                c.classList.remove('unread');
+                c.classList.add('read');
+            });
+            updateBadges(0);
+        }
+
+        function updateBadges(count) {
+            const badge = document.getElementById('notif-badge');
+            if (badge) {
+                badge.innerText = count;
+                badge.style.display = count > 0 ? 'flex' : 'none';
+            }
+            const panelPill = document.getElementById('panel-unread-pill');
+            const panelNum = document.getElementById('panel-unread-num');
+            if (panelPill && panelNum) {
+                panelNum.innerText = count;
+                panelPill.style.display = count > 0 ? 'inline-block' : 'none';
+            }
+        }
+
+        // ============ NOTIFICATION SOUND ============
+        function playNotificationSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 3.0);
+            } catch(e) {}
+        }
+
+        let lastUnreadCount = {{ unread_notifications_count | default(0) }};
+        setInterval(() => {
+            fetch('/api/notifications')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const newCount = data.unread_count;
+                        if (newCount > lastUnreadCount) {
+                            playNotificationSound();
+                        }
+                        lastUnreadCount = newCount;
+                        updateBadges(newCount);
+                    }
+                })
+                .catch(() => {});
+        }, 20000);
+
+        // ============ THEME TOGGLE ============
         function toggleTheme() {
             const html = document.documentElement;
             const btn = document.getElementById('theme-toggle');
@@ -1445,7 +486,6 @@
             }
         }
 
-        // Restore theme preference on page load
         (function() {
             const savedTheme = localStorage.getItem('wc-theme');
             const btn = document.getElementById('theme-toggle');
@@ -1467,143 +507,11 @@
             }
         })();
 
-        // Notification dropdown functions
-        function toggleNotifDropdown(e) {
-            e.stopPropagation();
-            const panel = document.getElementById('notif-dropdown-panel');
-            if (panel.style.display === 'block') {
-                panel.style.display = 'none';
-            } else {
-                panel.style.display = 'block';
-                fetchNotificationsList();
-            }
+        // ============ INTERVIEW MODAL ============
+        function openInterviewModal(appId, jobId, workerId, workerName, jobTitle) {
+            alert('Schedule meeting with ' + workerName + ' for ' + jobTitle + ' (App ID: ' + appId + ')');
         }
-
-        function closeNotifDropdown(e) {
-            if (e) e.stopPropagation();
-            const panel = document.getElementById('notif-dropdown-panel');
-            if (panel) panel.style.display = 'none';
-        }
-
-        function markAllNotificationsRead(e) {
-            if (e) e.preventDefault();
-            fetch('/api/notifications/read-all', { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    const badge = document.getElementById('notif-badge');
-                    const panelPill = document.getElementById('panel-unread-pill');
-                    const panelNum = document.getElementById('panel-unread-num');
-                    if (badge) { badge.innerText = data.unread_count; badge.style.display = data.unread_count > 0 ? 'flex' : 'none'; }
-                    if (panelPill && panelNum) { panelNum.innerText = data.unread_count; panelPill.style.display = data.unread_count > 0 ? 'inline-block' : 'none'; }
-                })
-                .catch(() => {});
-        }
-
-        function fetchNotificationsList() {
-            fetch('/api/notifications')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const list = document.getElementById('notif-items-list');
-                    if (data.notifications.length === 0) {
-                        list.innerHTML = '<div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">No new notifications.</div>';
-                        return;
-                    }
-                    let html = '';
-                    data.notifications.slice(0, 5).forEach(n => {
-                        html += `<div class="notif-card ${n.is_read ? 'read' : 'unread'}" style="padding: var(--wc-space-2) var(--wc-space-3); margin-bottom: var(--wc-space-2); border-radius: var(--wc-radius-md); border: var(--wc-border-width) solid var(--wc-border);">
-                            <div style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm); margin-bottom: var(--wc-space-1);">${n.title}</div>
-                            <div style="color: var(--wc-text-muted); font-size: var(--wc-text-xs); margin-top: var(--wc-space-1);">${n.message}</div>
-                            <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-top: var(--wc-space-1);">${n.created_at}</div>
-                        </div>`;
-                    });
-                    list.innerHTML = html;
-                    if (data.unread_count > 0) {
-                        playNotificationSound();
-                    }
-                }
-            });
-        }
-
-        function playNotificationSound() {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const audioCtx = new AudioContext();
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3); // A5
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 3.0);
-            } catch(e) {}
-        }
-
-        let lastUnreadCount = {{ unread_notifications_count | default(0) }};
-        setInterval(() => {
-            fetch('/api/notifications')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const newCount = data.unread_count;
-                        if (newCount > lastUnreadCount) {
-                            playNotificationSound();
-                        }
-                        lastUnreadCount = newCount;
-                    }
-                })
-                .catch(() => {});
-        }, 20000);
     </script>
-
-    <!-- Mobile Bottom App Bar -->
-    <nav class="mobile-bottom-bar" aria-label="Mobile Navigation">
-        <a href="{{ url_for('home') }}" class="mobile-bottom-item {% if request.endpoint == 'home' %}active{% endif %}">
-            <span class="icon">🏠</span>
-            <span>Home</span>
-        </a>
-        <a href="{{ url_for('browse_jobs') }}" class="mobile-bottom-item {% if request.endpoint == 'browse_jobs' or request.endpoint == 'trade_sector' %}active{% endif %}">
-            <span class="icon">🔍</span>
-            <span>Explore</span>
-        </a>
-        {% if user_role == 'employer' %}
-        <a href="{{ url_for('post_job') }}" class="mobile-bottom-item {% if request.endpoint == 'post_job' %}active{% endif %}">
-            <span class="icon">＋</span>
-            <span>Post Job</span>
-        </a>
-        <a href="{{ url_for('employer_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'employer_dashboard' %}active{% endif %}">
-            <span class="icon">🏢</span>
-            <span>Dashboard</span>
-        </a>
-        {% elif user_role == 'worker' %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice AI</span>
-        </a>
-        <a href="{{ url_for('worker_dashboard') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_dashboard' or request.endpoint == 'worker_profile_edit' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Dashboard</span>
-        </a>
-        {% else %}
-        <a href="{{ url_for('worker_voice_register') }}" class="mobile-bottom-item {% if request.endpoint == 'worker_voice_register' %}active{% endif %}">
-            <span class="icon">🎙️</span>
-            <span>Voice Reg</span>
-        </a>
-        <a href="{{ url_for('login') }}" class="mobile-bottom-item {% if request.endpoint == 'login' %}active{% endif %}">
-            <span class="icon">👤</span>
-            <span>Sign In</span>
-        </a>
-        {% endif %}
-    </nav>
-    {% include 'partials/ai_assistant.html' %}
 
 </body>
 </html>
