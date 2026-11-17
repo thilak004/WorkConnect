@@ -371,15 +371,21 @@ def get_all_jobs(status_filter="Open", search_query=None, skill_filter=None,
     Supports search by keyword, skill, location, wage, and intelligent match sorting.
     """
     with get_db_connection() as connection:
-        
+
         query = """
             SELECT
                 jobs.*,
                 employers.name AS employer_name,
                 employers.phone AS employer_phone,
-                (SELECT COUNT(*) FROM applications WHERE job_id = jobs.id AND status IN ('Confirmed', 'Accepted')) AS confirmed_count
+                app_counts.confirmed_count
             FROM jobs
             JOIN employers ON jobs.employer_id = employers.id
+            LEFT JOIN (
+                SELECT job_id, COUNT(*) AS confirmed_count
+                FROM applications
+                WHERE status IN ('Confirmed', 'Accepted')
+                GROUP BY job_id
+            ) AS app_counts ON app_counts.job_id = jobs.id
             WHERE 1=1
         """
         params = []
@@ -435,8 +441,9 @@ def get_all_jobs(status_filter="Open", search_query=None, skill_filter=None,
         worker = get_worker_by_email(worker_email)
 
     for j in raw_jobs:
+        confirmed_count = j.get("confirmed_count") or 0
         if "positions_remaining" not in j or j["positions_remaining"] is None:
-            j["positions_remaining"] = max(0, j["workers_needed"] - j["confirmed_count"])
+            j["positions_remaining"] = max(0, j["workers_needed"] - confirmed_count)
 
         if worker:
             match = compute_match_score(worker, j)
@@ -501,10 +508,16 @@ def get_applications_by_employer(employer_email, job_id=None, status_filter=None
                 jobs.workers_needed AS job_workers_needed,
                 jobs.positions_remaining AS job_positions_remaining,
                 jobs.status AS job_status,
-                (SELECT COUNT(*) FROM applications WHERE job_id = jobs.id AND status IN ('Confirmed', 'Accepted')) AS confirmed_count
+                app_counts.confirmed_count
             FROM applications
             JOIN workers ON applications.worker_id = workers.id
             JOIN jobs ON applications.job_id = jobs.id
+            LEFT JOIN (
+                SELECT job_id, COUNT(*) AS confirmed_count
+                FROM applications
+                WHERE status IN ('Confirmed', 'Accepted')
+                GROUP BY job_id
+            ) AS app_counts ON app_counts.job_id = jobs.id
             WHERE jobs.employer_id = %s
         """
         params = [employer["id"]]
@@ -743,7 +756,24 @@ def get_matched_workers_for_job(job_id, min_score=0):
         return []
 
     job_profession = job.get("skill_required") or ""
-    workers = get_all_workers()
+    if not job_profession:
+        return []
+
+    # Filter by skill in SQL first so we only load matching workers into Python.
+    # is_profession_match() accepts exact match or keyword overlap, so start with
+    # the exact match (fast, index-backed) and fall back to all workers only if
+    # no exact matches exist.
+    with get_db_connection() as connection:
+        rows = connection.execute(
+            "SELECT * FROM workers WHERE LOWER(skill) = LOWER(%s) ORDER BY id",
+            (job_profession,)
+        ).fetchall()
+        workers = [dict(r) for r in rows]
+
+    if not workers:
+        # Fallback: load all workers if no exact-skill match (covers keyword-overlap cases).
+        workers = get_all_workers()
+
     matched_candidates = []
 
     for w in workers:
@@ -962,6 +992,18 @@ def is_job_saved_by_worker(worker_id, job_id):
             (worker_id, job_id)
         ).fetchone()
         return bool(row)
+
+
+def get_saved_job_ids_by_worker(worker_id):
+    """Fetch saved job IDs in one query for list pages."""
+    if not worker_id:
+        return set()
+    with get_db_connection() as connection:
+        rows = connection.execute(
+            "SELECT job_id FROM saved_jobs WHERE worker_id = %s",
+            (worker_id,),
+        ).fetchall()
+        return {row["job_id"] for row in rows}
 
 
 def get_saved_jobs_by_worker(worker_id):

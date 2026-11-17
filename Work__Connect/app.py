@@ -46,6 +46,7 @@ from database import (
     save_job_for_worker,
     unsave_job_for_worker,
     is_job_saved_by_worker,
+    get_saved_job_ids_by_worker,
     get_saved_jobs_by_worker,
     create_notification,
     get_notifications,
@@ -69,7 +70,6 @@ except Exception:
 
 from translations import get_translation, SUPPORTED_LANGUAGES
 from trade_utils import get_trade_for_skill, get_all_trades_list, TRADE_METADATA
-from ai_services import ask_workconnect_assistant, extract_registration_fields_from_transcript
 from notification_service import notify_workers_new_job, format_relative_time
 
 app = Flask(__name__)
@@ -314,7 +314,10 @@ def google_site_verification():
 @app.route("/")
 def home():
     """WorkConnect Homepage."""
-    return render_template("index.html")
+    response = make_response(render_template("index.html"))
+    # Homepage is public and changes infrequently; cache at edge + browser
+    response.headers["Cache-Control"] = "public, s-maxage=60, stale-while-revalidate=300"
+    return response
 
 
 @app.route("/register/worker", methods=["GET", "POST"])
@@ -435,12 +438,13 @@ def trade_sector(trade_key):
             jobs.append(j)
 
     current_worker_id = session.get("user_id") if session.get("role") == "worker" else None
+    saved_job_ids = get_saved_job_ids_by_worker(current_worker_id)
     for j in jobs:
         j["trade_image"] = trade_meta["image"]
         j["trade_icon"] = trade_meta["icon"]
         j["trade_color"] = trade_meta["color"]
         j["trade_bg_tint"] = trade_meta["bg_tint"]
-        j["is_saved"] = is_job_saved_by_worker(current_worker_id, j["id"]) if current_worker_id else False
+        j["is_saved"] = j["id"] in saved_job_ids
 
     return render_template(
         "trade_sector.html",
@@ -553,13 +557,14 @@ def browse_jobs():
 
     # Attach visual trade metadata and saved job state for worker
     current_worker_id = session.get("user_id") if session.get("role") == "worker" else None
+    saved_job_ids = get_saved_job_ids_by_worker(current_worker_id)
     for j in jobs:
         trade_meta = get_trade_for_skill(j["skill_required"])
         j["trade_image"] = trade_meta["image"]
         j["trade_icon"] = trade_meta["icon"]
         j["trade_color"] = trade_meta["color"]
         j["trade_bg_tint"] = trade_meta["bg_tint"]
-        j["is_saved"] = is_job_saved_by_worker(current_worker_id, j["id"]) if current_worker_id else False
+        j["is_saved"] = j["id"] in saved_job_ids
 
     # Retrieve unique skills and locations for quick filter pills
     with get_db_connection() as connection:
@@ -703,7 +708,16 @@ def job_details(job_id):
         has_applied=has_applied,
         application_status=application_status,
         is_saved=is_saved
-    )
+    ), 200, _cache_headers_for_job_details(session)
+
+
+def _cache_headers_for_job_details(session):
+    """Public cache headers for job details when no user-specific personalization applied."""
+    if session.get("user_id") and session.get("role") == "worker":
+        # Personalized content: browser-only short cache
+        return {"Cache-Control": "private, max-age=30"}
+    # Public page: edge + browser cache
+    return {"Cache-Control": "public, s-maxage=60, stale-while-revalidate=300"}
 
 
 @app.route("/jobs/<int:job_id>/apply", methods=["GET", "POST"])
@@ -1266,11 +1280,14 @@ def api_get_notifications():
     user_id = session.get("user_id")
     notifs = get_notifications(user_role, user_id)
     unread_count = get_unread_notifications_count(user_role, user_id)
-    return jsonify({
+    response = jsonify({
         "success": True,
         "unread_count": unread_count,
         "notifications": notifs
     })
+    # User-specific data: cache briefly in the browser only, never on shared CDN
+    response.headers["Cache-Control"] = "private, max-age=30, stale-while-revalidate=60"
+    return response
 
 
 @app.route("/api/notifications/read/<int:notif_id>", methods=["POST"])
@@ -1310,6 +1327,7 @@ def api_ai_chat():
         return jsonify({"reply": "Please ask a question." if lang == "en" else "దయచేసి ఒక ప్రశ్న అడగండి."})
 
     try:
+        from ai_services import ask_workconnect_assistant
         reply = ask_workconnect_assistant(message, lang=lang, role=role)
         return jsonify({"reply": reply, "success": True})
     except Exception as e:
@@ -1332,6 +1350,7 @@ def api_voice_stt():
     if not transcript:
         return jsonify({"error": "No transcript provided"}), 400
 
+    from ai_services import extract_registration_fields_from_transcript
     extracted = extract_registration_fields_from_transcript(transcript, lang=lang)
     return jsonify({"success": True, "data": extracted})
 
@@ -1353,7 +1372,7 @@ def api_voice_tts():
         "text": text,
         "lang": lang,
         "voice_locale": "te-IN" if lang == "te" else ("hi-IN" if lang == "hi" else "en-IN")
-    })
+    }), 200, {"Cache-Control": "public, max-age=300, stale-while-revalidate=600"}
 
 
 @app.errorhandler(Exception)
