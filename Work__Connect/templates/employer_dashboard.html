@@ -6,64 +6,28 @@
     <title>{{ t('nav_employer_dashboard') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-        /* =========================================================
-           EMPLOYER DASHBOARD - MODERN REFINED UI STYLING
-           ========================================================= */
-
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --primary-light: #eff6ff;
-            --text-main: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --card-bg: #ffffff;
-            --card-border: #e2e8f0;
-            --card-border-hover: #cbd5e1;
-            --card-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
-            --card-shadow-hover: 0 6px 18px -4px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-            --navy-gradient: linear-gradient(135deg, #091326 0%, #0f1f3d 50%, #1e3a8a 100%);
-        }
-
-        body {
-            background-color: #f8fafc;
-            color: var(--text-main);
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .dashboard-container {
-            max-width: 1140px;
-            margin: 24px auto 60px auto;
-            padding: 0 20px;
-        }
-
-        /* ---------------------------------------------------------
-           1. EMPLOYER PROFILE HEADER (COMPACT & REFINED)
-           --------------------------------------------------------- */
+        /* Employer Dashboard refinements (design-system-based) */
         .emp-profile-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-top: 3px solid #2563eb;
-            border-radius: 14px;
-            padding: 16px 22px;
-            color: var(--text-main);
+            background: var(--wc-surface);
+            border: var(--wc-border-width) solid var(--wc-border);
+            border-top: 3px solid var(--wc-primary);
+            border-radius: var(--wc-radius-lg);
+            padding: var(--wc-space-3) var(--wc-space-5);
+            color: var(--wc-heading);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
+            gap: var(--wc-space-4);
             flex-wrap: wrap;
-            margin-bottom: 22px;
-            box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+            margin-bottom: var(--wc-space-5);
+            box-shadow: var(--wc-shadow);
             position: relative;
         }
 
         .emp-profile-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: var(--wc-space-4);
             flex: 1 1 480px;
             min-width: 0;
         }
@@ -71,15 +35,15 @@
         .emp-avatar-box {
             width: 44px;
             height: 44px;
-            border-radius: 10px;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
+            border-radius: var(--wc-radius-md);
+            background: var(--wc-primary-light);
+            border: var(--wc-border-width) solid #bfdbfe;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #2563eb;
+            color: var(--wc-primary);
             flex-shrink: 0;
-            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+            box-shadow: var(--wc-shadow-sm);
         }
 
         .emp-profile-info {
@@ -90,32 +54,32 @@
         .emp-name-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--wc-space-2);
             flex-wrap: wrap;
-            margin-bottom: 5px;
+            margin-bottom: var(--wc-space-1);
         }
 
         .emp-name {
-            font-size: 20px;
-            font-weight: 800;
-            color: #0f172a;
+            font-size: var(--wc-text-xl);
+            font-weight: var(--wc-font-weight-extrabold);
+            color: var(--wc-heading);
             letter-spacing: -0.3px;
             margin: 0;
-            line-height: 1.25;
+            line-height: var(--wc-line-tight);
             word-break: break-word;
         }
 
         .verified-chip {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            background: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
+            gap: var(--wc-space-1);
+            background: var(--wc-success-bg);
+            color: var(--wc-success);
+            border: var(--wc-border-width) solid #a7f3d0;
             padding: 2.5px 9px;
-            border-radius: 9999px;
-            font-size: 11.5px;
-            font-weight: 700;
+            border-radius: var(--wc-radius-full);
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
             letter-spacing: 0.2px;
         }
 
@@ -124,58 +88,59 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 6px 12px;
-            font-size: 13px;
-            color: #475569;
-            font-weight: 500;
+            font-size: var(--wc-text-sm);
+            color: var(--wc-text-muted);
+            font-weight: var(--wc-font-weight-medium);
         }
 
         .meta-item {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            color: #475569;
+            gap: var(--wc-space-1);
+            color: var(--wc-text-muted);
             word-break: break-word;
         }
 
         .meta-item svg {
-            color: #64748b;
+            color: var(--wc-text-muted);
             flex-shrink: 0;
         }
 
         .meta-dot {
-            color: #cbd5e1;
-            font-size: 12px;
+            color: var(--wc-border-hover);
+            font-size: var(--wc-text-xs);
             user-select: none;
         }
 
         .emp-header-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--wc-space-2);
             flex-wrap: wrap;
             margin-left: auto;
         }
 
         .btn-verify-badge {
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 600;
+            padding: var(--wc-space-2) var(--wc-space-3);
+            border-radius: var(--wc-radius);
+            font-size: var(--wc-text-sm);
+            font-weight: var(--wc-font-weight-semibold);
             cursor: pointer;
-            transition: all 0.18s ease;
+            transition: all var(--wc-transition-fast);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: var(--wc-space-1);
             white-space: nowrap;
             text-decoration: none;
-            line-height: 1.4;
+            line-height: var(--wc-line-normal);
             font-family: inherit;
+            border: var(--wc-border-width) solid transparent;
         }
 
         .btn-verify-badge.is-verified {
-            background: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            color: #065f46;
+            background: var(--wc-success-bg);
+            border-color: #a7f3d0;
+            color: var(--wc-success);
         }
 
         .btn-verify-badge.is-verified:hover {
@@ -185,9 +150,9 @@
         }
 
         .btn-verify-badge.is-pending {
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            color: #92400e;
+            background: var(--wc-warning-bg);
+            border-color: #fde68a;
+            color: var(--wc-warning);
         }
 
         .btn-verify-badge.is-pending:hover {
@@ -200,82 +165,79 @@
             width: 7px;
             height: 7px;
             border-radius: 50%;
-            background: #d97706;
+            background: var(--wc-warning);
             flex-shrink: 0;
             display: inline-block;
         }
 
         .status-sep {
-            color: #d97706;
-            font-size: 11px;
+            color: var(--wc-warning);
+            font-size: var(--wc-text-xs);
             opacity: 0.7;
         }
 
         .action-name {
-            color: #b45309;
+            color: var(--wc-warning);
             text-decoration: underline;
             text-underline-offset: 2px;
-            font-weight: 700;
+            font-weight: var(--wc-font-weight-bold);
         }
 
         .btn-post-job-main {
-            background: #2563eb;
+            background: var(--wc-primary);
             color: #ffffff;
-            border: 1px solid #1d4ed8;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
+            border: var(--wc-border-width) solid var(--wc-primary-dark);
+            padding: var(--wc-space-2) var(--wc-space-4);
+            border-radius: var(--wc-radius);
+            font-size: var(--wc-text-sm);
+            font-weight: var(--wc-font-weight-bold);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: var(--wc-space-1);
             box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
-            transition: all 0.18s ease;
+            transition: all var(--wc-transition-fast);
             white-space: nowrap;
-            line-height: 1.4;
+            line-height: var(--wc-line-normal);
         }
 
         .btn-post-job-main:hover {
-            background: #1d4ed8;
+            background: var(--wc-primary-dark);
             border-color: #1e40af;
             box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
             transform: translateY(-1px);
             color: #ffffff;
         }
 
-        /* ---------------------------------------------------------
-           2. STATISTICS CARDS
-           --------------------------------------------------------- */
+        /* Statistics cards */
         .stat-grid-modern {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 26px;
+            gap: var(--wc-space-4);
+            margin-bottom: var(--wc-space-6);
         }
 
         .stat-card-modern {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 18px 20px;
-            box-shadow: var(--card-shadow);
+            background: var(--wc-surface);
+            border: var(--wc-border-width) solid var(--wc-border);
+            border-radius: var(--wc-radius-lg);
+            padding: var(--wc-space-4) var(--wc-space-5);
+            box-shadow: var(--wc-shadow);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             min-height: 104px;
-            transition: all 0.2s ease;
+            transition: all var(--wc-transition-normal);
             position: relative;
             overflow: hidden;
         }
 
         .stat-card-modern:hover {
-            border-color: var(--card-border-hover);
-            box-shadow: var(--card-shadow-hover);
+            border-color: var(--wc-border-hover);
+            box-shadow: var(--wc-shadow-md);
             transform: translateY(-2px);
         }
 
-        /* Subtle top colored accent bars */
         .stat-card-modern::before {
             content: "";
             position: absolute;
@@ -285,22 +247,22 @@
             height: 3px;
         }
 
-        .stat-card-blue::before { background: #2563eb; }
-        .stat-card-green::before { background: #059669; }
-        .stat-card-orange::before { background: #d97706; }
+        .stat-card-blue::before { background: var(--wc-primary); }
+        .stat-card-green::before { background: var(--wc-success); }
+        .stat-card-orange::before { background: var(--wc-warning); }
         .stat-card-purple::before { background: #7c3aed; }
 
         .stat-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: var(--wc-space-2);
         }
 
         .stat-title {
-            font-size: 12.5px;
-            font-weight: 700;
-            color: var(--text-secondary);
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
+            color: var(--wc-text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -308,7 +270,7 @@
         .stat-icon-pill {
             width: 32px;
             height: 32px;
-            border-radius: 8px;
+            border-radius: var(--wc-radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -316,9 +278,9 @@
             flex-shrink: 0;
         }
 
-        .stat-card-blue .stat-icon-pill { background: #eff6ff; color: #2563eb; }
-        .stat-card-green .stat-icon-pill { background: #ecfdf5; color: #059669; }
-        .stat-card-orange .stat-icon-pill { background: #fffbeb; color: #d97706; }
+        .stat-card-blue .stat-icon-pill { background: var(--wc-primary-light); color: var(--wc-primary); }
+        .stat-card-green .stat-icon-pill { background: var(--wc-success-bg); color: var(--wc-success); }
+        .stat-card-orange .stat-icon-pill { background: var(--wc-warning-bg); color: var(--wc-warning); }
         .stat-card-purple .stat-icon-pill { background: #f5f3ff; color: #7c3aed; }
 
         .stat-number {
@@ -329,57 +291,49 @@
         }
 
         .stat-card-blue .stat-number { color: #1e40af; }
-        .stat-card-green .stat-number { color: #065f46; }
+        .stat-card-green .stat-number { color: var(--wc-success); }
         .stat-card-orange .stat-number { color: #92400e; }
         .stat-card-purple .stat-number { color: #5b21b6; }
 
-        /* ---------------------------------------------------------
-           3. DASHBOARD NAVIGATION TABS
-           --------------------------------------------------------- */
+        /* Dashboard navigation tabs */
         .tabs-header-modern {
             display: flex;
             align-items: center;
-            gap: 10px;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 22px;
+            gap: var(--wc-space-2);
+            border-bottom: 2px solid var(--wc-border);
+            margin-bottom: var(--wc-space-5);
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
             padding-bottom: 0;
-        }
-
-        .tabs-header-modern::-webkit-scrollbar {
-            display: none;
         }
 
         .tab-btn-modern {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 18px;
-            font-size: 13.5px;
-            font-weight: 600;
-            color: var(--text-muted);
+            gap: var(--wc-space-2);
+            padding: var(--wc-space-3) var(--wc-space-4);
+            font-size: var(--wc-text-sm);
+            font-weight: var(--wc-font-weight-semibold);
+            color: var(--wc-text-muted);
             background: transparent;
             border: none;
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--wc-transition-fast);
             white-space: nowrap;
-            border-radius: 8px 8px 0 0;
+            border-radius: var(--wc-radius-md) var(--wc-radius-md) 0 0;
         }
 
         .tab-btn-modern:hover {
-            color: var(--text-main);
-            background: #f1f5f9;
+            color: var(--wc-heading);
+            background: var(--wc-surface-hover);
         }
 
         .tab-btn-modern.active {
-            color: #2563eb;
-            font-weight: 750;
-            border-bottom-color: #2563eb;
-            background: rgba(37, 99, 235, 0.05);
+            color: var(--wc-primary);
+            font-weight: var(--wc-font-weight-bold);
+            border-bottom-color: var(--wc-primary);
+            background: rgba(40, 100, 201, 0.05);
         }
 
         .tab-count-badge {
@@ -388,49 +342,47 @@
             justify-content: center;
             min-width: 20px;
             height: 20px;
-            padding: 0 6px;
+            padding: 0 var(--wc-space-1);
             border-radius: 10px;
-            font-size: 11px;
-            font-weight: 750;
-            background: #e2e8f0;
-            color: #475569;
-            transition: all 0.2s ease;
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
+            background: var(--wc-border-hover);
+            color: var(--wc-text-muted);
+            transition: all var(--wc-transition-fast);
         }
 
         .tab-btn-modern.active .tab-count-badge {
-            background: #2563eb;
+            background: var(--wc-primary);
             color: #ffffff;
         }
 
-        /* ---------------------------------------------------------
-           4. POSTED JOB CARDS
-           --------------------------------------------------------- */
+        /* Posted job cards */
         .job-card-modern {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 18px 22px;
-            margin-bottom: 14px;
-            box-shadow: var(--card-shadow);
+            background: var(--wc-surface);
+            border: var(--wc-border-width) solid var(--wc-border);
+            border-radius: var(--wc-radius-lg);
+            padding: var(--wc-space-4) var(--wc-space-5);
+            margin-bottom: var(--wc-space-3);
+            box-shadow: var(--wc-shadow);
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 18px;
-            border-left: 4px solid #2563eb;
-            transition: all 0.2s ease;
+            gap: var(--wc-space-4);
+            border-left: 4px solid var(--wc-primary);
+            transition: all var(--wc-transition-normal);
         }
 
         .job-card-modern:hover {
-            border-color: var(--card-border-hover);
-            box-shadow: var(--card-shadow-hover);
+            border-color: var(--wc-border-hover);
+            box-shadow: var(--wc-shadow-md);
             transform: translateY(-1px);
         }
 
         .job-card-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: var(--wc-space-4);
             flex: 1 1 500px;
             min-width: 0;
         }
@@ -438,10 +390,10 @@
         .job-trade-thumb {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            padding: 5px;
+            border-radius: var(--wc-radius-md);
+            background: var(--wc-surface-hover);
+            border: var(--wc-border-width) solid var(--wc-border);
+            padding: var(--wc-space-1);
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -462,40 +414,40 @@
         .job-title-row {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--wc-space-2);
             flex-wrap: wrap;
-            margin-bottom: 6px;
+            margin-bottom: var(--wc-space-1);
         }
 
         .job-title-text {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-main);
+            font-size: var(--wc-text-lg);
+            font-weight: var(--wc-font-weight-extrabold);
+            color: var(--wc-heading);
             margin: 0;
-            line-height: 1.3;
+            line-height: var(--wc-line-tight);
         }
 
         .job-status-pill {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: var(--wc-space-1);
             padding: 2.5px 9px;
             border-radius: 14px;
-            font-size: 11.5px;
-            font-weight: 750;
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
             letter-spacing: 0.2px;
         }
 
         .job-status-open {
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #a7f3d0;
+            background: var(--wc-success-bg);
+            color: var(--wc-success);
+            border: var(--wc-border-width) solid #a7f3d0;
         }
 
         .job-status-closed {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
+            background: var(--wc-surface-hover);
+            color: var(--wc-text-muted);
+            border: var(--wc-border-width) solid var(--wc-border-hover);
         }
 
         .status-dot-pulse {
@@ -513,8 +465,8 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 8px 14px;
-            font-size: 13px;
-            color: var(--text-muted);
+            font-size: var(--wc-text-sm);
+            color: var(--wc-text-muted);
         }
 
         .job-meta-pill {
@@ -523,37 +475,30 @@
             gap: 4px;
         }
 
-        .job-meta-wage {
-            color: #047857;
-            font-weight: 750;
-        }
-
-        .job-meta-positions {
-            color: #2563eb;
-            font-weight: 750;
-        }
+        .job-meta-wage { color: var(--wc-success); font-weight: var(--wc-font-weight-bold); }
+        .job-meta-positions { color: var(--wc-primary); font-weight: var(--wc-font-weight-bold); }
 
         .job-actions-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--wc-space-2);
             flex-wrap: wrap;
             flex-shrink: 0;
         }
 
         .btn-action-matches {
-            padding: 8px 14px;
-            background: #eef2ff;
+            padding: var(--wc-space-2) var(--wc-space-3);
+            background: var(--wc-info-bg);
             color: #4338ca;
-            border: 1px solid #c7d2fe;
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 700;
+            border: var(--wc-border-width) solid #c7d2fe;
+            border-radius: var(--wc-radius);
+            font-size: var(--wc-text-sm);
+            font-weight: var(--wc-font-weight-bold);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
+            gap: var(--wc-space-1);
+            transition: all var(--wc-transition-fast);
             white-space: nowrap;
         }
 
@@ -565,58 +510,56 @@
         }
 
         .btn-action-applicants {
-            padding: 8px 14px;
-            background: #f8fafc;
-            color: #334155;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 700;
+            padding: var(--wc-space-2) var(--wc-space-3);
+            background: var(--wc-surface-hover);
+            color: var(--wc-heading);
+            border: var(--wc-border-width) solid var(--wc-border);
+            border-radius: var(--wc-radius);
+            font-size: var(--wc-text-sm);
+            font-weight: var(--wc-font-weight-semibold);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
+            gap: var(--wc-space-1);
+            transition: all var(--wc-transition-fast);
             white-space: nowrap;
         }
 
         .btn-action-applicants:hover {
             background: #f1f5f9;
             color: #1e293b;
-            border-color: #94a3b8;
+            border-color: var(--wc-border-hover);
             transform: translateY(-1px);
         }
 
         .applicant-count-pill {
-            background: #e2e8f0;
-            color: #334155;
+            background: var(--wc-border-hover);
+            color: var(--wc-heading);
             padding: 1px 7px;
             border-radius: 10px;
-            font-size: 11px;
-            font-weight: 800;
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
         }
 
-        /* ---------------------------------------------------------
-           5. APPLICANT & MEETING ROWS
-           --------------------------------------------------------- */
+        /* Applicant & meeting rows */
         .applicant-row-modern {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 18px 22px;
-            margin-bottom: 14px;
-            box-shadow: var(--card-shadow);
+            background: var(--wc-surface);
+            border: var(--wc-border-width) solid var(--wc-border);
+            border-radius: var(--wc-radius-lg);
+            padding: var(--wc-space-4) var(--wc-space-5);
+            margin-bottom: var(--wc-space-3);
+            box-shadow: var(--wc-shadow);
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 16px;
-            transition: all 0.2s ease;
+            gap: var(--wc-space-4);
+            transition: all var(--wc-transition-normal);
         }
 
         .applicant-row-modern:hover {
-            border-color: var(--card-border-hover);
-            box-shadow: var(--card-shadow-hover);
+            border-color: var(--wc-border-hover);
+            box-shadow: var(--wc-shadow-md);
         }
 
         .applicant-info-block {
@@ -627,165 +570,161 @@
         .applicant-title-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
+            gap: var(--wc-space-2);
+            margin-bottom: var(--wc-space-1);
             flex-wrap: wrap;
         }
 
         .applicant-name {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-main);
+            font-size: var(--wc-text-lg);
+            font-weight: var(--wc-font-weight-extrabold);
+            color: var(--wc-heading);
             margin: 0;
         }
 
         .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: var(--wc-space-1);
             padding: 3px 10px;
             border-radius: 14px;
-            font-size: 11.5px;
-            font-weight: 750;
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
         }
 
-        .status-pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-        .status-shortlisted { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
-        .status-confirmed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-        .status-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .status-pending { background: var(--wc-warning-bg); color: var(--wc-warning); border: var(--wc-border-width) solid #fde68a; }
+        .status-shortlisted { background: var(--wc-info-bg); color: #4338ca; border: var(--wc-border-width) solid #c7d2fe; }
+        .status-confirmed { background: var(--wc-success-bg); color: #15803d; border: var(--wc-border-width) solid #bbf7d0; }
+        .status-rejected { background: var(--wc-danger-bg); color: var(--wc-danger); border: var(--wc-border-width) solid #fecaca; }
 
         .applicant-meta-row {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
             gap: 8px 14px;
-            font-size: 13px;
-            color: var(--text-muted);
+            font-size: var(--wc-text-sm);
+            color: var(--wc-text-muted);
         }
 
         .match-score-badge {
-            margin-top: 8px;
+            margin-top: var(--wc-space-2);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #166534;
-            font-weight: 700;
+            gap: var(--wc-space-1);
+            background: var(--wc-success-bg);
+            border: var(--wc-border-width) solid #bbf7d0;
+            padding: var(--wc-space-1) var(--wc-space-3);
+            border-radius: var(--wc-radius-md);
+            font-size: var(--wc-text-xs);
+            color: var(--wc-success);
+            font-weight: var(--wc-font-weight-bold);
         }
 
         .match-explanation-text {
-            font-size: 12px;
-            color: #475569;
-            margin-top: 4px;
+            font-size: var(--wc-text-xs);
+            color: var(--wc-text-muted);
+            margin-top: var(--wc-space-1);
             line-height: 1.4;
         }
 
         .applicant-actions-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: var(--wc-space-2);
             align-items: flex-end;
             flex-shrink: 0;
         }
 
         .btn-status-action {
-            padding: 6px 12px;
-            border-radius: 7px;
-            font-size: 12px;
-            font-weight: 750;
+            padding: var(--wc-space-1) var(--wc-space-2);
+            border-radius: var(--wc-radius-sm);
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
             cursor: pointer;
-            transition: all 0.15s ease;
-            border: 1px solid transparent;
+            transition: all var(--wc-transition-fast);
+            border: var(--wc-border-width) solid transparent;
         }
 
         .btn-status-shortlist {
-            background: #e0e7ff;
+            background: var(--wc-info-bg);
             color: #4338ca;
             border-color: #c7d2fe;
         }
         .btn-status-shortlist:hover { background: #c7d2fe; }
 
         .btn-status-confirm {
-            background: #dcfce7;
+            background: var(--wc-success-bg);
             color: #15803d;
             border-color: #bbf7d0;
         }
         .btn-status-confirm:hover { background: #bbf7d0; }
 
         .btn-status-reject {
-            background: #fee2e2;
-            color: #b91c1c;
+            background: var(--wc-danger-bg);
+            color: var(--wc-danger);
             border-color: #fecaca;
         }
         .btn-status-reject:hover { background: #fecaca; }
 
         .btn-schedule-action {
             background: #ffffff;
-            border: 1px solid #cbd5e1;
-            color: #1e293b;
-            padding: 7px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 700;
+            border: var(--wc-border-width) solid var(--wc-border);
+            color: var(--wc-heading);
+            padding: var(--wc-space-1) var(--wc-space-3);
+            border-radius: var(--wc-radius);
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
+            gap: var(--wc-space-1);
+            transition: all var(--wc-transition-fast);
         }
 
         .btn-schedule-action:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
-            color: #0f172a;
+            background: var(--wc-surface-hover);
+            border-color: var(--wc-border-hover);
+            color: var(--wc-heading);
         }
 
-        /* ---------------------------------------------------------
-           6. EMPTY STATES
-           --------------------------------------------------------- */
+        /* Empty states */
         .empty-state-modern {
-            background: var(--card-bg);
-            border-radius: 14px;
-            padding: 44px 24px;
+            background: var(--wc-surface);
+            border-radius: var(--wc-radius-lg);
+            padding: var(--wc-space-8) var(--wc-space-4);
             text-align: center;
-            border: 1px solid var(--card-border);
-            box-shadow: var(--card-shadow);
+            border: var(--wc-border-width) solid var(--wc-border);
+            box-shadow: var(--wc-shadow);
         }
 
         .empty-icon-circle {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: #f1f5f9;
+            background: var(--wc-surface-hover);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
-            margin: 0 auto 14px auto;
+            margin: 0 auto var(--wc-space-3) auto;
         }
 
         .empty-state-title {
-            font-size: 17px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin: 0 0 6px 0;
+            font-size: var(--wc-text-lg);
+            font-weight: var(--wc-font-weight-extrabold);
+            color: var(--wc-heading);
+            margin: 0 0 var(--wc-space-2) 0;
         }
 
         .empty-state-text {
-            font-size: 13.5px;
-            color: var(--text-muted);
-            margin: 0 auto 18px auto;
+            font-size: var(--wc-text-sm);
+            color: var(--wc-text-muted);
+            margin: 0 auto var(--wc-space-4) auto;
             max-width: 440px;
-            line-height: 1.5;
+            line-height: var(--wc-line-relaxed);
         }
 
-        /* ---------------------------------------------------------
-           7. MODAL STYLES
-           --------------------------------------------------------- */
+        /* Modal styles */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -794,60 +733,60 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            padding: 16px;
+            z-index: var(--wc-z-modal);
+            padding: var(--wc-space-4);
         }
 
         .modal-content-modern {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 26px 28px;
+            background: var(--wc-surface);
+            border-radius: var(--wc-radius-xl);
+            padding: var(--wc-space-5) var(--wc-space-6);
             width: 480px;
             max-width: 100%;
-            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
-            border: 1px solid #e2e8f0;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--wc-shadow-xl);
+            border: var(--wc-border-width) solid var(--wc-border);
         }
 
         .modal-header-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin: 0 0 16px 0;
+            font-size: var(--wc-text-lg);
+            font-weight: var(--wc-font-weight-extrabold);
+            color: var(--wc-heading);
+            margin: 0 0 var(--wc-space-4) 0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--wc-space-2);
         }
 
         .form-label-modern {
             display: block;
-            font-size: 12.5px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
+            font-size: var(--wc-text-xs);
+            font-weight: var(--wc-font-weight-bold);
+            color: var(--wc-text-muted);
+            margin-bottom: var(--wc-space-1);
         }
 
         .form-input-modern {
             width: 100%;
             box-sizing: border-box;
-            padding: 9px 12px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            font-size: 13.5px;
+            padding: var(--wc-space-2) var(--wc-space-3);
+            border-radius: var(--wc-radius);
+            border: var(--wc-border-width) solid var(--wc-border);
+            font-size: var(--wc-text-base);
             font-family: inherit;
-            color: var(--text-main);
-            background: #ffffff;
-            transition: all 0.2s ease;
+            color: var(--wc-text);
+            background: var(--wc-surface);
+            transition: all var(--wc-transition-fast);
         }
 
         .form-input-modern:focus {
             outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: var(--wc-primary);
+            box-shadow: 0 0 0 3px rgb(40 100 201 / 0.15);
         }
 
-        /* ---------------------------------------------------------
-           8. RESPONSIVE BREAKPOINTS
-           --------------------------------------------------------- */
+        /* Responsive breakpoints */
         @media (max-width: 960px) {
             .stat-grid-modern {
                 grid-template-columns: repeat(2, 1fr);
@@ -856,15 +795,15 @@
 
         @media (max-width: 768px) {
             .dashboard-container {
-                padding: 0 14px;
-                margin-top: 16px;
+                padding: 0 var(--wc-space-4);
+                margin-top: var(--wc-space-4);
             }
 
             .emp-profile-card {
-                padding: 16px 18px;
+                padding: var(--wc-space-3) var(--wc-space-4);
                 flex-direction: column;
                 align-items: stretch;
-                gap: 14px;
+                gap: var(--wc-space-3);
             }
 
             .emp-profile-left {
@@ -873,10 +812,9 @@
 
             .emp-header-actions {
                 width: 100%;
-                display: flex;
                 flex-direction: column;
                 align-items: stretch;
-                gap: 10px;
+                gap: var(--wc-space-2);
                 margin-left: 0;
             }
 
@@ -896,7 +834,7 @@
             .job-card-modern {
                 flex-direction: column;
                 align-items: stretch;
-                padding: 16px 18px;
+                padding: var(--wc-space-4);
             }
 
             .job-card-left {
@@ -907,7 +845,7 @@
                 width: 100%;
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 8px;
+                gap: var(--wc-space-2);
             }
 
             .btn-action-matches,
@@ -950,13 +888,13 @@
             .emp-profile-left {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 12px;
+                gap: var(--wc-space-2);
             }
 
             .emp-profile-meta {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 6px;
+                gap: var(--wc-space-2);
             }
 
             .emp-profile-meta .meta-dot {
@@ -966,23 +904,23 @@
             .btn-verify-badge.is-pending {
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 4px;
+                gap: var(--wc-space-1);
             }
         }
     </style>
 </head>
-<body>
+<body style="background: var(--wc-background);">
 
     <!-- Navigation Header -->
-    <header class="navbar" style="background: #ffffff; border-bottom: 1px solid #e3eaf2; padding: 0 4%; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
-        <a href="{{ url_for('home') }}" style="font-size: 18px; font-weight: 800; color: #172b4d; text-decoration: none; display: flex; align-items: center; gap: 6px;">
-            Work<span style="color: #2864c9;">Connect</span>
+    <header class="navbar">
+        <a class="brand" href="{{ url_for('home') }}">
+            <div class="brand-name">Work<span>Connect</span></div>
         </a>
-        <nav style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <a href="{{ url_for('home') }}" style="font-size: 13px; font-weight: 600; color: #536780; text-decoration: none;">{{ t('nav_home') }}</a>
-            <a href="{{ url_for('post_job') }}" style="font-size: 13px; font-weight: 600; color: #536780; text-decoration: none;">{{ t('nav_post_job') }}</a>
-            <a href="{{ url_for('employer_dashboard') }}" style="padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #2864c9; background: #eef4fc; text-decoration: none;">{{ t('nav_employer_dashboard') }}</a>
-            <a href="{{ url_for('candidate_matches') }}" style="padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #ffffff; background: #2864c9; text-decoration: none;">{{ t('nav_candidate_matcher') }}</a>
+        <nav class="nav-links">
+            <a class="nav-link" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
+            <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
+            <a class="nav-link active" href="{{ url_for('employer_dashboard') }}">{{ t('nav_employer_dashboard') }}</a>
+            <a class="nav-link" href="{{ url_for('candidate_matches') }}" style="background: var(--wc-primary-light); color: var(--wc-primary); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius); font-weight: var(--wc-font-weight-bold);">{{ t('nav_candidate_matcher') }}</a>
 
             <!-- Language Switcher -->
             <div class="lang-selector">
@@ -992,21 +930,17 @@
             </div>
 
             <!-- Logout -->
-            <a href="{{ url_for('logout') }}" style="font-size: 12px; font-weight: 700; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 10px; border-radius: 8px; text-decoration: none;">
-                {{ t('nav_logout') }}
-            </a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
         </nav>
     </header>
 
-    <main class="dashboard-container">
+    <main class="dashboard-container wc-container">
 
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div style="padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-weight: 600; font-size: 13px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% elif category == 'danger' %}#fee2e2; color: #991b1b; border: 1px solid #fecaca;{% else %}#eff6ff; color: #1e40af; border: 1px solid #bfdbfe;{% endif %}">
-                        {{ message }}
-                    </div>
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -1091,18 +1025,18 @@
         </section>
 
         <!-- Quick Action Toolbar -->
-        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 22px; margin-bottom: 24px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 4px 18px rgba(0,0,0,0.03);">
-            <strong style="color: #1e293b; font-size: 14px;">Quick Navigation:</strong>
-            <a href="{{ url_for('post_job') }}" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #2864c9; color: white; display: inline-flex; align-items: center; gap: 6px;">
+        <div class="card card-padded" style="margin-bottom: var(--wc-space-6); display: flex; gap: var(--wc-space-3); align-items: center; flex-wrap: wrap;">
+            <strong style="color: var(--wc-heading); font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-bold);">Quick Navigation:</strong>
+            <a href="{{ url_for('post_job') }}" class="btn btn-primary btn-sm">
                 ＋ Post New Job
             </a>
-            <a href="{{ url_for('candidate_matches') }}" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; display: inline-flex; align-items: center; gap: 6px;">
+            <a href="{{ url_for('candidate_matches') }}" class="btn btn-secondary btn-sm">
                 🎯 Smart Candidate Matcher
             </a>
-            <a href="{{ url_for('employer_profile_edit') }}" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+            <a href="{{ url_for('employer_profile_edit') }}" class="btn btn-ghost btn-sm">
                 ⚙️ {{ t('edit_profile') }}
             </a>
-            <a href="#applicants" onclick="switchEmpTab('applicants')" style="padding: 8px 16px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 6px;">
+            <a href="#applicants" onclick="switchEmpTab('applicants')" class="btn btn-ghost btn-sm">
                 👥 Review Applicants
             </a>
         </div>

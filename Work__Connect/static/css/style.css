@@ -62,6 +62,7 @@
 
     /* Spacing (4px unit) */
     --wc-space-0: 0;
+    --wc-space-0_5: 0.125rem; /* 2px */
     --wc-space-1: 0.25rem;   /* 4px */
     --wc-space-2: 0.5rem;    /* 8px */
     --wc-space-3: 0.75rem;   /* 12px */

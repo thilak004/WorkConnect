@@ -6,49 +6,48 @@
     <title>{{ t('register_worker_title') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="registration-page" style="background: #f7f9fd;">
+<body class="registration-page" style="background: var(--wc-background);">
 
-    <header class="navbar" style="background: #ffffff; border-bottom: 1px solid #e3eaf2; padding: 0 4%; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
-        <a href="{{ url_for('home') }}" style="font-size: 18px; font-weight: 800; color: #172b4d; text-decoration: none; display: flex; align-items: center; gap: 6px;">
-            Work<span style="color: #2864c9;">Connect</span>
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <a class="brand" href="{{ url_for('home') }}">
+            <div class="brand-name">Work<span>Connect</span></div>
         </a>
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: var(--wc-space-3);">
             <div class="lang-selector">
                 <a href="{{ url_for('set_language', lang_code='en') }}" class="lang-btn {% if active_lang == 'en' %}active{% endif %}">EN</a>
                 <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
                 <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
             </div>
-            <a href="{{ url_for('home') }}" style="font-size: 13px; font-weight: 600; color: #536780; text-decoration: none;">← {{ t('nav_home') }}</a>
+            <a href="{{ url_for('home') }}" class="nav-link">← {{ t('nav_home') }}</a>
         </div>
     </header>
 
-    <main class="registration-main" style="max-width: 620px; margin: 30px auto; padding: 0 20px;">
+    <main class="wc-container" style="max-width: 620px; padding: var(--wc-space-8) 0;">
 
         <!-- Voice Registration Prompt -->
-        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 26px;">🎙️</span>
+        <div class="card card-padded" style="background: var(--wc-success-bg); border-color: #a7f3d0; margin-bottom: var(--wc-space-6); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--wc-space-2);">
+            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                <span style="font-size: var(--wc-text-3xl);">🎙️</span>
                 <div>
-                    <strong style="color: #065f46; font-size: 14px;">Prefer to speak instead of typing?</strong>
-                    <div style="font-size: 12px; color: #047857;">Use our voice assistant to register in Telugu, Hindi, or English.</div>
+                    <strong style="color: var(--wc-success); font-size: var(--wc-text-sm);">Prefer to speak instead of typing?</strong>
+                    <div style="font-size: var(--wc-text-xs); color: #047857;">Use our voice assistant to register in Telugu, Hindi, or English.</div>
                 </div>
             </div>
-            <a href="{{ url_for('worker_voice_register') }}" style="background: #047857; color: #ffffff; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none;">
+            <a href="{{ url_for('worker_voice_register') }}" class="btn btn-primary btn-sm">
                 {{ t('hero_voice_reg') }}
             </a>
         </div>
 
-        <header class="registration-heading" style="text-align: center; margin-bottom: 22px;">
-            <span class="registration-eyebrow" style="color: #2864c9; font-weight: 800; font-size: 12px;">JOIN WORKCONNECT</span>
-            <h1 style="font-size: 24px; font-weight: 850; color: #172b4d; margin: 4px 0;">{{ t('register_worker_title') }}</h1>
-            <p style="font-size: 13px; color: #64748b; margin: 0;">Create your profile and start discovering local jobs matched to you.</p>
+        <header class="registration-heading" style="text-align: center; margin-bottom: var(--wc-space-6);">
+            <span class="registration-eyebrow" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs);">JOIN WORKCONNECT</span>
+            <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: var(--wc-space-1) 0;">{{ t('register_worker_title') }}</h1>
+            <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); margin: 0;">Create your profile and start discovering local jobs matched to you.</p>
         </header>
 
-        <section class="registration-card" style="background: #ffffff; border-radius: 18px; padding: 28px; box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06); border: 1px solid #e2e8f0;">
+        <section class="registration-card card card-padded">
             {% if error %}
-                <div style="background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 700;">
-                    {{ error }}
-                </div>
+                <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
 
             <form action="{{ url_for('worker_register') }}" method="POST" class="registration-form">
@@ -88,9 +87,9 @@
                     <label for="show-pwd" style="cursor: pointer; font-weight: 600;">{{ t('show_password') }}</label>
                 </div>
 
-                <div class="registration-field" style="margin-bottom: 16px;">
-                    <label for="skill" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('primary_skill') }}</label>
-                    <select id="skill" name="skill" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div class="form-field">
+                    <label class="form-label" for="skill">{{ t('primary_skill') }}</label>
+                    <select id="skill" name="skill" required class="form-select">
                         <option value="">Select your main trade</option>
                         <option value="Electrician">Electrician / ఎలక్ట్రీషియన్ / इलेक्ट्रीशियन</option>
                         <option value="Mason">Mason / మేస్త్రీ / राजमिस्त्री</option>
@@ -103,26 +102,26 @@
                     </select>
                 </div>
 
-                <div class="registration-field" style="margin-bottom: 16px;">
-                    <label for="location" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('location_label') }}</label>
-                    <input id="location" name="location" type="text" placeholder="Town, city, or village (e.g. Narasapur)" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div class="form-field">
+                    <label class="form-label" for="location">{{ t('location_label') }}</label>
+                    <input id="location" name="location" type="text" placeholder="Town, city, or village (e.g. Narasapur)" required class="form-input">
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
-                    <div class="registration-field">
-                        <label for="experience" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('experience_label') }}</label>
-                        <input id="experience" name="experience" type="number" min="0" max="60" value="0" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--wc-space-3);">
+                    <div class="form-field">
+                        <label class="form-label" for="experience">{{ t('experience_label') }}</label>
+                        <input id="experience" name="experience" type="number" min="0" max="60" value="0" required class="form-input">
                     </div>
 
-                    <div class="registration-field">
-                        <label for="wage" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('expected_wage') }}</label>
-                        <input id="wage" name="wage" type="number" min="0" step="1" placeholder="e.g. 600" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                    <div class="form-field">
+                        <label class="form-label" for="wage">{{ t('expected_wage') }}</label>
+                        <input id="wage" name="wage" type="number" min="0" step="1" placeholder="e.g. 600" required class="form-input">
                     </div>
                 </div>
 
-                <div class="registration-field" style="margin-bottom: 22px;">
-                    <label for="availability" style="display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 4px;">{{ t('availability_label') }}</label>
-                    <select id="availability" name="availability" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div class="form-field">
+                    <label class="form-label" for="availability">{{ t('availability_label') }}</label>
+                    <select id="availability" name="availability" required class="form-select">
                         <option value="Immediate" selected>Immediate (Ready now)</option>
                         <option value="Within 1 Week">Within 1 Week</option>
                         <option value="Part-Time">Part-Time</option>
@@ -130,11 +129,11 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn-apply-big" style="width: 100%;">
-                    ✓ {{ t('hero_worker_cta') }} →
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    ✓ {{ t('hero_worker_cta') }} <span>→</span>
                 </button>
 
-                <p class="registration-footer" style="text-align: center; margin-top: 18px; font-size: 13px; color: #64748b;">
+                <p class="registration-footer" style="text-align: center; margin-top: var(--wc-space-5); font-size: var(--wc-text-sm); color: var(--wc-text-muted);">
                     {{ t('already_have_account') }}
                 </p>
 
