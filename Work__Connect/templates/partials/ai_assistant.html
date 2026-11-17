@@ -31,6 +31,7 @@
     <div class="ai-chat-header">
         <span>🤖 {{ t('ai_assistant_title') }}</span>
         <div class="ai-header-actions">
+            <button type="button" id="ai-autospeak-toggle" onclick="aiToggleAutoSpeak()" title="Toggle Auto Read Aloud" aria-label="Toggle Auto Read Aloud">🔇</button>
             <button type="button" onclick="aiMinimize()" title="{{ t('ai_minimize') }}" aria-label="{{ t('ai_minimize') }}">−</button>
             <button type="button" onclick="aiClear()" title="{{ t('ai_clear') }}" aria-label="{{ t('ai_clear') }}">🗑️</button>
             <button type="button" onclick="aiClose()" title="{{ t('ai_close') }}" aria-label="{{ t('ai_close') }}">✕</button>
@@ -80,12 +81,27 @@
         isMinimized: false,
         recognition: null,
         speaking: false,
+        autoSpeak: localStorage.getItem('wc_ai_autospeak') === '1',
 
         init: function() {
             this.loadHistory();
             this.showWelcome();
             this.showSuggestions();
             this.restoreMinimizedState();
+            this.updateAutoSpeakUI();
+        },
+
+        toggleAutoSpeak: function() {
+            this.autoSpeak = !this.autoSpeak;
+            localStorage.setItem('wc_ai_autospeak', this.autoSpeak ? '1' : '0');
+            this.updateAutoSpeakUI();
+        },
+        updateAutoSpeakUI: function() {
+            var btn = document.getElementById('ai-autospeak-toggle');
+            if (btn) {
+                btn.textContent = this.autoSpeak ? '🔊' : '🔇';
+                btn.title = this.autoSpeak ? 'Auto Read Aloud Enabled' : 'Auto Read Aloud Disabled';
+            }
         },
 
         // ---------------- Storage / History ----------------
@@ -177,7 +193,9 @@
             this.appendMessageUI(text, type, time, true);
             this.addToHistory(text, type);
             msgs.scrollTop = msgs.scrollHeight;
-            if (speak && type === 'bot') this.speak(text);
+            if (type === 'bot' && (speak || this.autoSpeak)) {
+                this.speak(text);
+            }
         },
         appendMessageUI: function(text, type, time, persist) {
             var msgs = document.getElementById('ai-messages');
@@ -191,12 +209,33 @@
             bubble.appendChild(timeEl);
 
             if (type === 'bot') {
+                var controlsDiv = document.createElement('div');
+                controlsDiv.style.cssText = 'display: flex; gap: 6px; margin-top: 6px; align-items: center; font-size: 11px;';
+
                 var speakBtn = document.createElement('button');
                 speakBtn.className = 'ai-voice-play';
-                speakBtn.textContent = '🔊';
-                speakBtn.title = 'Listen';
+                speakBtn.textContent = '🔊 Listen';
+                speakBtn.style.cssText = 'background: rgba(40,100,201,0.1); border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; color: var(--wc-primary);';
                 speakBtn.onclick = (function(t) { return function() { AI.speak(t); }; })(text);
-                bubble.appendChild(speakBtn);
+                controlsDiv.appendChild(speakBtn);
+
+                // Add quick action if text references features
+                var tLower = text.toLowerCase();
+                if (tLower.includes('browse jobs') || tLower.includes('పనులు')) {
+                    var actionBtn = document.createElement('a');
+                    actionBtn.href = '/jobs';
+                    actionBtn.textContent = '🔍 Browse Jobs →';
+                    actionBtn.style.cssText = 'background: var(--wc-primary); color: white; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-weight: 600;';
+                    controlsDiv.appendChild(actionBtn);
+                } else if (tLower.includes('post a job') || tLower.includes('పోస్ట్')) {
+                    var actionBtn2 = document.createElement('a');
+                    actionBtn2.href = '/post-job';
+                    actionBtn2.textContent = '➕ Post Job →';
+                    actionBtn2.style.cssText = 'background: var(--wc-primary); color: white; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-weight: 600;';
+                    controlsDiv.appendChild(actionBtn2);
+                }
+
+                bubble.appendChild(controlsDiv);
             }
 
             msgs.appendChild(bubble);
@@ -269,7 +308,7 @@
             var roleItems = [];
             if (role === 'worker') {
                 roleItems = lang === 'te'
-                    ? [ { label: 'నచ్చిన పనులను చూపించు', query: 'Find jobs near me' }, { label: 'எளிய'} ]
+                    ? [ { label: 'నచ్చిన పనులను చూపించు', query: 'Find jobs near me' }, { label: 'నా ప్రొఫైల్ అప్‌డేట్ చేయి', query: 'How do I update my profile?' } ]
                     : [];
                 if (lang !== 'te') {
                     roleItems = lang === 'hi'
@@ -436,6 +475,7 @@
 
     // Expose to HTML onclick handlers
     window.aiToggle = function() { AI.toggle(); };
+    window.aiToggleAutoSpeak = function() { AI.toggleAutoSpeak(); };
     window.aiMinimize = function() { if (typeof AI.minimize === 'function') AI.minimize(); };
     window.aiClose = function() { if (typeof AI.close === 'function') AI.close(); };
     window.aiClear = function() { if (typeof AI.clear === 'function') AI.clear(); };
