@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 from database import get_job_by_id, get_all_workers
 from db import get_db_connection
-from psycopg.extras import execute_values
+from psycopg.sql import SQL, Literal, Placeholder
 
 
 class NotificationType:
@@ -142,20 +142,21 @@ def notify_workers_new_job(job_id):
             ))
 
         if insert_rows:
-            execute_values(
-                cursor,
-                """
+            # psycopg 3-compatible batch INSERT using SQL composition
+            values_sql = SQL(", ").join(
+                SQL("(") + SQL(", ").join([
+                    Literal('worker'), Literal(r[0]), Literal(r[1]), Literal(r[2]), Literal(r[3]),
+                    Literal(r[4]), Literal(r[5]), Literal(r[6]), Literal(r[7]), Literal(r[8]), Literal(0)
+                ]) + SQL(")")
+                for r in insert_rows
+            )
+            query = SQL("""
                 INSERT INTO notifications
                 (user_role, user_id, title, message, link, notification_type, job_id,
                  company_name, job_title, location, is_read)
-                VALUES %s
-                """,
-                [(
-                    'worker',
-                    r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
-                    0,
-                ) for r in insert_rows],
-            )
+                VALUES {}
+            """).format(values_sql)
+            cursor.execute(query)
             created_count = len(insert_rows)
 
 
