@@ -136,18 +136,18 @@
     </style>
 </head>
 
-<body class="employer-dashboard-page" style="background: #f7f9fd;">
+<body class="employer-dashboard-page" style="background: var(--wc-background);">
 
     <!-- Universal Site Navigation -->
-    <header class="site-nav">
-        <a href="{{ url_for('home') }}" class="site-brand">
-            Work<span>Connect</span>
+    <header class="navbar">
+        <a class="brand" href="{{ url_for('home') }}">
+            <div class="brand-name">Work<span>Connect</span></div>
         </a>
-        <nav class="site-links">
-            <a href="{{ url_for('home') }}" class="site-link">{{ t('nav_home') }}</a>
-            <a href="{{ url_for('post_job') }}" class="site-link">{{ t('nav_post_job') }}</a>
-            <a href="{{ url_for('employer_dashboard') }}" class="site-link">{{ t('nav_employer_dashboard') }}</a>
-            <a href="{{ url_for('candidate_matches') }}" class="site-link active" style="color: #ffffff; background: #2864c9;">{{ t('nav_candidate_matcher') }}</a>
+        <nav class="nav-links">
+            <a class="nav-link" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
+            <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
+            <a class="nav-link" href="{{ url_for('employer_dashboard') }}">{{ t('nav_employer_dashboard') }}</a>
+            <a class="nav-link active" style="background: var(--wc-primary-light); color: var(--wc-primary); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius); font-weight: var(--wc-font-weight-bold);">{{ t('nav_candidate_matcher') }}</a>
 
             <!-- Language Switcher -->
             <div class="lang-selector">
@@ -156,40 +156,36 @@
                 <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
             </div>
 
-            <a href="{{ url_for('logout') }}" style="font-size: 12px; font-weight: 700; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 10px; border-radius: 8px; text-decoration: none;">
-                {{ t('nav_logout') }}
-            </a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
         </nav>
     </header>
 
-    <main class="dashboard-main" style="max-width: 1050px; margin: 0 auto; padding: 30px 20px;">
+    <main class="dashboard-main wc-container" style="padding: var(--wc-space-10) 0 var(--wc-space-12);">
 
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div style="padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-weight: 600; font-size: 13px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% elif category == 'danger' %}#fee2e2; color: #991b1b; border: 1px solid #fecaca;{% else %}#eff6ff; color: #1e40af; border: 1px solid #bfdbfe;{% endif %}">
-                        {{ message }}
-                    </div>
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <header class="dashboard-heading" style="text-align: center; margin-bottom: 25px;">
-            <p class="dashboard-eyebrow" style="color: #2864c9; font-weight: 800; font-size: 12px;">SMART JOB MATCHING (STEP 7)</p>
-            <h1 style="font-size: 26px; font-weight: 850; color: #172b4d; margin: 0 0 6px 0;">Worker Compatibility Recommendations</h1>
-            <p style="font-size: 14px; color: #536780; max-width: 650px; margin: 0 auto;">
+        <header class="dashboard-heading" style="text-align: center; margin-bottom: var(--wc-space-6);">
+            <p class="dashboard-eyebrow" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs);">SMART JOB MATCHING (STEP 7)</p>
+            <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: var(--wc-space-2) 0 var(--wc-space-3);">Worker Compatibility Recommendations</h1>
+            <p style="font-size: var(--wc-text-base); color: var(--wc-text-muted); max-width: 650px; margin: 0 auto;">
                 Our intelligent scoring engine scans all registered workers and ranks the best candidates for your job requirements with detailed multilingual explanations.
             </p>
         </header>
 
         <!-- Employer & Job Selector Panel -->
-        <section class="dashboard-panel" style="background: #ffffff; border: 1px solid #e3eaf2; border-radius: 14px; padding: 22px; box-shadow: 0 4px 18px rgba(25, 45, 75, 0.04); margin-bottom: 25px;">
-            
-            <form method="GET" action="{{ url_for('candidate_matches') }}" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+        <section class="card card-padded" style="margin-bottom: var(--wc-space-6); box-shadow: var(--wc-shadow); border: var(--wc-border-width) solid var(--wc-border);">
+
+            <form method="GET" action="{{ url_for('candidate_matches') }}" style="display: flex; gap: var(--wc-space-3); align-items: flex-end; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 250px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Select One of Your Posted Jobs:</label>
-                    <select name="job_id" onchange="this.form.submit()" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                    <label class="form-label">Select One of Your Posted Jobs:</label>
+                    <select name="job_id" onchange="this.form.submit()" class="form-select">
                         {% for j in employer_jobs %}
                             <option value="{{ j.id }}" {% if selected_job and selected_job.id == j.id %}selected{% endif %}>
                                 #{{ j.id }} - {{ j.title }} ({{ j.skill_required }} | 📍 {{ j.location }} | 💰 ₹{{ j.daily_wage }}/day)
@@ -197,20 +193,20 @@
                         {% endfor %}
                     </select>
                 </div>
-                <button type="submit" class="btn-apply-big" style="padding: 10px 20px; font-size: 13px;">
+                <button type="submit" class="btn btn-primary btn-sm">
                     🎯 Find Top Candidates
                 </button>
             </form>
 
             {% if selected_job %}
-                <div style="margin-top: 16px; padding: 14px 18px; background: #eef5ff; border: 1px solid #c7d2fe; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="margin-top: var(--wc-space-4); padding: var(--wc-space-3) var(--wc-space-4); background: var(--wc-info-bg); border: var(--wc-border-width) solid #c7d2fe; border-radius: var(--wc-radius-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--wc-space-3);">
                     <div>
-                        <strong style="color: #1e3a8a; font-size: 15px;">Active Job: {{ selected_job.title }}</strong>
-                        <div style="font-size: 12px; color: #4338ca; margin-top: 2px;">
+                        <strong style="color: var(--wc-primary-dark); font-size: var(--wc-text-sm);">Active Job: {{ selected_job.title }}</strong>
+                        <div style="font-size: var(--wc-text-xs); color: #4338ca; margin-top: var(--wc-space-1);">
                             Required Skill: <strong>{{ selected_job.skill_required }}</strong> | Location: <strong>{{ selected_job.location }}</strong> | Wage: <strong>₹{{ selected_job.daily_wage }}/day</strong>
                         </div>
                     </div>
-                    <span style="background: #2864c9; color: #ffffff; font-weight: 800; font-size: 12px; padding: 4px 12px; border-radius: 14px;">
+                    <span style="background: var(--wc-primary); color: #ffffff; font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">
                         {{ matched_workers|length }} Candidates Analyzed
                     </span>
                 </div>
@@ -219,20 +215,20 @@
 
         <!-- Matched Candidates List -->
         {% if matched_workers %}
-            <div style="display: grid; gap: 14px;">
+            <div style="display: grid; gap: var(--wc-space-4);">
                 {% for cand in matched_workers %}
-                    <div class="candidate-card" style="border-left: 4px solid {% if cand.match_percentage >= 80 %}#22c55e{% elif cand.match_percentage >= 60 %}#2864c9{% else %}#cbd5e1{% endif %};">
+                    <div class="candidate-card" style="border-left: 4px solid {% if cand.match_percentage >= 80 %}#22c55e{% elif cand.match_percentage >= 60 %}var(--wc-primary){% else %}var(--wc-border-hover){% endif %};">
                         <div style="flex: 1; min-width: 280px;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                                <h3 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0;">
+                            <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-1);">
+                                <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">
                                     {{ cand.name }}
                                 </h3>
-                                <span style="background: {% if cand.match_percentage >= 75 %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% else %}#eff6ff; color: #1e40af; border: 1px solid #bfdbfe;{% endif %} font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 12px;">
+                                <span style="background: {% if cand.match_percentage >= 75 %}var(--wc-success-bg); color: var(--wc-success); border: var(--wc-border-width) solid #a7f3d0;{% else %}var(--wc-info-bg); color: var(--wc-info); border: var(--wc-border-width) solid #bfdbfe;{% endif %} font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">
                                     🎯 {{ cand.match_percentage }}% • {{ cand.match_level }}
                                 </span>
                             </div>
-                            
-                            <div style="font-size: 13px; color: #64748b; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 10px;">
+
+                            <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--wc-space-3);">
                                 <span>🛠️ <strong>{{ cand.skill }}</strong></span>
                                 <span>📍 {{ cand.location }}</span>
                                 <span>⏳ {{ cand.experience }} yrs exp</span>
@@ -245,7 +241,7 @@
                                 <div class="match-reasons-list">
                                     <strong>Why this candidate matches:</strong>
                                     {% for r in cand.match_reasons %}
-                                        <div style="margin-top: 2px;">{{ r }}</div>
+                                        <div style="margin-top: var(--wc-space-1);">{{ r }}</div>
                                     {% endfor %}
                                 </div>
                             {% endif %}
@@ -253,12 +249,11 @@
 
                         <!-- Action Button to Schedule Meeting -->
                         <div>
-                            <button type="button" class="btn-apply-big" data-schedule-candidate
+                            <button type="button" class="btn btn-primary btn-sm" data-schedule-candidate
                                     data-job-id="{{ selected_job.id }}"
                                     data-worker-id="{{ cand.id }}"
                                     data-worker-name="{{ cand.name }}"
-                                    data-job-title="{{ selected_job.title }}"
-                                    style="padding: 10px 18px; font-size: 13px;">
+                                    data-job-title="{{ selected_job.title }}">
                                 📅 Schedule Meeting
                             </button>
                         </div>
@@ -266,14 +261,14 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
-                <div style="font-size: 40px; margin-bottom: 10px;">🎯</div>
+            <div class="card card-padded" style="text-align: center; padding: var(--wc-space-8) var(--wc-space-4);">
+                <div style="font-size: 40px; margin-bottom: var(--wc-space-3);">🎯</div>
                 {% if selected_job %}
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No candidates found for this profession.</h3>
-                    <p style="font-size: 13px; color: #64748b;">Workers with the required profession ({{ selected_job.skill_required }}) will appear here ranked by compatibility as they register.</p>
+                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-2);">No candidates found for this profession.</h3>
+                    <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted);">Workers with the required profession ({{ selected_job.skill_required }}) will appear here ranked by compatibility as they register.</p>
                 {% else %}
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No candidates found for this profession.</h3>
-                    <p style="font-size: 13px; color: #64748b;">Workers will appear here ranked by compatibility as they register.</p>
+                    <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-2);">No candidates found for this profession.</h3>
+                    <p style="font-size: var(--wc-text-sm); color: var(--wc-text-muted);">Workers will appear here ranked by compatibility as they register.</p>
                 {% endif %}
             </div>
         {% endif %}
@@ -283,11 +278,11 @@
     <!-- Meeting Modal -->
     <div class="modal-overlay" id="interview-modal" style="display: none;">
         <div class="modal-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
-                <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0;" id="cand-modal-title">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--wc-space-4); border-bottom: var(--wc-border-width) solid var(--wc-border); padding-bottom: var(--wc-space-2);">
+                <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;" id="cand-modal-title">
                     📅 Schedule Meeting
                 </h3>
-                <button type="button" class="modal-close-btn" onclick="closeInterviewModal()" title="Close">&times;</button>
+                <button type="button" class="btn-close-dropdown" onclick="closeInterviewModal()" title="Close">✕</button>
             </div>
 
             <form method="POST" action="{{ url_for('schedule_interview_route') }}" onsubmit="prepareInterviewForm()">
@@ -298,41 +293,41 @@
                 <input type="hidden" name="return_to" value="candidate_matches">
 
                 <!-- 1. Meeting Date -->
-                <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Date</label>
-                    <input type="date" name="interview_date" id="cand-date" class="form-control" required>
+                <div style="margin-bottom: var(--wc-space-3);">
+                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Date</label>
+                    <input type="date" name="interview_date" id="cand-date" class="form-input" required>
                 </div>
 
                 <!-- 2. Meeting Time -->
-                <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Time</label>
-                    <input type="time" name="interview_time" id="cand-time" class="form-control" required>
+                <div style="margin-bottom: var(--wc-space-3);">
+                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Time</label>
+                    <input type="time" name="interview_time" id="cand-time" class="form-input" required>
                 </div>
 
                 <!-- 3. Meeting Venue (Optional) -->
-                <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Venue</label>
-                    <input type="text" name="venue" id="cand-venue" class="form-control" placeholder="e.g., Site Office, Narasapur">
+                <div style="margin-bottom: var(--wc-space-3);">
+                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Venue</label>
+                    <input type="text" name="venue" id="cand-venue" class="form-input" placeholder="e.g., Site Office, Narasapur">
                 </div>
 
                 <!-- 4. Meeting Phone Number (Optional) -->
-                <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Meeting Phone Number</label>
-                    <input type="tel" name="phone" id="cand-phone" class="form-control" placeholder="Enter phone number for phone meeting" pattern="[0-9+\-\s()]{7,20}" title="Please enter a valid phone number">
+                <div style="margin-bottom: var(--wc-space-3);">
+                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Meeting Phone Number</label>
+                    <input type="tel" name="phone" id="cand-phone" class="form-input" placeholder="Enter phone number for phone meeting">
                 </div>
 
                 <!-- 5. Notes -->
-                <div style="margin-bottom: 18px;">
-                    <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 5px;">Notes</label>
-                    <textarea name="notes" id="cand-notes" rows="2" class="form-control" placeholder="Instructions or message for candidate..."></textarea>
+                <div style="margin-bottom: var(--wc-space-4);">
+                    <label class="form-label" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-semibold); color: var(--wc-heading); margin-bottom: var(--wc-space-1);">Notes</label>
+                    <textarea name="notes" id="cand-notes" rows="2" class="form-input" placeholder="Instructions or message for candidate..."></textarea>
                 </div>
 
                 <!-- 6 & 7. Action Buttons -->
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="submit" class="btn-apply-big" style="flex: 1; padding: 11px 18px; font-size: 14px; border-radius: 8px; font-weight: 700;">
+                <div style="display: flex; gap: var(--wc-space-2); margin-top: var(--wc-space-4);">
+                    <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
                         Send Meeting Request
                     </button>
-                    <button type="button" onclick="closeInterviewModal()" style="padding: 11px 18px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; cursor: pointer; font-weight: 700; color: #64748b; font-size: 14px;">
+                    <button type="button" onclick="closeInterviewModal()" class="btn btn-outline btn-sm">
                         Cancel
                     </button>
                 </div>
