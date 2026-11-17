@@ -112,7 +112,39 @@
             </div>
 
             {% if current_user %}
-                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
+                <div class="notif-bell-container" id="home-notif-wrapper">
+                    <button type="button" id="home-notif-bell" class="notif-bell-badge" onclick="toggleHomeNotifDropdown(event)" title="Notifications" aria-label="Notifications">
+                        🔔
+                        <span id="home-notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
+                    </button>
+
+                    <div id="home-notif-panel" class="notif-dropdown-panel" style="display: none;">
+                        <div class="notif-panel-header">
+                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                                <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
+                                <span id="home-panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
+                                    <span id="home-panel-unread-num">{{ unread_notifications_count }}</span> unread
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                                <button type="button" id="home-btn-mark-all" onclick="markAllHomeNotificationsRead(event)" class="btn-mark-all-text">✓ Mark all read</button>
+                                <button type="button" onclick="closeHomeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
+                            </div>
+                        </div>
+                        <div id="home-notif-items-list" class="notif-items-scroll">
+                            <div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">Loading notifications...</div>
+                        </div>
+                        <div class="notif-panel-footer">
+                            <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}#notifs" style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">{{ t('view_all_notifications') }}</a>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('logout') }}" class="nav-cta btn-outline">{{ t('nav_logout') }}</a>
+                <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" class="nav-cta">👤 {{ current_user.name }}</a>
+            {% else %}
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('login') }}" class="nav-cta">{{ t('nav_login') }}</a>
             {% endif %}
         </nav>
     </header>
@@ -158,13 +190,13 @@
             <form action="{{ url_for('browse_jobs') }}" method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--wc-space-3);">
 
                 <div class="form-field">
-                    <label class="form-label">Keywords / Title</label>
+                    <label class="form-label">{{ t('job_keywords_title') }}</label>
                     <input name="q" type="text" placeholder="{{ t('search_placeholder') }}" value="{{ search_query }}" class="form-input">
                 </div>
 
                 <div class="form-field">
-                    <label class="form-label">Location / Town</label>
-                    <input name="location" type="text" placeholder="e.g. Narasapur, Kavitam..." value="{{ location_filter }}" class="form-input">
+                    <label class="form-label">{{ t('job_location_town') }}</label>
+                    <input name="location" type="text" placeholder="{{ t('location_placeholder') }}" value="{{ location_filter }}" class="form-input">
                 </div>
 
                 <div class="form-field">
@@ -523,6 +555,149 @@
                 appendAIMessage(messages, 'Assistant temporarily busy. Please try again.', 'bot');
             });
         }
+
+        // Notification sound
+        function playNotificationSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 3.0);
+            } catch(e) {}
+        }
+
+        // Theme toggle - Dark/Light mode
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            const isDark = html.classList.contains('theme-dark');
+
+            if (isDark) {
+                html.classList.remove('theme-dark');
+                html.classList.add('theme-light');
+                btn.textContent = '🌙';
+                localStorage.setItem('wc-theme', 'light');
+            } else {
+                html.classList.remove('theme-light');
+                html.classList.add('theme-dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('wc-theme', 'dark');
+            }
+        }
+
+        // Restore theme preference on page load
+        (function() {
+            const savedTheme = localStorage.getItem('wc-theme');
+            const btn = document.getElementById('theme-toggle');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+                document.documentElement.classList.remove('theme-light');
+                if (btn) btn.textContent = '☀️';
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                document.documentElement.classList.remove('theme-dark');
+                if (btn) btn.textContent = '🌙';
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('theme-dark');
+                    if (btn) btn.textContent = '☀️';
+                } else {
+                    if (btn) btn.textContent = '🌙';
+                }
+            }
+        })();
+
+        // Notification dropdown functions
+        function toggleHomeNotifDropdown(e) {
+            e.stopPropagation();
+            const panel = document.getElementById('home-notif-panel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                fetchNotificationsList();
+            }
+        }
+
+        function closeHomeNotifDropdown(e) {
+            if (e) e.stopPropagation();
+            const panel = document.getElementById('home-notif-panel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        function markAllHomeNotificationsRead(e) {
+            if (e) e.preventDefault();
+            fetch('/api/notifications/read-all', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('home-notif-badge');
+                    const panelPill = document.getElementById('home-panel-unread-pill');
+                    const panelNum = document.getElementById('home-panel-unread-num');
+                    if (badge) { badge.innerText = data.unread_count; badge.style.display = data.unread_count > 0 ? 'flex' : 'none'; }
+                    if (panelPill && panelNum) { panelNum.innerText = data.unread_count; panelPill.style.display = data.unread_count > 0 ? 'inline-block' : 'none'; }
+                })
+                .catch(() => {});
+        }
+
+        function fetchNotificationsList() {
+            fetch('/api/notifications')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const list = document.getElementById('home-notif-items-list');
+                    if (data.notifications.length === 0) {
+                        list.innerHTML = '<div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">No new notifications.</div>';
+                        return;
+                    }
+                    let html = '';
+                    data.notifications.slice(0, 5).forEach(n => {
+                        html += `<div class="notif-card ${n.is_read ? 'read' : 'unread'}" style="padding: var(--wc-space-2) var(--wc-space-3); margin-bottom: var(--wc-space-2); border-radius: var(--wc-radius-md); border: var(--wc-border-width) solid var(--wc-border);">
+                            <div style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm); margin-bottom: var(--wc-space-1);">${n.title}</div>
+                            <div style="color: var(--wc-text-muted); font-size: var(--wc-text-xs); margin-top: var(--wc-space-1);">${n.message}</div>
+                            <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-top: var(--wc-space-1);">${n.created_at}</div>
+                        </div>`;
+                    });
+                    list.innerHTML = html;
+                    if (data.unread_count > 0) {
+                        playNotificationSound();
+                    }
+                }
+            });
+        }
+
+        // Automatic background polling for new unread notifications
+        let lastUnreadCount = {{ unread_notifications_count | default(0) }};
+        setInterval(() => {
+            fetch('/api/notifications')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const newCount = data.unread_count;
+                        const badge = document.getElementById('home-notif-badge');
+                        if (badge) {
+                            if (newCount > 0) {
+                                badge.innerText = newCount;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+                        if (newCount > lastUnreadCount) {
+                            playNotificationSound();
+                        }
+                        lastUnreadCount = newCount;
+                    }
+                })
+                .catch(() => {});
+        }, 20000);
     </script>
 
     <!-- Mobile Bottom App Bar -->

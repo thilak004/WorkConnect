@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 WorkConnect Trilingual Translation Dictionary
 Supports English (en), Telugu (te), and Hindi (hi).
@@ -22,6 +22,30 @@ TRANSLATIONS = {
         "nav_profile": "My Profile",
         "nav_saved_jobs": "Saved Jobs",
         "nav_notifications": "Notifications",
+
+        # Worker Dashboard
+        "my_applications": "My Applications",
+        "view_similar_jobs": "View Similar Jobs",
+        "no_applications_yet": "No applications submitted yet",
+        "browse_available_jobs": "Browse available jobs in your locality and apply with 1 click.",
+        "remove_saved": "✕ Remove",
+        "no_saved_jobs_yet": "No saved jobs yet",
+        "saved_jobs_description": "Click the bookmark icon on any job card to save it for later.",
+        "meeting_scheduled": "MEETING SCHEDULED",
+        "meeting_date_time": "Date & Time:",
+        "meeting_location_venue": "Location / Venue:",
+        "meeting_notes": "Notes:",
+        "confirmed_with_employer": "Confirmed with Employer:",
+        "recent_notifications": "Recent Notifications",
+        "mark_all_as_read": "✓ Mark all as read",
+        "view_job_details": "👁️ View Job Details",
+        "mark_as_read": "Mark as read",
+        "no_notifications_yet": "No notifications yet",
+        "notifications_will_appear": "When employers post new job opportunities matching your skills, you'll receive real-time notifications here.",
+
+        # Registration - already have account
+        "already_registered": "Already registered?",
+        "sign_in_here": "Sign in here",
 
         # Roles
         "role_worker": "Worker / Job Seeker",
@@ -48,6 +72,53 @@ TRANSLATIONS = {
         "trade_helper": "General Helper",
         "filter_by_trade": "Filter by Trade Picture",
         "all_trades": "All Trades",
+
+        # Job Details
+        "job_number": "Job #",
+        "job_description": "Job Description",
+        "view_applications": "View Applications",
+        "sign_in_to_apply": "Sign in to Apply",
+        "posted_by": "Posted by",
+
+        # Apply Job
+        "applying_as_email": "Applying as (Your Worker Email)",
+        "brief_note_employer": "Brief Note for Employer (Optional)",
+        "apply_note_placeholder": "Tell employer when you can start or your past work...",
+
+        # Trade Sector
+        "trade_sector": "Trade Sector",
+        "available_opportunities": "Available",
+        "trade_opportunities": "Opportunities",
+        "back_to_all_sectors": "← View All Sectors",
+        "listen_audio": "Listen Audio",
+        "no_active_openings": "No active openings in this sector right now",
+        "check_back_soon": "Check back soon or explore other trade categories.",
+        "browse_all_jobs": "Browse All Jobs",
+
+        # Employer Dashboard - Quick nav & statuses
+        "quick_navigation": "Quick Navigation",
+        "status_open": "Open",
+        "status_closed": "Closed",
+        "matched_candidates": "Matched Candidates",
+        "view_applicants": "View Applicants",
+
+        # Employer Dashboard - empty states & buttons
+        "no_jobs_posted_yet": "No jobs posted yet",
+        "post_first_job_desc": "Post your first job requirement to start receiving applications and finding AI matched local workers.",
+        "no_applications_received_yet": "No applications received yet",
+        "applications_received_desc": "Workers can apply to your open jobs from the browse jobs portal. Review incoming candidates here.",
+        "applied_for": "Applied for:",
+        "years_exp": "yrs exp",
+        "expected": "Expected:",
+        "match_score": "Match Score:",
+        "btn_confirm_schedule": "Confirm & Schedule",
+        "btn_cancel": "Cancel",
+
+        # Browse Jobs - Filters
+        "job_keywords_title": "Keywords / Title",
+        "job_location_town": "Location / Town",
+        "location_placeholder": "e.g. Narasapur, Kavitam...",
+        "view_all_notifications": "View All Notifications →",
 
         # Job Card & Browse
         "search_placeholder": "Search jobs by title, trade, or location...",
@@ -77,6 +148,7 @@ TRANSLATIONS = {
         "match_good": "Good Match",
         "match_moderate": "Moderate Match",
         "match_low": "Low Match",
+        "match_compatibility": "Match Compatibility",
         "match_skill_exact": "Exact trade / skill match",
         "match_location_exact": "Exact locality match",
         "match_wage_good": "Offered wage meets your expected rate",
@@ -116,7 +188,48 @@ TRANSLATIONS = {
         "register_worker_title": "Worker Registration",
         "register_employer_title": "Employer Registration",
         "edit_profile": "Edit Profile & Preferences",
+        "verification_pending": "Verification Pending",
+        "request_verification": "Request Verification Badge",
         "save_changes": "Save Changes",
+        "show_password": "Show password",
+        "forgot_password": "Forgot password?",
+        "keep_signed_in": "Keep me signed in",
+        "full_name": "Full name",
+        "email_address": "Email address",
+        "mobile_phone": "Mobile Phone Number",
+        "primary_skill": "Primary skill / Trade",
+        "location_label": "Town / Village / Location",
+        "experience_label": "Years of Experience",
+        "expected_wage": "Expected Daily Wage (₹)",
+        "availability_label": "Availability",
+
+        # Employer Dashboard continued
+        "total_workers_needed": "Total Workers Needed",
+        "positions_open": "Positions Open",
+        "manage_applicants": "Manage Applicants",
+        "scheduled_meetings": "Scheduled Meetings",
+        "status_open": "Open",
+        "status_closed": "Closed",
+        "matched_candidates": "Matched Candidates",
+        "view_applicants": "View Applicants",
+        "shortlist": "⭐ Shortlist",
+        "confirm": "✓ Confirm",
+        "reject": "✕ Reject",
+        "schedule_meeting": "📅 Schedule Meeting",
+        "meeting_date": "Meeting Date",
+        "meeting_time": "Meeting Time",
+        "meeting_location": "Location / Workplace Address / Phone Call",
+        "meeting_notes": "Notes / Instructions for Candidate",
+        "btn_confirm_schedule": "Confirm & Schedule",
+        "btn_cancel": "Cancel",
+        "no_jobs_posted_yet": "No jobs posted yet",
+        "post_first_job_desc": "Post your first job requirement to start receiving applications and finding AI matched local workers.",
+        "no_applications_received_yet": "No applications received yet",
+        "applications_received_desc": "Workers can apply to your open jobs from the browse jobs portal. Review incoming candidates here.",
+        "applied_for": "Applied for:",
+        "years_exp": "yrs exp",
+        "expected": "Expected:",
+        "match_score": "Match Score:",
         "show_password": "Show password",
         "forgot_password": "Forgot password?",
         "keep_signed_in": "Keep me signed in",
@@ -156,6 +269,7 @@ TRANSLATIONS = {
         "ai_assistant_placeholder": "Ask in English, Telugu, or Hindi (e.g., 'Find painter jobs in Kakinada')...",
         "send": "Send",
         "close": "Close",
+        "ai_greeting": "I am your WorkConnect Assistant. Ask me anything about job matches, wages, or meetings.",
         "employer_voice_title": "Employer Voice AI Registration",
         "employer_voice_subtitle": "Speak your business details in Telugu, Hindi, or English to register instantly as an employer.",
         "employer_voice_start": "Start Employer Voice Reg",
@@ -165,7 +279,13 @@ TRANSLATIONS = {
         "one_community": "One connected community",
         "community_sub": "Workers and employers, together.",
         "visual_discovery": "VISUAL JOB DISCOVERY",
-        "visual_discovery_sub": "Tap any picture to find all matching local job opportunities."
+        "visual_discovery_sub": "Tap any picture to find all matching local job opportunities.",
+
+        # Homepage
+        "hero_help_title": "How can WorkConnect help you?",
+        "home_welcome_worker": "Find jobs and track your applications.",
+        "home_welcome_employer": "Post jobs and manage candidates.",
+        "home_welcome_guest": "Choose an option to get started.",
     },
 
     "te": {
@@ -184,6 +304,26 @@ TRANSLATIONS = {
         "nav_profile": "నా ప్రొఫైల్",
         "nav_saved_jobs": "దాచుకున్న పనులు",
         "nav_notifications": "నోటిఫికేషన్లు",
+
+        # Worker Dashboard
+        "my_applications": "మా దరఖాస్తులు",
+        "view_similar_jobs": "సమానమైన పనులను చూడండి",
+        "no_applications_yet": "ఏ దరఖాస్తులు నమోదు కాలేదు",
+        "browse_available_jobs": "మీ స్థానిక పొడ ఇద్దరు పనులలో వెతకండి మరియు 1 క్లిక్తో దరఖాస్తు చేయండి.",
+        "remove_saved": "✕ తొలగించండి",
+        "no_saved_jobs_yet": "ఏ పోర్టు లేదు",
+        "saved_jobs_description": "ఏదైనా పని కార్డుపై బುಕ్‌మార్క్ ఐకాన్ నొక్కండి మరియు తర్వాతেখানে దాచుకోండి.",
+        "meeting_scheduled": "MEETING SCHEDULED",
+        "meeting_date_time": "తేదీ & సమయం:",
+        "meeting_location_venue": "ప్రమాణం / స్థలం:",
+        "meeting_notes": "వివరాలు:",
+        "confirmed_with_employer": "ఇప్పటికే యజమానితో నిర్ధారించబడింది:",
+        "recent_notifications": "ఇటీవలి నోటిఫికేషన్లు",
+        "mark_all_as_read": "✓ ಎಲ್ಲా నోటిఫికేషన్‌లను చదవండి",
+        "view_job_details": "👁️ పని విషయాలను చూడండి",
+        "mark_as_read": "ఇప్పటికే చదివినట్లుగా చేసుకోండి",
+        "no_notifications_yet": "ఏ నోటిఫికేషన్ లేదు",
+        "notifications_will_appear": "ఇంగ్లీషులో పనులు పోస్ట్ చేసినప్పుడు మీ నైపుణ్యాలను మ్యాచ్ చేస్తూ నగు రియల్ టైమ్ అలర్ట్‌లు మీరు పొందుతారు.",
 
         # Roles
         "role_worker": "పనివారు / కూలీలు",
@@ -239,6 +379,7 @@ TRANSLATIONS = {
         "match_good": "బాగా సరిపోతుంది",
         "match_moderate": "ఓ మోస్తరుగా సరిపోతుంది",
         "match_low": "తక్కువగా సరిపోతుంది",
+        "match_compatibility": "సరిపోడు శాతం",
         "match_skill_exact": "మీ వృత్తికి సరిగ్గా సరిపోతుంది",
         "match_location_exact": "మీ సొంత ఊరు లేదా దగ్గర ప్రాంతం",
         "match_wage_good": "మీరు ఆశించిన కూలీ లభిస్తుంది",
@@ -318,6 +459,7 @@ TRANSLATIONS = {
         "ai_assistant_placeholder": "తెలుగులో అడగండి (ఉదా: 'నర్సాపురంలో ఎలక్ట్రీషియన్ పనులు చూపించు')...",
         "send": "పంపండి",
         "close": "మూసివేయి",
+        "ai_greeting": "నేను మీ వర్క్ కనెక్ట్ అసిస్టెంట్‌ని. పని మ్యాచింగ్, కూలీ రేట్లు లేదా సమావేశాల గురించి అడగండి.",
         "employer_voice_title": "యజమాని వాయిస్ AI రిజిస్ట్రేషన్",
         "employer_voice_subtitle": "మీ వ్యాపార వివరాలను తెలుగు, హిందీ లేదా ఇంగ్లీషులో మాట్లాడి యజమానిగా నమోదు చేసుకోండి.",
         "employer_voice_start": "యజమాని వాయిస్ రిజిస్ట్రేషన్ ప్రారంభించండి",
@@ -327,7 +469,13 @@ TRANSLATIONS = {
         "one_community": "ఒక అనుసంధానించబడిన సంఘం",
         "community_sub": "కూలీలు మరియు యజమానులు, కలిసి.",
         "visual_discovery": "చిత్రాల ద్వారా పని అన్వేషణ",
-        "visual_discovery_sub": "స్థానిక పనులను కనుగొనడానికి ఏదైనా చిత్రంపై నొక్కండి."
+        "visual_discovery_sub": "స్థానిక పనులను కనుగొనడానికి ఏదైనా చిత్రంపై నొక్కండి.",
+
+        # Homepage
+        "hero_help_title": "వర్క్ కనెక్ట్ మీకు ఎలా సహాయకంగా ఉంటుంది?",
+        "home_welcome_worker": "మీ దరఖాస్తులను ఎంచుకోండి మరియు పనులను ట్రాక్ చేయండి.",
+        "home_welcome_employer": "పనులను పోస్ట్ చేయండి మరియు అప్లికెంట్లను నిర్వహించండి.",
+        "home_welcome_guest": "ప్రారంభించడానికి ఒక ఎంపికను ఎంచుకోండి.",
     },
 
     "hi": {
@@ -346,6 +494,26 @@ TRANSLATIONS = {
         "nav_profile": "मेरी प्रोफाइल",
         "nav_saved_jobs": "सहेजी गई नौकरियां",
         "nav_notifications": "सूचनाएं",
+
+        # Worker Dashboard
+        "my_applications": "मेरे आवेदन",
+        "view_similar_jobs": "समान नौकरियां देखें",
+        "no_applications_yet": "किसी आवेदन को जमा नहीं किया गया",
+        "browse_available_jobs": "अपने इलाके में उपलब्ध नौकरियां खोजें और 1 क्लिक में आवेदन करें।",
+        "remove_saved": "✕ निकालें",
+        "no_saved_jobs_yet": "किसी नौकरी को सहेजा नहीं गया",
+        "saved_jobs_description": "कोई भी जॉब कार्ड पर बुकमार्क आइकन पर क्लिक करें और बाद में सहेजें।",
+        "meeting_scheduled": "मीटिंग निर्धारित",
+        "meeting_date_time": "दिनांक और समय:",
+        "meeting_location_venue": "स्थान / स्थान:",
+        "meeting_notes": "नोट्स:",
+        "confirmed_with_employer": "नियोक्ता के साथ पुष्टि की गई:",
+        "recent_notifications": "हाल की सूचनाएं",
+        "mark_all_as_read": "✓ सभी को पढ़ें",
+        "view_job_details": "👁️ नौकरी का विवरण देखें",
+        "mark_as_read": "पढ़ें",
+        "no_notifications_yet": "किसी सूचना नहीं",
+        "notifications_will_appear": "जब नियोक्ता आपकी क्षमताओं से मेल खाने वाली नई नौकरियां पोस्ट करते हैं, तो आपको रियल-टाइम सूचनाएं प्राप्त होंगी।",
 
         # Roles
         "role_worker": "श्रमिक / कामगार",
@@ -401,6 +569,7 @@ TRANSLATIONS = {
         "match_good": "अच्छा मेल",
         "match_moderate": "मध्यम मेल",
         "match_low": "कम मेल",
+        "match_compatibility": "मेल अनुकूलता",
         "match_skill_exact": "आपके हुनर से बिल्कुल मेल खाता है",
         "match_location_exact": "आपका अपना शहर या नजदीकी क्षेत्र",
         "match_wage_good": "आपकी मनचाही मजदूरी के अनुरूप",
@@ -480,6 +649,7 @@ TRANSLATIONS = {
         "ai_assistant_placeholder": "हिंदी में पूछें (जैसे: 'मुझे नरसपुर में ड्राइवर का काम दिखाओ')...",
         "send": "भेजें",
         "close": "बंद करें",
+        "ai_greeting": "मैं आपका वर्क कनेक्ट सहायक हूँ। नौकरी मैचिंग, मजदूरी या मीटिंग के बारे में पूछें।",
         "employer_voice_title": "नियोक्ता वॉयस AI पंजीकरण",
         "employer_voice_subtitle": "एक नियोक्ता के रूप में तुरंत पंजीकरण करने के लिए तेलुगु, हिंदी या अंग्रेजी में अपनी व्यावसायिक विवरण बोलें।",
         "employer_voice_start": "नियोक्ता वॉयस पंजीकरण शुरू करें",
@@ -489,7 +659,13 @@ TRANSLATIONS = {
         "one_community": "एक जुड़ा हुआ समुदाय",
         "community_sub": "कामगार और नियोक्ता, एकसाथ.",
         "visual_discovery": "विजुअल जॉब डिस्कवरी",
-        "visual_discovery_sub": "स्थानीय अवसरों का पता लगाने के लिए किसी भी तस्वीर पर टैप करें."
+        "visual_discovery_sub": "स्थानीय अवसरों का पता लगाने के लिए किसी भी तस्वीर पर टैप करें.",
+
+        # Homepage
+        "hero_help_title": "वर्क कनेक्ट आपकी कैसे मदद कर सकता है?",
+        "home_welcome_worker": "नौकरियां खोजें और अपने आवेदन ट्रैक करें।",
+        "home_welcome_employer": "नौकरियां पोस्ट करें और उम्मीदवारों का प्रबंधन करें।",
+        "home_welcome_guest": "शुरू करने के लिए एक विकल्प चुनें।",
     }
 }
 

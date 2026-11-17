@@ -147,6 +147,7 @@
             </div>
 
             <!-- Logout -->
+            <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
             <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
         </nav>
     </header>
@@ -198,7 +199,7 @@
         <!-- Navigation Tabs for Dashboard -->
         <div class="tabs-header">
             <a href="#apps" class="tab-btn active" id="btn-tab-apps" onclick="switchTab('apps')">
-                📋 My Applications ({{ applications|length }})
+                📋 {{ t('my_applications') }} ({{ applications|length }})
             </a>
             <a href="#saved" class="tab-btn" id="btn-tab-saved" onclick="switchTab('saved')">
                 ⭐ {{ t('nav_saved_jobs') }} ({{ saved_jobs|length }})
@@ -222,10 +223,10 @@
                                     {{ app.job_title }}
                                 </h2>
                                 <span class="status-badge status-{{ app.application_status|lower }}">
-                                    {% if app.application_status == 'Confirmed' %}✓ Confirmed
-                                    {% elif app.application_status == 'Shortlisted' %}⭐ Shortlisted
-                                    {% elif app.application_status == 'Rejected' %}✕ Rejected
-                                    {% else %}⏳ Pending{% endif %}
+                                    {% if app.application_status == 'Confirmed' %}✓ {{ t('status_confirmed') }}
+                                    {% elif app.application_status == 'Shortlisted' %}⭐ {{ t('status_shortlisted') }}
+                                    {% elif app.application_status == 'Rejected' %}✕ {{ t('status_rejected') }}
+                                    {% else %}⏳ {{ t('status_pending') }}{% endif %}
                                 </span>
                             </div>
                             <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap;">
@@ -237,14 +238,14 @@
 
                             {% if app.match_percentage %}
                                 <div style="margin-top: var(--wc-space-3); display: inline-flex; align-items: center; gap: var(--wc-space-2); background: var(--wc-success-bg); border: var(--wc-border-width) solid #bbf7d0; padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-md); font-size: var(--wc-text-xs); color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">
-                                    <span>🎯 Match Compatibility: {{ app.match_percentage }}% ({{ app.match_level }})</span>
+                                    <span>🎯 {{ t('match_compatibility') }}: {{ app.match_percentage }}% ({{ app.match_level }})</span>
                                 </div>
                             {% endif %}
                         </div>
 
                         <div style="text-align: right;">
                             <a href="{{ url_for('browse_jobs', q=app.job_skill) }}" class="btn btn-ghost btn-sm" style="font-weight: var(--wc-font-weight-bold); color: var(--wc-text-muted);">
-                                View Similar Jobs
+                                {{ t('view_similar_jobs') }}
                             </a>
                         </div>
                     </div>
@@ -252,8 +253,8 @@
             {% else %}
                 <div style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
                     <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No applications submitted yet</h3>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">Browse available jobs in your locality and apply with 1 click.</p>
+                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">{{ t('no_applications_yet') }}</h3>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">{{ t('browse_available_jobs') }}</p>
                     <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
                         {{ t('hero_explore_jobs') }} →
                     </a>
@@ -276,7 +277,7 @@
                                     <span>🏢 {{ job.employer_name }}</span>
                                     <span>📍 {{ job.location }}</span>
                                     <span style="color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">💰 ₹{{ job.daily_wage }}/day</span>
-                                    <span>👥 {{ job.positions_remaining }} left</span>
+                                    <span>👥 {{ job.positions_remaining }} {{ t('positions_left') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -286,7 +287,7 @@
                             </a>
                             <form method="POST" action="{{ url_for('unsave_job_route', job_id=job.id) }}" style="display: inline;">
                                 <button type="submit" class="btn btn-outline btn-sm" style="color: var(--wc-danger); border-color: var(--wc-danger);">
-                                    ✕ Remove
+                                    {{ t('remove_saved') }}
                                 </button>
                             </form>
                         </div>
@@ -295,8 +296,8 @@
             {% else %}
                 <div style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
                     <div style="font-size: 40px; margin-bottom: 10px;">⭐</div>
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No saved jobs yet</h3>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">Click the bookmark icon on any job card to save it for later.</p>
+                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">{{ t('no_saved_jobs_yet') }}</h3>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">{{ t('saved_jobs_description') }}</p>
                     <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
                         {{ t('hero_explore_jobs') }}
                     </a>
@@ -311,26 +312,26 @@
                     <div class="app-card" style="border-left: 4px solid #2864c9;">
                         <div>
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                <span style="background: #dbeafe; color: #1e40af; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 10px;">📅 MEETING SCHEDULED</span>
+                                <span style="background: #dbeafe; color: #1e40af; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 10px;">{{ t('meeting_scheduled') }}</span>
                                 <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0;">
                                     {{ iv.job_title }}
                                 </h3>
                             </div>
                             <div style="font-size: 13px; color: #475569; margin-top: 6px;">
-                                <strong>Date & Time:</strong> {{ iv.interview_date }} at {{ iv.interview_time }}
+                                <strong>{{ t('meeting_date_time') }}</strong> {{ iv.interview_date }} at {{ iv.interview_time }}
                             </div>
                             <div style="font-size: 13px; color: #475569; margin-top: 4px;">
-                                <strong>Location / Venue:</strong> 📍 {{ iv.location_or_link }}
+                                <strong>{{ t('meeting_location_venue') }}</strong> 📍 {{ iv.location_or_link }}
                             </div>
                             {% if iv.notes %}
                                 <div style="font-size: 12px; color: #64748b; margin-top: 4px; background: #f8fafc; padding: 6px 10px; border-radius: 6px;">
-                                    <strong>Notes:</strong> {{ iv.notes }}
+                                    <strong>{{ t('meeting_notes') }}</strong> {{ iv.notes }}
                                 </div>
                             {% endif %}
                         </div>
                         <div>
                             <span style="font-weight: 700; font-size: 13px; color: #047857; background: #ecfdf5; padding: 6px 12px; border-radius: 14px;">
-                                Confirmed with Employer: {{ iv.employer_name }}
+                                {{ t('confirmed_with_employer') }}: {{ iv.employer_name }}
                             </span>
                         </div>
                     </div>
@@ -348,13 +349,13 @@
         <div id="tab-content-notifications" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0;">Recent Notifications</h3>
+                    <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0;">{{ t('recent_notifications') }}</h3>
                     <span id="tab-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
                         <span id="tab-unread-num">{{ unread_notifications_count }}</span> unread
                     </span>
                 </div>
                 <button type="button" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">
-                    ✓ Mark all as read
+                    {{ t('mark_all_as_read') }}
                 </button>
             </div>
 
@@ -400,8 +401,8 @@
             {% else %}
                 <div class="notif-empty-state" style="background: #ffffff; border-radius: 14px; padding: 40px 20px; text-align: center; border: 1px solid #e2e8f0;">
                     <div style="font-size: 40px; margin-bottom: 10px;">🔔</div>
-                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0;">No notifications yet</h3>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 6px;">When employers post new job opportunities matching your skills, you'll receive real-time notifications here.</p>
+                    <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0;">{{ t('no_notifications_yet') }}</h3>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 6px;">{{ t('notifications_will_appear') }}</p>
                 </div>
             {% endif %}
         </div>
@@ -419,15 +420,9 @@
             <span style="cursor: pointer; font-size: 16px;" onclick="toggleAIChat()">✕</span>
         </div>
         <div class="ai-chat-messages" id="ai-messages">
-            <div class="ai-bubble bot">
-                {% if active_lang == 'te' %}
-                    నమస్కారం {{ worker.name }}! నేను మీ వర్క్ కనెక్ట్ అసిస్టెంట్‌ని. కొత్త పనుల గురించి లేదా కూలీ రేట్ల గురించి ఏదైనా అడగండి.
-                {% elif active_lang == 'hi' %}
-                    नमस्ते {{ worker.name }}! मैं आपका वर्क कनेक्ट सहायक हूँ। नई नौकरियों या मजदूरी के बारे में कुछ भी पूछें।
-                {% else %}
-                    Hello {{ worker.name }}! I am your WorkConnect Assistant. Ask me anything about job matches, wages, or meetings.
-                {% endif %}
-            </div>
+        <div class="ai-bubble bot">
+            Hello {{ worker.name }}! {{ t('ai_greeting') }}
+        </div>
         </div>
         <div class="ai-chat-input-bar">
             <input type="text" id="ai-user-query" class="ai-chat-input" placeholder="{{ t('ai_assistant_placeholder') }}" onkeydown="if(event.key==='Enter') sendAIMessage()">
@@ -616,6 +611,47 @@
                 })
                 .catch(() => {});
         }, 20000);
+
+        // Theme toggle - Dark/Light mode
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            const isDark = html.classList.contains('theme-dark');
+
+            if (isDark) {
+                html.classList.remove('theme-dark');
+                html.classList.add('theme-light');
+                btn.textContent = '🌙';
+                localStorage.setItem('wc-theme', 'light');
+            } else {
+                html.classList.remove('theme-light');
+                html.classList.add('theme-dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('wc-theme', 'dark');
+            }
+        }
+
+        // Restore theme preference on page load
+        (function() {
+            const savedTheme = localStorage.getItem('wc-theme');
+            const btn = document.getElementById('theme-toggle');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+                document.documentElement.classList.remove('theme-light');
+                if (btn) btn.textContent = '☀️';
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                document.documentElement.classList.remove('theme-dark');
+                if (btn) btn.textContent = '🌙';
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('theme-dark');
+                    if (btn) btn.textContent = '☀️';
+                } else {
+                    if (btn) btn.textContent = '🌙';
+                }
+            }
+        })();
 
         function toggleAIChat() {
             const box = document.getElementById('ai-chat-box');

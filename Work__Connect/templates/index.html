@@ -54,7 +54,7 @@
                     <div id="home-notif-panel" class="notif-dropdown-panel" style="display: none;">
                         <div class="notif-panel-header">
                             <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
-                                <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">Notifications</span>
+                                <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
                                 <span id="home-panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
                                     <span id="home-panel-unread-num">{{ unread_notifications_count }}</span> unread
                                 </span>
@@ -72,10 +72,11 @@
                         </div>
                     </div>
                 </div>
-
-                <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" class="nav-cta">👤 {{ current_user.name }}</a>
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
                 <a href="{{ url_for('logout') }}" class="nav-cta btn-outline">{{ t('nav_logout') }}</a>
+                <a href="{% if user_role == 'employer' %}{{ url_for('employer_dashboard') }}{% else %}{{ url_for('worker_dashboard') }}{% endif %}" class="nav-cta">👤 {{ current_user.name }}</a>
             {% else %}
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
                 <a href="{{ url_for('login') }}" class="nav-cta">{{ t('nav_login') }}</a>
             {% endif %}
         </nav>
@@ -273,13 +274,13 @@
             <div class="wc-container">
                 <div class="section-heading">
                     <span class="section-label">GET STARTED</span>
-                    <h2>How can WorkConnect help you?</h2>
+                    <h2>{{ t('hero_help_title') }}</h2>
                     {% if user_role == 'worker' %}
-                        <p>Welcome back, {{ current_user.name }}! Find jobs and track your applications.</p>
+                        <p>Welcome back, {{ current_user.name }}! {{ t('home_welcome_worker') }}</p>
                     {% elif user_role == 'employer' %}
-                        <p>Welcome back, {{ current_user.name }}! Post jobs and manage candidates.</p>
+                        <p>Welcome back, {{ current_user.name }}! {{ t('home_welcome_employer') }}</p>
                     {% else %}
-                        <p>Choose an option to get started.</p>
+                        <p>{{ t('home_welcome_guest') }}</p>
                     {% endif %}
                 </div>
 
@@ -595,6 +596,48 @@
                 })
                 .catch(() => {});
         }, 20000);
+
+        // Theme toggle - Dark/Light mode
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            const isDark = html.classList.contains('theme-dark');
+
+            if (isDark) {
+                html.classList.remove('theme-dark');
+                html.classList.add('theme-light');
+                btn.textContent = '🌙';
+                localStorage.setItem('wc-theme', 'light');
+            } else {
+                html.classList.remove('theme-light');
+                html.classList.add('theme-dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('wc-theme', 'dark');
+            }
+        }
+
+        // Restore theme preference on page load
+        (function() {
+            const savedTheme = localStorage.getItem('wc-theme');
+            const btn = document.getElementById('theme-toggle');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+                document.documentElement.classList.remove('theme-light');
+                if (btn) btn.textContent = '☀️';
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                document.documentElement.classList.remove('theme-dark');
+                if (btn) btn.textContent = '🌙';
+            } else {
+                // Check system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('theme-dark');
+                    if (btn) btn.textContent = '☀️';
+                } else {
+                    if (btn) btn.textContent = '🌙';
+                }
+            }
+        })();
 
         function toggleHomeNotifDropdown(e) {
             e.stopPropagation();

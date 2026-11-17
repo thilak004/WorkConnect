@@ -19,6 +19,7 @@
                 <a href="{{ url_for('set_language', lang_code='te') }}" class="lang-btn {% if active_lang == 'te' %}active{% endif %}">తెలుగు</a>
                 <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
             </div>
+            <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
             <a href="{{ url_for('home') }}" class="nav-link">← {{ t('nav_home') }}</a>
         </div>
     </header>
@@ -110,8 +111,7 @@
                 </button>
 
                 <p class="registration-footer" style="text-align: center; margin-top: var(--wc-space-5); font-size: var(--wc-text-sm); color: var(--wc-text-muted);">
-                    Already registered?
-                    <a href="{{ url_for('login', role='employer') }}" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-bold);">Sign in here</a>
+                    {{ t('already_registered') }} <a href="{{ url_for('login', role='employer') }}" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-bold);">{{ t('sign_in_here') }}</a>
                 </p>
 
             </form>
@@ -139,6 +139,47 @@
                 }
             });
         }
+
+        // Theme toggle - Dark/Light mode
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            const isDark = html.classList.contains('theme-dark');
+
+            if (isDark) {
+                html.classList.remove('theme-dark');
+                html.classList.add('theme-light');
+                btn.textContent = '🌙';
+                localStorage.setItem('wc-theme', 'light');
+            } else {
+                html.classList.remove('theme-light');
+                html.classList.add('theme-dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('wc-theme', 'dark');
+            }
+        }
+
+        // Restore theme preference on page load
+        (function() {
+            const savedTheme = localStorage.getItem('wc-theme');
+            const btn = document.getElementById('theme-toggle');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+                document.documentElement.classList.remove('theme-light');
+                if (btn) btn.textContent = '☀️';
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                document.documentElement.classList.remove('theme-dark');
+                if (btn) btn.textContent = '🌙';
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('theme-dark');
+                    if (btn) btn.textContent = '☀️';
+                } else {
+                    if (btn) btn.textContent = '🌙';
+                }
+            }
+        })();
     </script>
 </body>
 </html>

@@ -929,8 +929,40 @@
                 <a href="{{ url_for('set_language', lang_code='hi') }}" class="lang-btn {% if active_lang == 'hi' %}active{% endif %}">हिन्दी</a>
             </div>
 
-            <!-- Logout -->
-            <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
+            {% if current_user %}
+                <div class="notif-bell-container" id="notif-bell-wrapper">
+                    <button type="button" id="notif-bell-btn" class="notif-bell-badge" onclick="toggleNotifDropdown(event)" title="Notifications" aria-label="Notifications">
+                        🔔
+                        <span id="notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
+                    </button>
+
+                    <div id="notif-dropdown-panel" class="notif-dropdown-panel" style="display: none;">
+                        <div class="notif-panel-header">
+                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                                <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">{{ t('nav_notifications') }}</span>
+                                <span id="panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
+                                    <span id="panel-unread-num">{{ unread_notifications_count }}</span> unread
+                                </span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                                <button type="button" id="btn-mark-all-dropdown" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">✓ Mark all read</button>
+                                <button type="button" onclick="closeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
+                            </div>
+                        </div>
+                        <div id="notif-items-list" class="notif-items-scroll">
+                            <div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">Loading notifications...</div>
+                        </div>
+                        <div class="notif-panel-footer">
+                            <a href="#notifs" style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">View All Notifications →</a>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
+            {% else %}
+                <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">🌙</button>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
+            {% endif %}
         </nav>
     </header>
 
@@ -998,16 +1030,16 @@
                             <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span>Verified Employer</span>
+                            <span>{{ t('verified_employer') }}</span>
                         </button>
                     </form>
                 {% else %}
                     <form method="POST" action="{{ url_for('toggle_verify_route') }}" style="margin: 0; display: inline-flex;">
                         <button type="submit" class="btn-verify-badge is-pending" title="Click to request verification badge">
                             <span class="pending-indicator" aria-hidden="true"></span>
-                            <span class="status-name">Verification Pending</span>
+                            <span class="status-name">{{ t('verification_pending') }}</span>
                             <span class="status-sep" aria-hidden="true">•</span>
-                            <span class="action-name">Request Verification Badge</span>
+                            <span class="action-name">{{ t('request_verification') }}</span>
                         </button>
                     </form>
                 {% endif %}
@@ -1026,18 +1058,18 @@
 
         <!-- Quick Action Toolbar -->
         <div class="card card-padded" style="margin-bottom: var(--wc-space-6); display: flex; gap: var(--wc-space-3); align-items: center; flex-wrap: wrap;">
-            <strong style="color: var(--wc-heading); font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-bold);">Quick Navigation:</strong>
+            <strong style="color: var(--wc-heading); font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-bold);">{{ t('quick_navigation') }}:</strong>
             <a href="{{ url_for('post_job') }}" class="btn btn-primary btn-sm">
-                ＋ Post New Job
+                ＋ {{ t('post_new_job') }}
             </a>
             <a href="{{ url_for('candidate_matches') }}" class="btn btn-secondary btn-sm">
-                🎯 Smart Candidate Matcher
+                🎯 {{ t('nav_candidate_matcher') }}
             </a>
             <a href="{{ url_for('employer_profile_edit') }}" class="btn btn-ghost btn-sm">
                 ⚙️ {{ t('edit_profile') }}
             </a>
             <a href="#applicants" onclick="switchEmpTab('applicants')" class="btn btn-ghost btn-sm">
-                👥 Review Applicants
+                👥 {{ t('manage_applicants') }}
             </a>
         </div>
 
@@ -1058,8 +1090,8 @@
             <div class="stat-card-modern stat-card-green">
                 {% set total_needed = employer_jobs|sum(attribute='workers_needed') %}
                 <div class="stat-header">
-                    <span class="stat-title">Total Workers Needed</span>
-                    <div class="stat-icon-pill" title="Workers Needed">
+                    <span class="stat-title">{{ t('total_workers_needed') }}</span>
+                    <div class="stat-icon-pill" title="{{ t('total_workers_needed') }}">
                         👥
                     </div>
                 </div>
@@ -1070,8 +1102,8 @@
             <div class="stat-card-modern stat-card-orange">
                 {% set total_remaining = employer_jobs|sum(attribute='positions_remaining') %}
                 <div class="stat-header">
-                    <span class="stat-title">Positions Open</span>
-                    <div class="stat-icon-pill" title="Open Positions">
+                    <span class="stat-title">{{ t('positions_open') }}</span>
+                    <div class="stat-icon-pill" title="{{ t('positions_open') }}">
                         🎯
                     </div>
                 </div>
@@ -1099,12 +1131,12 @@
             </button>
             <button class="tab-btn-modern tab-btn" id="btn-tab-applicants" onclick="switchEmpTab('applicants')" type="button" role="tab" aria-selected="false">
                 <span>👥</span>
-                <span>Manage Applicants</span>
+                <span>{{ t('manage_applicants') }}</span>
                 <span class="tab-count-badge">{{ applications|length }}</span>
             </button>
             <button class="tab-btn-modern tab-btn" id="btn-tab-interviews" onclick="switchEmpTab('interviews')" type="button" role="tab" aria-selected="false">
                 <span>📅</span>
-                <span>Scheduled Meetings</span>
+                <span>{{ t('scheduled_meetings') }}</span>
                 <span class="tab-count-badge">{{ interviews|length }}</span>
             </button>
         </div>
@@ -1125,12 +1157,12 @@
                                         {% if job.status|lower == 'open' %}
                                             <span class="job-status-pill job-status-open">
                                                 <span class="status-dot-pulse"></span>
-                                                Open
+                                                {{ t('status_open') }}
                                             </span>
                                         {% else %}
                                             <span class="job-status-pill job-status-closed">
                                                 <span class="status-dot-pulse"></span>
-                                                {{ job.status }}
+                                                {{ t('status_closed') }}
                                             </span>
                                         {% endif %}
                                     </div>
@@ -1157,11 +1189,11 @@
                             <div class="job-actions-group">
                                 <a href="{{ url_for('candidate_matches', job_id=job.id) }}" class="btn-action-matches" title="View AI matched candidates">
                                     <span>🎯</span>
-                                    <span>Matched Candidates</span>
+                                    <span>{{ t('matched_candidates') }}</span>
                                 </a>
                                 <a href="?job_id={{ job.id }}#applicants" onclick="switchEmpTab('applicants')" class="btn-action-applicants" title="View applicants for this job">
                                     <span>👥</span>
-                                    <span>View Applicants</span>
+                                    <span>{{ t('view_applicants') }}</span>
                                     <span class="applicant-count-pill">{{ job.total_applicants }}</span>
                                 </a>
                             </div>
@@ -1393,6 +1425,105 @@
                 switchEmpTab('interviews');
             }
         });
+
+        // Theme toggle - Dark/Light mode
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            const isDark = html.classList.contains('theme-dark');
+
+            if (isDark) {
+                html.classList.remove('theme-dark');
+                html.classList.add('theme-light');
+                btn.textContent = '🌙';
+                localStorage.setItem('wc-theme', 'light');
+            } else {
+                html.classList.remove('theme-light');
+                html.classList.add('theme-dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('wc-theme', 'dark');
+            }
+        }
+
+        // Restore theme preference on page load
+        (function() {
+            const savedTheme = localStorage.getItem('wc-theme');
+            const btn = document.getElementById('theme-toggle');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('theme-dark');
+                document.documentElement.classList.remove('theme-light');
+                if (btn) btn.textContent = '☀️';
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.add('theme-light');
+                document.documentElement.classList.remove('theme-dark');
+                if (btn) btn.textContent = '🌙';
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('theme-dark');
+                    if (btn) btn.textContent = '☀️';
+                } else {
+                    if (btn) btn.textContent = '🌙';
+                }
+            }
+        })();
+
+        // Notification dropdown functions
+        function toggleNotifDropdown(e) {
+            e.stopPropagation();
+            const panel = document.getElementById('notif-dropdown-panel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                fetchNotificationsList();
+            }
+        }
+
+        function closeNotifDropdown(e) {
+            if (e) e.stopPropagation();
+            const panel = document.getElementById('notif-dropdown-panel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        function markAllNotificationsRead(e) {
+            if (e) e.preventDefault();
+            fetch('/api/notifications/read-all', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notif-badge');
+                    const panelPill = document.getElementById('panel-unread-pill');
+                    const panelNum = document.getElementById('panel-unread-num');
+                    if (badge) { badge.innerText = data.unread_count; badge.style.display = data.unread_count > 0 ? 'flex' : 'none'; }
+                    if (panelPill && panelNum) { panelNum.innerText = data.unread_count; panelPill.style.display = data.unread_count > 0 ? 'inline-block' : 'none'; }
+                })
+                .catch(() => {});
+        }
+
+        function fetchNotificationsList() {
+            fetch('/api/notifications')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const list = document.getElementById('notif-items-list');
+                    if (data.notifications.length === 0) {
+                        list.innerHTML = '<div style="color: var(--wc-text-muted); text-align: center; padding: var(--wc-space-4);">No new notifications.</div>';
+                        return;
+                    }
+                    let html = '';
+                    data.notifications.slice(0, 5).forEach(n => {
+                        html += `<div class="notif-card ${n.is_read ? 'read' : 'unread'}" style="padding: var(--wc-space-2) var(--wc-space-3); margin-bottom: var(--wc-space-2); border-radius: var(--wc-radius-md); border: var(--wc-border-width) solid var(--wc-border);">
+                            <div style="font-weight: 700; color: var(--wc-heading); font-size: var(--wc-text-sm); margin-bottom: var(--wc-space-1);">${n.title}</div>
+                            <div style="color: var(--wc-text-muted); font-size: var(--wc-text-xs); margin-top: var(--wc-space-1);">${n.message}</div>
+                            <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-top: var(--wc-space-1);">${n.created_at}</div>
+                        </div>`;
+                    });
+                    list.innerHTML = html;
+                    if (data.unread_count > 0) {
+                        playNotificationSound();
+                    }
+                }
+            });
+        }
 
         function playNotificationSound() {
             try {
