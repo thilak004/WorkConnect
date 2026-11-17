@@ -83,25 +83,25 @@
         }
     </style>
 </head>
-<body class="jobs-page" style="background: #f7f9fd;">
+<body class="jobs-page">
 
-    <!-- Universal Site Navigation -->
-    <header class="site-nav">
-        <a href="{{ url_for('home') }}" class="site-brand">
-            Work<span>Connect</span>
+    <!-- Universal Site Navigation (Phase 1 design system) -->
+    <header class="navbar">
+        <a class="brand" href="{{ url_for('home') }}">
+            <div class="brand-name">Work<span>Connect</span></div>
         </a>
-        <nav class="site-links">
-            <a href="{{ url_for('home') }}" class="site-link">{{ t('nav_home') }}</a>
-            <a href="{{ url_for('browse_jobs') }}" class="site-link active">{{ t('nav_browse_jobs') }}</a>
+        <nav class="nav-links">
+            <a class="nav-link" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
+            <a class="nav-link active" href="{{ url_for('browse_jobs') }}">{{ t('nav_browse_jobs') }}</a>
             {% if user_role == 'employer' %}
-                <a href="{{ url_for('post_job') }}" class="site-link">{{ t('nav_post_job') }}</a>
-                <a href="{{ url_for('employer_dashboard') }}" class="site-link">{{ t('nav_employer_dashboard') }}</a>
-                <a href="{{ url_for('candidate_matches') }}" class="site-link">{{ t('nav_candidate_matcher') }}</a>
+                <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
+                <a class="nav-link" href="{{ url_for('employer_dashboard') }}">{{ t('nav_employer_dashboard') }}</a>
+                <a class="nav-link" href="{{ url_for('candidate_matches') }}">{{ t('nav_candidate_matcher') }}</a>
             {% elif user_role == 'worker' %}
-                <a href="{{ url_for('worker_dashboard') }}" class="site-link">{{ t('nav_worker_dashboard') }}</a>
+                <a class="nav-link" href="{{ url_for('worker_dashboard') }}">{{ t('nav_worker_dashboard') }}</a>
             {% else %}
-                <a href="{{ url_for('post_job') }}" class="site-link">{{ t('nav_post_job') }}</a>
-                <a href="{{ url_for('login') }}" class="site-link" style="color: #2864c9; font-weight: 700;">{{ t('nav_login') }}</a>
+                <a class="nav-link" href="{{ url_for('post_job') }}">{{ t('nav_post_job') }}</a>
+                <a class="nav-link" href="{{ url_for('login') }}" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-bold);">{{ t('nav_login') }}</a>
             {% endif %}
 
             <!-- Language Switcher (Step 3) -->
@@ -112,43 +112,41 @@
             </div>
 
             {% if current_user %}
-                <a href="{{ url_for('logout') }}" style="font-size: 12px; font-weight: 700; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 10px; border-radius: 8px; text-decoration: none;">
-                    {{ t('nav_logout') }}
-                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
             {% endif %}
         </nav>
     </header>
 
-    <main class="jobs-main" style="max-width: 1100px; margin: 0 auto; padding: 25px 20px;">
+    <main class="jobs-main wc-container" style="padding: var(--wc-space-10) 0 var(--wc-space-12);">
 
         <!-- Header -->
-        <header class="jobs-heading" style="text-align: center; margin-bottom: 20px;">
-            <p class="jobs-eyebrow" style="color: #2864c9; font-weight: 800; font-size: 12px; letter-spacing: 0.5px; margin-bottom: 6px;">
+        <header class="jobs-heading" style="text-align: center; margin-bottom: var(--wc-space-8);">
+            <p class="jobs-eyebrow" style="color: var(--wc-primary); font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-xs); letter-spacing: 0.5px; margin-bottom: var(--wc-space-2);">
                 {{ t('tagline') }}
             </p>
-            <h1 style="font-size: 26px; font-weight: 850; color: #172b4d; margin: 0 0 8px 0;">
+            <h1 style="font-size: var(--wc-text-2xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-3);">
                 {{ t('hero_explore_jobs') }}
             </h1>
-            <p style="font-size: 14px; color: #536780; max-width: 600px; margin: 0 auto;">
+            <p style="font-size: var(--wc-text-base); color: var(--wc-text-muted); max-width: 600px; margin: 0 auto;">
                 Find daily wage work near you. Filter by pictures, listen to job descriptions, or apply with 1 tap.
             </p>
         </header>
 
         <!-- VISUAL TRADE RECOGNITION GALLERY (Step 5) -->
-        <section style="margin-bottom: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <label style="font-size: 13px; font-weight: 800; color: #172b4d; display: flex; align-items: center; gap: 6px;">
+        <section style="margin-bottom: var(--wc-space-8);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--wc-space-3);">
+                <label style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); display: flex; align-items: center; gap: var(--wc-space-2);">
                     🖼️ {{ t('filter_by_trade') }}:
                 </label>
-                <a href="{{ url_for('browse_jobs') }}" style="font-size: 12px; font-weight: 700; color: #2864c9; text-decoration: none;">
+                <a href="{{ url_for('browse_jobs') }}" style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">
                     {{ t('all_trades') }}
                 </a>
             </div>
 
-            <div class="trade-cards-gallery">
+            <div class="wc-grid-4" style="gap: var(--wc-space-3);">
                 {% for trade in available_trades %}
-                    <a href="{{ url_for('trade_sector', trade_key=trade.key) }}" class="trade-card-btn {% if skill_filter == trade.key %}active{% endif %}">
-                        <img src="{{ url_for('static', filename=trade.image) }}" alt="{{ trade.name }}" class="trade-card-img">
+                    <a href="{{ url_for('trade_sector', trade_key=trade.key) }}" class="trade-card {% if skill_filter == trade.key %}trade-card-active{% endif %}">
+                        <img src="{{ url_for('static', filename=trade.image) }}" alt="{{ trade.name }}" class="trade-card-img" style="background: {{ trade.bg_tint }};">
                         <span class="trade-card-title">{{ trade.name }}</span>
                     </a>
                 {% endfor %}
@@ -156,22 +154,22 @@
         </section>
 
         <!-- Search & Filter Controls Panel -->
-        <section class="dashboard-panel" style="margin-bottom: 30px; background: #ffffff; border-radius: 16px; padding: 22px; box-shadow: 0 4px 18px rgba(25, 45, 75, 0.04); border: 1px solid #e3eaf2;">
-            <form action="{{ url_for('browse_jobs') }}" method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
-                
-                <div class="dashboard-field">
-                    <label style="font-weight: 700; font-size: 12px; color: #536780;">Keywords / Title</label>
-                    <input name="q" type="text" placeholder="{{ t('search_placeholder') }}" value="{{ search_query }}" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px;">
+        <section class="card card-padded" style="margin-bottom: var(--wc-space-8); box-shadow: var(--wc-shadow); border: var(--wc-border-width) solid var(--wc-border);">
+            <form action="{{ url_for('browse_jobs') }}" method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--wc-space-3);">
+
+                <div class="form-field">
+                    <label class="form-label">Keywords / Title</label>
+                    <input name="q" type="text" placeholder="{{ t('search_placeholder') }}" value="{{ search_query }}" class="form-input">
                 </div>
 
-                <div class="dashboard-field">
-                    <label style="font-weight: 700; font-size: 12px; color: #536780;">Location / Town</label>
-                    <input name="location" type="text" placeholder="e.g. Narasapur, Kavitam..." value="{{ location_filter }}" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div class="form-field">
+                    <label class="form-label">Location / Town</label>
+                    <input name="location" type="text" placeholder="e.g. Narasapur, Kavitam..." value="{{ location_filter }}" class="form-input">
                 </div>
 
-                <div class="dashboard-field">
-                    <label style="font-weight: 700; font-size: 12px; color: #536780;">{{ t('sort_by') }}</label>
-                    <select name="sort" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div class="form-field">
+                    <label class="form-label">{{ t('sort_by') }}</label>
+                    <select name="sort" class="form-select">
                         <option value="match" {% if sort_by == 'match' %}selected{% endif %}>{{ t('sort_match') }}</option>
                         <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>{{ t('sort_newest') }}</option>
                         <option value="wage_desc" {% if sort_by == 'wage_desc' %}selected{% endif %}>{{ t('sort_wage_high') }}</option>
@@ -180,25 +178,25 @@
                     </select>
                 </div>
 
-                <div style="display: flex; gap: 8px; align-items: flex-end;">
-                    <button type="submit" class="dashboard-button" style="padding: 10px 18px; background: #2864c9; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; flex: 1;">
+                <div style="display: flex; gap: var(--wc-space-2); align-items: flex-end;">
+                    <button type="submit" class="btn btn-primary btn-block" style="padding: var(--wc-space-2) var(--wc-space-4);">
                         🔍 {{ t('filter_button') }}
                     </button>
-                    <a href="{{ url_for('browse_jobs') }}" style="padding: 10px 14px; background: #f1f5f9; color: #536780; border-radius: 8px; font-weight: 700; font-size: 13px; text-decoration: none;">
+                    <a href="{{ url_for('browse_jobs') }}" class="btn btn-ghost btn-block" style="padding: var(--wc-space-2) var(--wc-space-4); font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-bold);">
                         {{ t('reset_filters') }}
                     </a>
                 </div>
             </form>
 
             {% if worker %}
-                <div style="margin-top: 16px; padding: 12px 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style="margin-top: var(--wc-space-5); padding: var(--wc-space-4); background: var(--wc-success-bg); border: var(--wc-border-width) solid #a7f3d0; border-radius: var(--wc-radius-lg); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--wc-space-3);">
                     <div>
-                        <strong style="color: #065f46;">Personalized Match Scores calculated for {{ worker['name'] }}</strong>
-                        <span style="color: #047857; font-size: 12px; margin-left: 8px;">
+                        <strong style="color: var(--wc-success);">Personalized Match Scores calculated for {{ worker['name'] }}</strong>
+                        <span style="color: #047857; font-size: var(--wc-text-xs); margin-left: var(--wc-space-2);">
                             (Skill: <strong>{{ worker['skill'] }}</strong> | Loc: <strong>{{ worker['location'] }}</strong> | Expected: <strong>₹{{ worker['wage'] }}</strong>)
                         </span>
                     </div>
-                    <span style="font-size: 11px; font-weight: 800; color: #047857; background: #ffffff; padding: 4px 10px; border-radius: 12px;">
+                    <span style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-extrabold); color: #047857; background: #ffffff; padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);">
                         ✓ ACTIVE PROFILE
                     </span>
                 </div>
@@ -207,16 +205,16 @@
 
         <!-- JOBS GRID (Step 5, 7, 8) -->
         {% if jobs %}
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: var(--wc-space-6);">
                 {% for job in jobs %}
-                    <article class="jobs-card-modern" id="job-{{ job.id }}">
+                    <article class="jobs-card-modern card card-padded" id="job-{{ job.id }}">
                         <div>
                             <!-- Header with Trade Picture & Title -->
-                            <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;">
+                            <div style="display: flex; gap: var(--wc-space-3); align-items: flex-start; margin-bottom: var(--wc-space-3);">
                                 <img src="{{ url_for('static', filename=job.trade_image) }}" alt="{{ job.skill_required }}" class="job-trade-thumb">
                                 <div style="flex: 1;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                                        <span style="font-size: 11px; font-weight: 700; color: {{ job.trade_color }}; text-transform: uppercase;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--wc-space-1);">
+                                        <span style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: {{ job.trade_color }}; text-transform: uppercase;">
                                             {{ job.skill_required }}
                                         </span>
                                         <!-- Bookmark / Save Button (Step 8) -->
@@ -226,44 +224,44 @@
                                             </button>
                                         {% endif %}
                                     </div>
-                                    <h2 style="font-size: 17px; font-weight: 800; color: #172b4d; margin: 0; line-height: 1.3;">
+                                    <h2 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0; line-height: var(--wc-line-tight);">
                                         <a href="{{ url_for('job_details', job_id=job.id) }}" style="color: inherit; text-decoration: none;">
                                             {{ job["title"] }}
                                         </a>
                                     </h2>
-                                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                                    <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-top: var(--wc-space-1);">
                                         🏢 {{ job["employer_name"] }}
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Badges: Daily Wage & Location (Step 5) -->
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;">
+                            <div style="display: flex; gap: var(--wc-space-2); flex-wrap: wrap; margin-bottom: var(--wc-space-3);">
                                 <span class="wage-badge">
                                     💰 ₹{{ job["daily_wage"] }}/day
                                 </span>
                                 <span class="locality-badge">
                                     📍 {{ job["location"] }}
                                 </span>
-                                <span style="background: #eef2f6; color: #334155; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 12px;">
+                                <span style="background: var(--wc-surface-hover); color: var(--wc-text-muted); font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); padding: var(--wc-space-1) var(--wc-space-2); border-radius: var(--wc-radius-full);">
                                     👥 {{ job["positions_remaining"] }} {{ t('positions_left') }}
                                 </span>
                             </div>
 
-                            <p style="font-size: 13px; color: #475569; margin: 0 0 14px 0; line-height: 1.45;">
+                            <p style="font-size: var(--wc-text-sm); color: var(--wc-text); margin: 0 0 var(--wc-space-4); line-height: 1.45;">
                                 {{ job["description"] }}
                             </p>
 
                             <!-- Intelligent Match Score Breakdown & Explanations (Step 7) -->
                             {% if job["match_percentage"] is not none %}
-                                <div style="margin-bottom: 14px; padding: 10px 14px; border-radius: 10px; background: {% if job['match_percentage'] >= 75 %}#f0fdf4; border: 1px solid #bbf7d0; color: #166534;{% else %}#eff6ff; border: 1px solid #bfdbfe; color: #1e40af;{% endif %}">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 13px;">
+                                <div style="margin-bottom: var(--wc-space-4); padding: var(--wc-space-3); border-radius: var(--wc-radius-md); background: {% if job['match_percentage'] >= 75 %}var(--wc-success-bg); border: var(--wc-border-width) solid #bbf7d0; color: var(--wc-success);{% else %}var(--wc-info-bg); border: var(--wc-border-width) solid #bfdbfe; color: var(--wc-info);{% endif %}">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-weight: var(--wc-font-weight-extrabold); font-size: var(--wc-text-sm);">
                                         <span>🎯 Match: {{ job["match_percentage"] }}%</span>
                                         <span>{{ job["match_level"] }}</span>
                                     </div>
 
                                     {% if job["match_breakdown"] %}
-                                        <div style="font-size: 11px; margin-top: 6px; line-height: 1.4;">
+                                        <div style="font-size: var(--wc-text-xs); margin-top: var(--wc-space-2); line-height: 1.4;">
                                             <div><strong>Why this matches you:</strong></div>
                                             <div>• {{ job["match_breakdown"]["skills"]["desc"] }} ({{ job["match_breakdown"]["skills"]["score"] }}/35 pts)</div>
                                             <div>• {{ job["match_breakdown"]["location"]["desc"] }} ({{ job["match_breakdown"]["location"]["score"] }}/20 pts)</div>
@@ -275,11 +273,11 @@
                         </div>
 
                         <!-- Action Bar: Audio Description, Large Apply Button, Report (Step 5 & 8) -->
-                        <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
-                            
+                        <div style="border-top: var(--wc-border-width) solid var(--wc-border); padding-top: var(--wc-space-3); display: flex; flex-direction: column; gap: var(--wc-space-3);">
+
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <!-- Audio Description Playback Button (Step 5) -->
-                                <button type="button" class="btn-audio-speak"
+                                <button type="button" class="btn btn-ghost btn-sm btn-audio-speak"
                                         data-title="{{ job.title }}"
                                         data-employer="{{ job.employer_name }}"
                                         data-wage="{{ job.daily_wage }}"
@@ -295,18 +293,19 @@
                                         data-target-id="{{ job.id }}"
                                         data-title="{{ job.title }}"
                                         onclick="openReportModalFromBtn(this)"
-                                        style="background: none; border: none; font-size: 11px; font-weight: 700; color: #94a3b8; cursor: pointer;">
+                                        class="btn btn-ghost btn-sm"
+                                        style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-text-muted); padding: var(--wc-space-1) var(--wc-space-2);">
                                     🚩 {{ t('report_job') }}
                                 </button>
                             </div>
 
                             <!-- Big Simple Apply Button (Step 5) -->
                             {% if job["positions_remaining"] > 0 %}
-                                <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn-apply-big">
+                                <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn btn-primary btn-lg btn-apply-big">
                                     ⚡ {{ t('apply_now') }}
                                 </a>
                             {% else %}
-                                <button class="btn-apply-big disabled" disabled>
+                                <button class="btn btn-primary btn-lg btn-apply-big disabled" disabled>
                                     {{ t('job_filled') }}
                                 </button>
                             {% endif %}
@@ -315,11 +314,11 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div style="background: #ffffff; border-radius: 16px; padding: 50px 20px; text-align: center; border: 1px solid #e2e8f0;">
-                <div style="font-size: 48px; margin-bottom: 12px;">🔍</div>
-                <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 6px 0;">No matching job requirements found</h3>
-                <p style="font-size: 14px; color: #64748b; margin-top: 0; margin-bottom: 20px;">Try clearing search keywords or choosing a different trade category.</p>
-                <a href="{{ url_for('browse_jobs') }}" class="btn-apply-big">
+            <div class="card card-padded" style="text-align: center; padding: var(--wc-space-10) var(--wc-space-4);">
+                <div style="font-size: 48px; margin-bottom: var(--wc-space-3);">🔍</div>
+                <h3 style="font-size: var(--wc-text-xl); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-2);">No matching job requirements found</h3>
+                <p style="font-size: var(--wc-text-base); color: var(--wc-text-muted); margin-top: 0; margin-bottom: var(--wc-space-4);">Try clearing search keywords or choosing a different trade category.</p>
+                <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-lg">
                     {{ t('reset_filters') }}
                 </a>
             </div>
@@ -381,13 +380,19 @@
                 {% endif %}
             </div>
         </div>
-        <div style="padding: 8px 12px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 6px; flex-wrap: wrap;">
-            <button onclick="sendQuickPrompt('Find high wage electrician jobs')" style="font-size: 11px; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; border-radius: 12px; padding: 4px 8px; cursor: pointer; font-weight: 600;">⚡ High wage jobs</button>
-            <button onclick="sendQuickPrompt('How do I register by voice?')" style="font-size: 11px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; border-radius: 12px; padding: 4px 8px; cursor: pointer; font-weight: 600;">🎙️ Voice Reg</button>
-            <button onclick="sendQuickPrompt('How to apply for a job?')" style="font-size: 11px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; border-radius: 12px; padding: 4px 8px; cursor: pointer; font-weight: 600;">✓ How to apply</button>
+        <div style="padding: var(--wc-space-2) var(--wc-space-4); background: var(--wc-surface-hover); border-top: var(--wc-border-width) solid var(--wc-border); display: flex; gap: var(--wc-space-1); flex-wrap: wrap;">
+            <button onclick="sendQuickPrompt('Find high wage electrician jobs')" class="btn btn-ghost btn-sm">
+                ⚡ High wage jobs
+            </button>
+            <button onclick="sendQuickPrompt('How do I register by voice?')" class="btn btn-ghost btn-sm">
+                🎙️ Voice Reg
+            </button>
+            <button onclick="sendQuickPrompt('How to apply for a job?')" class="btn btn-ghost btn-sm">
+                ✓ How to apply
+            </button>
         </div>
         <div class="ai-chat-input-bar">
-            <input type="text" id="ai-user-query" class="ai-chat-input" placeholder="{{ t('ai_assistant_placeholder') }}" onkeydown="if(event.key==='Enter') sendAIMessage()">
+            <input type="text" id="ai-user-query" class="ai-chat-input form-input" placeholder="{{ t('ai_assistant_placeholder') }}" onkeydown="if(event.key==='Enter') sendAIMessage()">
             <button class="ai-chat-send" onclick="sendAIMessage()">{{ t('send') }}</button>
         </div>
     </div>

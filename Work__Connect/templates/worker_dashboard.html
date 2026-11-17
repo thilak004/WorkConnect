@@ -6,141 +6,72 @@
     <title>{{ t('nav_worker_dashboard') }} | WorkConnect</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-        .alert-base {
-            padding: 12px 18px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 600;
-            font-size: 13px;
-        }
-        .alert-success {
-            background: #ecfdf5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        .alert-danger {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-        .alert-info {
-            background: #eff6ff;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-        .dashboard-container {
-            max-width: 1100px;
-            margin: 25px auto;
-            padding: 0 20px;
-        }
+        .dashboard-container { max-width: 1100px; margin: var(--wc-space-8) auto; padding: 0 var(--wc-space-4); }
         .profile-banner {
-            background: linear-gradient(135deg, #1e3a8a 0%, #2864c9 100%);
-            border-radius: 18px;
-            padding: 24px 28px;
+            background: linear-gradient(135deg, var(--wc-primary-dark) 0%, var(--wc-primary) 100%);
+            border-radius: var(--wc-radius-xl);
+            padding: var(--wc-space-5) var(--wc-space-6);
             color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 25px rgba(30, 58, 138, 0.15);
+            gap: var(--wc-space-5);
+            margin-bottom: var(--wc-space-6);
+            box-shadow: var(--wc-shadow-lg);
         }
-        .profile-info {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
+        .profile-info { display: flex; align-items: center; gap: var(--wc-space-4); }
         .profile-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            flex-shrink: 0;
+            width: 64px; height: 64px; border-radius: var(--wc-radius-md);
+            background: #ffffff; display: flex; align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: var(--wc-shadow-md); flex-shrink: 0;
         }
-        .profile-meta-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
+        .profile-meta-pills { display: flex; flex-wrap: wrap; gap: var(--wc-space-2); margin-top: var(--wc-space-3); }
         .profile-pill {
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(4px);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(4px);
+            padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);
+            font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-semibold);
         }
         .tabs-header {
-            display: flex;
-            gap: 8px;
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 20px;
-            overflow-x: auto;
+            display: flex; gap: var(--wc-space-2); border-bottom: 2px solid var(--wc-border);
+            margin-bottom: var(--wc-space-6); overflow-x: auto;
         }
         .tab-btn {
-            padding: 10px 18px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #64748b;
-            text-decoration: none;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-            transition: all 0.2s;
-            white-space: nowrap;
+            padding: var(--wc-space-2) var(--wc-space-4); font-size: var(--wc-text-sm);
+            font-weight: var(--wc-font-weight-bold); color: var(--wc-text-muted);
+            text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -2px;
+            transition: all var(--wc-transition-fast); white-space: nowrap;
         }
-        .tab-btn:hover {
-            color: #2864c9;
-        }
-        .tab-btn.active {
-            color: #2864c9;
-            border-bottom-color: #2864c9;
-        }
+        .tab-btn:hover { color: var(--wc-primary); }
+        .tab-btn.active { color: var(--wc-primary); border-bottom-color: var(--wc-primary); }
         .app-card {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.03);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
+            background: var(--wc-surface); border-radius: var(--wc-radius-lg);
+            padding: var(--wc-space-5); margin-bottom: var(--wc-space-4);
+            border: var(--wc-border-width) solid var(--wc-border); box-shadow: var(--wc-shadow);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--wc-space-4);
         }
         .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
+            display: inline-flex; align-items: center; gap: var(--wc-space-1);
+            padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-full);
+            font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-extrabold);
         }
-        .status-pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-        .status-shortlisted { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
-        .status-confirmed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-        .status-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .status-pending { background: var(--wc-warning-bg); color: var(--wc-warning); border: var(--wc-border-width) solid #fde68a; }
+        .status-shortlisted { background: var(--wc-info-bg); color: #4338ca; border: var(--wc-border-width) solid #c7d2fe; }
+        .status-confirmed { background: var(--wc-success-bg); color: #15803d; border: var(--wc-border-width) solid #bbf7d0; }
+        .status-rejected { background: var(--wc-danger-bg); color: var(--wc-danger); border: var(--wc-border-width) solid #fecaca; }
     </style>
 </head>
-<body style="background: #f7f9fd;">
+<body style="background: var(--wc-background);">
 
-    <!-- Site Navigation -->
-    <header class="navbar" style="background: #ffffff; border-bottom: 1px solid #e3eaf2; padding: 0 4%; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
-        <a href="{{ url_for('home') }}" style="font-size: 18px; font-weight: 800; color: #172b4d; text-decoration: none; display: flex; align-items: center; gap: 6px;">
-            Work<span style="color: #2864c9;">Connect</span>
+    <!-- Site Navigation (Phase 1 design system) -->
+    <header class="navbar">
+        <a class="brand" href="{{ url_for('home') }}">
+            <div class="brand-name">Work<span>Connect</span></div>
         </a>
-        <nav style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <a href="{{ url_for('home') }}" style="font-size: 13px; font-weight: 600; color: #536780; text-decoration: none;">{{ t('nav_home') }}</a>
-            <a href="{{ url_for('browse_jobs') }}" style="font-size: 13px; font-weight: 600; color: #536780; text-decoration: none;">{{ t('nav_browse_jobs') }}</a>
-            <a href="{{ url_for('worker_dashboard') }}" style="padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #2864c9; background: #eef4fc; text-decoration: none;">{{ t('nav_worker_dashboard') }}</a>
+        <nav class="nav-links">
+            <a class="nav-link" href="{{ url_for('home') }}">{{ t('nav_home') }}</a>
+            <a class="nav-link" href="{{ url_for('browse_jobs') }}">{{ t('nav_browse_jobs') }}</a>
+            <a class="nav-link active" href="{{ url_for('worker_dashboard') }}">{{ t('nav_worker_dashboard') }}</a>
 
             <!-- Language Switcher -->
             <div class="lang-selector">
@@ -151,35 +82,23 @@
 
             <!-- Notifications Bell & Modern Dropdown -->
             <div class="notif-bell-container" id="notif-bell-wrapper">
-                <button type="button" 
-                        id="notif-bell-btn" 
-                        class="notif-bell-badge" 
-                        onclick="toggleNotifDropdown(event)" 
-                        title="Notifications" 
-                        aria-label="Notifications"
-                        style="border: none; cursor: pointer; outline: none;">
+                <button type="button" id="notif-bell-btn" class="notif-bell-badge" onclick="toggleNotifDropdown(event)" title="Notifications" aria-label="Notifications">
                     🔔
-                    <span id="notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">
-                        {{ unread_notifications_count }}
-                    </span>
+                    <span id="notif-badge" class="notif-count" style="display: {% if unread_notifications_count > 0 %}flex{% else %}none{% endif %};">{{ unread_notifications_count }}</span>
                 </button>
 
                 <!-- Notification Dropdown Panel -->
                 <div id="notif-dropdown-panel" class="notif-dropdown-panel" style="display: none;">
                     <div class="notif-panel-header">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="font-size: 15px; font-weight: 800; color: #1e293b;">Notifications</span>
+                        <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                            <span style="font-size: var(--wc-text-sm); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading);">Notifications</span>
                             <span id="panel-unread-pill" class="notif-unread-pill" style="display: {% if unread_notifications_count > 0 %}inline-block{% else %}none{% endif %};">
                                 <span id="panel-unread-num">{{ unread_notifications_count }}</span> unread
                             </span>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <button type="button" id="btn-mark-all-dropdown" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">
-                                ✓ Mark all read
-                            </button>
-                            <button type="button" onclick="closeNotifDropdown(event)" class="btn-close-dropdown" title="Close">
-                                ✕
-                            </button>
+                        <div style="display: flex; align-items: center; gap: var(--wc-space-2);">
+                            <button type="button" id="btn-mark-all-dropdown" onclick="markAllNotificationsRead(event)" class="btn-mark-all-text">✓ Mark all read</button>
+                            <button type="button" onclick="closeNotifDropdown(event)" class="btn-close-dropdown" title="Close">✕</button>
                         </div>
                     </div>
 
@@ -205,45 +124,30 @@
                                         <div class="notif-msg-text">{{ n.message }}</div>
                                     </div>
                                     <div class="notif-action-row">
-                                        <a href="{{ n.link }}{% if '?' in n.link %}&{% else %}?{% endif %}notif_id={{ n.id }}" 
-                                           class="btn-view-job"
-                                           onclick="handleNotificationClick({{ n.id }})">
-                                            👁️ View Job
-                                        </a>
+                                        <a href="{{ n.link }}{% if '?' in n.link %}&{% else %}?{% endif %}notif_id={{ n.id }}" class="btn-view-job" onclick="handleNotificationClick({{ n.id }})">👁️ View Job</a>
                                         {% if not n.is_read %}
-                                            <button type="button" 
-                                                    class="btn-mark-single-read" 
-                                                    id="dropdown-mark-read-{{ n.id }}"
-                                                    onclick="markNotificationRead({{ n.id }}, event)">
-                                                Mark as read
-                                            </button>
+                                            <button type="button" class="btn-mark-single-read" id="dropdown-mark-read-{{ n.id }}" onclick="markNotificationRead({{ n.id }}, event)">Mark as read</button>
                                         {% endif %}
                                     </div>
                                 </div>
                             {% endfor %}
                         {% else %}
                             <div class="notif-empty-state">
-                                <div style="font-size: 32px; margin-bottom: 8px;">🔔</div>
-                                <div style="font-weight: 750; color: #334155; font-size: 14px;">No notifications yet</div>
-                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
-                                    You will receive instant alerts when employers post new job opportunities.
-                                </div>
+                                <div style="font-size: 32px; margin-bottom: var(--wc-space-2);">🔔</div>
+                                <div style="font-weight: 750; color: var(--wc-heading); font-size: var(--wc-text-sm);">No notifications yet</div>
+                                <div style="font-size: var(--wc-text-xs); color: var(--wc-text-muted); margin-top: var(--wc-space-1);">You will receive instant alerts when employers post new job opportunities.</div>
                             </div>
                         {% endif %}
                     </div>
 
                     <div class="notif-panel-footer">
-                        <a href="#notifs" onclick="switchTab('notifications'); closeNotifDropdown();" style="font-size: 12px; font-weight: 700; color: #2563eb; text-decoration: none;">
-                            View All Notifications in Tab →
-                        </a>
+                        <a href="#notifs" onclick="switchTab('notifications'); closeNotifDropdown();" style="font-size: var(--wc-text-xs); font-weight: var(--wc-font-weight-bold); color: var(--wc-primary); text-decoration: none;">View All Notifications in Tab →</a>
                     </div>
                 </div>
             </div>
 
             <!-- Logout -->
-            <a href="{{ url_for('logout') }}" style="font-size: 12px; font-weight: 700; color: #ef4444; border: 1px solid #fca5a5; padding: 4px 10px; border-radius: 8px; text-decoration: none;">
-                {{ t('nav_logout') }}
-            </a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">{{ t('nav_logout') }}</a>
         </nav>
     </header>
 
@@ -253,9 +157,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert-base alert-{{ category }}">
-                        {{ message }}
-                    </div>
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -315,8 +217,8 @@
                 {% for app in applications %}
                     <div class="app-card">
                         <div style="flex: 1; min-width: 250px;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-                                <h2 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0;">
+                            <div style="display: flex; align-items: center; gap: var(--wc-space-2); margin-bottom: var(--wc-space-2);">
+                                <h2 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0;">
                                     {{ app.job_title }}
                                 </h2>
                                 <span class="status-badge status-{{ app.application_status|lower }}">
@@ -326,7 +228,7 @@
                                     {% else %}⏳ Pending{% endif %}
                                 </span>
                             </div>
-                            <div style="font-size: 13px; color: #64748b; display: flex; gap: 14px; flex-wrap: wrap;">
+                            <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap;">
                                 <span>🏢 {{ app.employer_name }}</span>
                                 <span>📍 {{ app.job_location }}</span>
                                 <span>💰 ₹{{ app.daily_wage }}/day</span>
@@ -334,14 +236,14 @@
                             </div>
 
                             {% if app.match_percentage %}
-                                <div style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 8px; font-size: 12px; color: #166534; font-weight: 700;">
+                                <div style="margin-top: var(--wc-space-3); display: inline-flex; align-items: center; gap: var(--wc-space-2); background: var(--wc-success-bg); border: var(--wc-border-width) solid #bbf7d0; padding: var(--wc-space-1) var(--wc-space-3); border-radius: var(--wc-radius-md); font-size: var(--wc-text-xs); color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">
                                     <span>🎯 Match Compatibility: {{ app.match_percentage }}% ({{ app.match_level }})</span>
                                 </div>
                             {% endif %}
                         </div>
 
                         <div style="text-align: right;">
-                            <a href="{{ url_for('browse_jobs', q=app.job_skill) }}" style="display: inline-block; padding: 8px 14px; background: #f1f5f9; color: #334155; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none;">
+                            <a href="{{ url_for('browse_jobs', q=app.job_skill) }}" class="btn btn-ghost btn-sm" style="font-weight: var(--wc-font-weight-bold); color: var(--wc-text-muted);">
                                 View Similar Jobs
                             </a>
                         </div>
@@ -352,7 +254,7 @@
                     <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
                     <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No applications submitted yet</h3>
                     <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">Browse available jobs in your locality and apply with 1 click.</p>
-                    <a href="{{ url_for('browse_jobs') }}" class="btn-apply-big">
+                    <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
                         {{ t('hero_explore_jobs') }} →
                     </a>
                 </div>
@@ -364,26 +266,26 @@
             {% if saved_jobs %}
                 {% for job in saved_jobs %}
                     <div class="app-card">
-                        <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
-                            <img src="{{ url_for('static', filename=job.trade_image) }}" alt="{{ job.skill_required }}" style="width: 48px; height: 48px; border-radius: 12px;">
+                        <div style="display: flex; align-items: center; gap: var(--wc-space-3); flex: 1;">
+                            <img src="{{ url_for('static', filename=job.trade_image) }}" alt="{{ job.skill_required }}" style="width: 48px; height: 48px; border-radius: var(--wc-radius-md);">
                             <div>
-                                <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">
+                                <h3 style="font-size: var(--wc-text-lg); font-weight: var(--wc-font-weight-extrabold); color: var(--wc-heading); margin: 0 0 var(--wc-space-1);">
                                     {{ job.title }}
                                 </h3>
-                                <div style="font-size: 13px; color: #64748b; display: flex; gap: 12px; flex-wrap: wrap;">
+                                <div style="font-size: var(--wc-text-sm); color: var(--wc-text-muted); display: flex; gap: var(--wc-space-3); flex-wrap: wrap;">
                                     <span>🏢 {{ job.employer_name }}</span>
                                     <span>📍 {{ job.location }}</span>
-                                    <span style="color: #047857; font-weight: 700;">💰 ₹{{ job.daily_wage }}/day</span>
+                                    <span style="color: var(--wc-success); font-weight: var(--wc-font-weight-bold);">💰 ₹{{ job.daily_wage }}/day</span>
                                     <span>👥 {{ job.positions_remaining }} left</span>
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn-apply-big" style="padding: 8px 18px; font-size: 13px;">
+                        <div style="display: flex; gap: var(--wc-space-3); align-items: center;">
+                            <a href="{{ url_for('apply_job', job_id=job.id) }}" class="btn btn-primary btn-sm">
                                 {{ t('apply_now') }}
                             </a>
                             <form method="POST" action="{{ url_for('unsave_job_route', job_id=job.id) }}" style="display: inline;">
-                                <button type="submit" style="background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                                <button type="submit" class="btn btn-outline btn-sm" style="color: var(--wc-danger); border-color: var(--wc-danger);">
                                     ✕ Remove
                                 </button>
                             </form>
@@ -395,7 +297,7 @@
                     <div style="font-size: 40px; margin-bottom: 10px;">⭐</div>
                     <h3 style="font-size: 17px; font-weight: 700; color: #334155; margin: 0 0 6px 0;">No saved jobs yet</h3>
                     <p style="font-size: 13px; color: #64748b; margin-top: 0; margin-bottom: 18px;">Click the bookmark icon on any job card to save it for later.</p>
-                    <a href="{{ url_for('browse_jobs') }}" class="btn-apply-big">
+                    <a href="{{ url_for('browse_jobs') }}" class="btn btn-primary btn-sm">
                         {{ t('hero_explore_jobs') }}
                     </a>
                 </div>
