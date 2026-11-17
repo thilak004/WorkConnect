@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 
 from database import get_job_by_id, get_all_workers
 from db import get_db_connection
+from psycopg.extras import execute_values
 
 
 class NotificationType:
@@ -122,30 +123,40 @@ def notify_workers_new_job(job_id):
         message = f"'{job_title}' posted by {employer_name} in {location} (₹{wage}/day)."
         link = f"/jobs/{job_id}"
 
+        # Build batch insert values for workers who haven't been notified yet
+        insert_rows = []
         for worker in workers:
             w_id = worker["id"]
             if w_id in already_notified_worker_ids:
                 continue
+            insert_rows.append((
+                w_id,
+                title,
+                message,
+                link,
+                NotificationType.JOB_POSTED,
+                job_id,
+                employer_name,
+                job_title,
+                location,
+            ))
 
-            cursor.execute(
+        if insert_rows:
+            execute_values(
+                cursor,
                 """
-                INSERT INTO notifications 
-                (user_role, user_id, title, message, link, notification_type, job_id, company_name, job_title, location, is_read)
-                VALUES ('worker', %s, %s, %s, %s, %s, %s, %s, %s, %s, 0)
+                INSERT INTO notifications
+                (user_role, user_id, title, message, link, notification_type, job_id,
+                 company_name, job_title, location, is_read)
+                VALUES %s
                 """,
-                (
-                    w_id,
-                    title,
-                    message,
-                    link,
-                    NotificationType.JOB_POSTED,
-                    job_id,
-                    employer_name,
-                    job_title,
-                    location
-                )
+                [(
+                    'worker',
+                    r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8],
+                    0,
+                ) for r in insert_rows],
             )
-            created_count += 1
+            created_count = len(insert_rows)
 
 
     return created_count

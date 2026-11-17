@@ -365,10 +365,14 @@ def get_job_by_id(job_id):
 
 
 def get_all_jobs(status_filter="Open", search_query=None, skill_filter=None,
-                 location_filter=None, max_wage=None, worker_email=None, sort_by=None):
+                 location_filter=None, max_wage=None, worker_email=None, sort_by=None,
+                 include_match_scoring=True):
     """
     Return jobs matching filters, with intelligent matching if worker_email is provided.
     Supports search by keyword, skill, location, wage, and intelligent match sorting.
+
+    When include_match_scoring=False, skips the per-job Python match-score computation
+    (useful for AI fallbacks and admin listings that don't need per-row scoring).
     """
     with get_db_connection() as connection:
 
@@ -435,9 +439,9 @@ def get_all_jobs(status_filter="Open", search_query=None, skill_filter=None,
         query += " ORDER BY jobs.id DESC"
         raw_jobs = [dict(r) for r in connection.execute(query, params).fetchall()]
 
-    # If worker is specified, compute match score for every job
+    # If worker is specified and match scoring is enabled, compute match score for every job
     worker = None
-    if worker_email:
+    if worker_email and include_match_scoring:
         worker = get_worker_by_email(worker_email)
 
     for j in raw_jobs:

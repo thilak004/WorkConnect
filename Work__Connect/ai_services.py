@@ -11,6 +11,8 @@ Secure server-side API integrations for:
 import os
 import re
 import json
+import time
+from collections import OrderedDict
 from dotenv import load_dotenv
 from trade_utils import get_trade_for_skill, TRADE_METADATA
 from database import get_all_jobs
@@ -20,7 +22,54 @@ load_dotenv()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 # Simple in-memory response cache to control costs and prevent redundant API calls
-_AI_CACHE = {}
+_AI_CACHE = OrderedDict()
+_MAX_CACHE_SIZE = 1000
+_CACHE_TTL_SECONDS = 900  # 15 minutes
+
+# Short-lived cache for open job listings (AI fallback uses this heavily)
+_OPEN_JOBS_CACHE = None
+_OPEN_JOBS_CACHE_TS = 0
+_OPEN_JOBS_CACHE_TTL = 120  # 2 minutes
+
+
+def _cache_get(key):
+    """Get a value from _AI_CACHE with TTL expiry. Returns None if missing or expired."""
+    if key not in _AI_CACHE:
+        return None
+    ts, value = _AI_CACHE[key]
+    if time.time() - ts > _CACHE_TTL_SECONDS:
+        del _AI_CACHE[key]
+        return None
+    # Move to end (most recently used)
+    _AI_CACHE.move_to_end(key)
+    return value
+
+
+def _cache_set(key, value):
+    """Set a value in _AI_CACHE with TTL and size-limit eviction."""
+    # Evict expired entries first
+    now = time.time()
+    expired = [k for k, (ts, _) in _AI_CACHE.items() if now - ts > _CACHE_TTL_SECONDS]
+    for k in expired:
+        del _AI_CACHE[k]
+
+    # Evict oldest if at capacity
+    while len(_AI_CACHE) >= _MAX_CACHE_SIZE:
+        _AI_CACHE.popitem(last=False)
+
+    _AI_CACHE[key] = (now, value)
+
+
+def get_open_jobs_cached():
+    """Return cached open jobs list with a short TTL (2 minutes)."""
+    global _OPEN_JOBS_CACHE, _OPEN_JOBS_CACHE_TS
+    now = time.time()
+    if _OPEN_JOBS_CACHE is not None and now - _OPEN_JOBS_CACHE_TS < _OPEN_JOBS_CACHE_TTL:
+        return _OPEN_JOBS_CACHE
+    jobs = get_all_jobs(status_filter="Open", include_match_scoring=False)
+    _OPEN_JOBS_CACHE = jobs
+    _OPEN_JOBS_CACHE_TS = now
+    return jobs
 
 
 def extract_registration_fields_from_transcript(transcript, lang="en"):
@@ -71,8 +120,9 @@ def ask_workconnect_assistant(message, lang="en", role="worker", context=None):
         return "Please ask a question." if lang == "en" else ("దయచేసి ప్రశ్నను అడగండి." if lang == "te" else "कृपया अपना प्रश्न पूछें।")
 
     cache_key = f"{lang}:{role}:{clean_msg.lower()}"
-    if cache_key in _AI_CACHE:
-        return _AI_CACHE[cache_key]
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return cached
 
     # Try calling Google Gemini API if key is present
     if GEMINI_API_KEY:
@@ -93,12 +143,13 @@ def ask_workconnect_assistant(message, lang="en", role="worker", context=None):
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
                 contents=f"User Role: {role}\nLanguage: {lang}\nQuestion: {clean_msg}",
-                config={"system_instruction": system_instruction, "max_output_tokens": 250, "temperature": 0.4}
+                config={"system_instruction": system_instruction, "max_output_tokens": 250, "temperature": 0.4},
+                timeout=10,
             )
 
             reply = response.text.strip()
             if reply:
-                _AI_CACHE[cache_key] = reply
+                _cache_set(cache_key, reply)
                 return reply
         except Exception:
             # On any API error, quota exceed, or network failure, fall back seamlessly
@@ -106,7 +157,7 @@ def ask_workconnect_assistant(message, lang="en", role="worker", context=None):
 
     # Intelligent Server-Side Rule-Based & Database-Aware NLP Engine
     response_text = _generate_domain_fallback(clean_msg, lang, role, context)
-    _AI_CACHE[cache_key] = response_text
+    _cache_set(cache_key, response_text)
     return response_text
 
 
@@ -165,7 +216,7 @@ def _generate_domain_fallback(query, lang, role, context):
             "4. Click 'Save' to ensure the matching engine uses your latest information."
         )
     if any(k in q_lower for k in ["place", "where", "location", "city", "town", "village", "ఎక్కడ", "ఏ ప్రాంతం", "स्थान", "कहां", "जगह"]):
-        locations = sorted(list(set(j.get("location", "") for j in get_all_jobs(status_filter="Open") if j.get("location"))))
+        locations = sorted(list(set(j.get("location", "") for j in get_open_jobs_cached() if j.get("location"))))
         loc_str = ", ".join(locations[:5]) if locations else "Narasapur, Kakinada, Vijayawada, Palakol"
         if lang == "te":
             return f"వర్క్ కనెక్ట్‌లో వివిధ ప్రాంతాలు మరియు గ్రామాలలో పనులు అందుబాటులో ఉన్నాయి (ఉదాహరణకు: {loc_str}). మీరు 'Browse Jobs' పేజీలో మీ ప్రాంతాన్ని ఎంచుకోవచ్చు!"
@@ -174,7 +225,7 @@ def _generate_domain_fallback(query, lang, role, context):
         else:
             return f"WorkConnect features local job opportunities across various towns and villages (such as {loc_str}). You can also filter by location on the Browse Jobs page!"
 
-    live_jobs = get_all_jobs(status_filter="Open")
+    live_jobs = get_open_jobs_cached()
     job_count = len(live_jobs)
 
     # Extract any number for wage filtering (e.g. 800)

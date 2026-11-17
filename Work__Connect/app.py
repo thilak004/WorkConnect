@@ -1345,7 +1345,10 @@ def api_ai_chat():
     try:
         from ai_services import ask_workconnect_assistant
         reply = ask_workconnect_assistant(message, lang=lang, role=role)
-        return jsonify({"reply": reply, "success": True})
+        response = jsonify({"reply": reply, "success": True})
+        # User-specific AI replies: cache briefly in browser only, never on shared CDN
+        response.headers["Cache-Control"] = "private, max-age=30, stale-while-revalidate=60"
+        return response
     except Exception as e:
         return jsonify({
             "reply": "Service temporarily busy. Please try again." if lang == "en" else "సేవ తాత్కాలికంగా బిజీగా ఉంది.",
